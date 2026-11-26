@@ -67,6 +67,18 @@ export class InterpretError extends Error {
   }
 }
 
+/**
+ * Hendelser mens en tolkning strømmer, for fortløpende visning. Påvirker ikke selve tolkningen.
+ *  - request: et nytt strømmet kall starter. attempt er forsøket (1 = første); resend er true når
+ *    samme forsøk sendes på nytt fordi svaret ikke kunne leses (teksten fra kallet før forkastes).
+ *  - text: tekst-delta (beskrivelsen av oppgaven).
+ *  - input_json: delta av verktøyargumentene, med hele den delvis tolkede inputen så langt.
+ */
+export type InterpretStreamEvent =
+  | { type: "request"; attempt: number; resend: boolean }
+  | { type: "text"; delta: string }
+  | { type: "input_json"; delta: string; snapshot: unknown };
+
 export interface InterpretProvider {
   /** F.eks. "claude:claude-opus-5-5". */
   readonly name: string;
