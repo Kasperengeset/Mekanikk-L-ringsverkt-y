@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "units": { "length": "m", "force": "kN" },
+  "nodes": [
+    { "id": "A", "x": 0, "y": 0 },
+    { "id": "C", "x": 2, "y": 0 },
+    { "id": "B", "x": 6, "y": 0 }
+  ],
+  "members": [
+    { "id": "AC", "i": "A", "j": "C", "kind": "beam" },
+    { "id": "CB", "i": "C", "j": "B", "kind": "beam" }
+  ],
+  "supports": [
+    { "node": "A", "type": "pinned" },
+    { "node": "B", "type": "roller", "angle_deg": 0 }
+  ],
+  "loads": [
+    { "id": "q1", "type": "distributed", "member": "AC", "w_start": -4, "w_end": -4, "from": 0, "to": 1, "direction": "global_y", "basis": "length" },
+    { "id": "q2", "type": "distributed", "member": "CB", "w_start": -4, "w_end": -4, "from": 0, "to": 1, "direction": "global_y", "basis": "length" },
+    { "id": "P1", "type": "point", "node": "C", "P": 10, "angle_deg": -90 }
+  ],
+  "asked": [
+    { "quantity": "reaction", "node": "A" },
+    { "quantity": "reaction", "node": "B" },
+    { "quantity": "M_max" }
+  ]
+}

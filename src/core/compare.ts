@@ -13,6 +13,7 @@
  *  - en bjelke med ledd i begge ender og uten last mot en fagverksstav.
  */
 import type { Model, SupportType } from "./schema";
+import { resolveSection } from "./sections";
 import { pointLoadComponents, toSI } from "./units";
 
 export type CompareKind = "node" | "member" | "section" | "support" | "hinge" | "load";
@@ -149,7 +150,7 @@ function canonicalize(model: Model, geometryTol: number): Canonical {
   // Kanonisk retning: a er noden med minst x (eller minst y når x er lik innenfor toleransen).
   const before = (p: CNode, q: CNode) => (Math.abs(p.x - q.x) > tol ? p.x < q.x : p.y < q.y);
 
-  const sections = new Map(si.sections.map((s) => [s.id, { E: s.E, A: s.A, I: s.I, assumed: s.assumed }]));
+  const sections = new Map(si.sections.map((s) => [s.id, resolveSection(s)]));
   const members: CMember[] = [];
   const byId = new Map<string, { member: CMember; flip: boolean; cos: number; sin: number }>();
   let uid = 0;
@@ -515,6 +516,9 @@ export function compareModels(truthModel: Model, candidateModel: Model, options:
       const cs = cm.section;
       const ok = !!cs && relClose(cs.E, tm.section.E, valueTol) && relClose(cs.A, tm.section.A, valueTol) && relClose(cs.I, tm.section.I, valueTol);
       push("section", cs ? (ok ? "match" : "mismatch") : "missing", tm.ids, cs ? cm.ids : [], ok ? undefined : "E, A eller I avviker");
+    } else if (cm.section && !cm.section.assumed) {
+      // Oppgaven oppgir ikke tverrsnittet som tall, så LLM-en må ha regnet det ut eller slått det opp.
+      push("section", "extra", [], cm.ids, "tverrsnitt som ikke står som tall i oppgaven");
     }
   }
   const matchedTruthMembers = new Set(memberMap.values());

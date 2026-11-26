@@ -236,6 +236,10 @@ describe("compareModels – feil", () => {
       return { ...m, sections: [{ id: "S", E, A: 1e-3, I: 1e-5, assumed }], members: [{ ...m.members[0]!, section: "S" }] };
     };
     expect(compareModels(withSection(210e9, true), simpleBeam()).exact).toBe(true);
+    const computed = compareModels(simpleBeam(), withSection(210e9, false));
+    expect(computed.exact).toBe(false);
+    expect(computed.counts.section).toEqual({ tp: 0, fp: 1, fn: 0 });
+    expect(compareModels(simpleBeam(), withSection(210e9, true)).exact).toBe(true);
     const r = compareModels(withSection(210e9, false), withSection(200e9, false));
     expect(r.exact).toBe(false);
     expect(r.counts.section).toEqual({ tp: 0, fp: 1, fn: 1 });

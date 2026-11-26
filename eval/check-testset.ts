@@ -5,7 +5,7 @@
 import { validateModel } from "../src/core/validate";
 import { loadTestset } from "./testset";
 
-const { cases, errors } = loadTestset();
+const { cases, pending, errors } = await loadTestset();
 let failed = errors.length > 0;
 
 for (const e of errors) console.log(`✗ ${e.id}\n${e.message.replace(/^/gm, "    ")}`);
@@ -20,7 +20,13 @@ for (const c of cases) {
   if (!v.ok) failed = true;
 }
 
+for (const p of pending) console.log(`… ${p.id.padEnd(24)} ${p.meta.category.padEnd(6)} venter på fasit (truth.json)${p.meta.split ? `  [${p.meta.split}]` : ""}`);
+
 const real = cases.filter((c) => !c.meta.example);
 const byCategory = (cat: string) => real.filter((c) => c.meta.category === cat).length;
-console.log(`\n${real.length} oppgaver i testsettet (bjelker ${byCategory("beam")}, rammer ${byCategory("frame")}, fagverk ${byCategory("truss")}), ${cases.length - real.length} eksempler.`);
+const bySplit = (split: string) => real.filter((c) => c.meta.split === split).length;
+console.log(
+  `\n${real.length} oppgaver med fasit (bjelker ${byCategory("beam")}, rammer ${byCategory("frame")}, fagverk ${byCategory("truss")}; ` +
+    `tuning ${bySplit("tuning")}, holdout ${bySplit("holdout")}), ${pending.length} venter på fasit, ${cases.length - real.length} eksempler.`,
+);
 process.exit(failed ? 1 : 0);

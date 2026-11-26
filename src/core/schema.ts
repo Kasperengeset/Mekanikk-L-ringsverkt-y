@@ -7,6 +7,11 @@
  *
  * Koordinater: x mot høyre, y oppover. Vinkler i grader, positivt mot klokka fra +x.
  *
+ * Symbolske oppgaver (F, q, L, a i stedet for tall): hvert grunnsymbol settes til 1 i m og kN
+ * (L = 1 m, F = 1 kN, q = 1 kN/m, M0 = 1 kNm), og alt annet skrives som multipler (0,25L → 0.25,
+ * 2F → P: 2, F = qL → P: 1). Tall som står i oppgaven, beholdes. `symbols` sier hvilke symboler
+ * som er satt til 1, så visningen kan skrive resultatene symbolsk (f.eks. 0,1125 FL).
+ *
  * Avvik fra skjemaet i spesifikasjonen (se docs/spesifikasjon.pdf, s. 2):
  *  - Punktlast er gitt som størrelse `P` og retning `angle_deg` i stedet for Fx/Fy, så
  *    LLM-en slipper å dekomponere skrå laster selv. Kan stå i en node eller på et element (`member` + `at`).
@@ -54,12 +59,46 @@ export const Member = z.strictObject({
   release: Release.optional(),
 });
 
+const Positive = z.number().positive();
+
+export const SectionShape = z.discriminatedUnion("type", [
+  z.strictObject({
+    type: z.literal("rectangle"),
+    b: Positive.describe("Bredde (vinkelrett på rammens plan)."),
+    h: Positive.describe("Høyde (i rammens plan, bøyes om denne)."),
+    unit: LengthUnit,
+  }),
+  z.strictObject({ type: z.literal("circle"), D: Positive.describe("Diameter."), unit: LengthUnit }),
+  z.strictObject({ type: z.literal("tube"), D: Positive.describe("Ytre diameter."), t: Positive.describe("Veggtykkelse."), unit: LengthUnit }),
+  z.strictObject({
+    type: z.literal("profile"),
+    name: z.string().min(1).describe("Profilnavn som i oppgaven, f.eks. 'IPE300'."),
+    axis: z.enum(["strong", "weak"]).describe("Akse profilet bøyes om. strong er vanlig for bjelker."),
+  }),
+  z.strictObject({
+    type: z.literal("composite"),
+    unit: LengthUnit,
+    parts: z
+      .array(
+        z.strictObject({
+          b: Positive,
+          h: Positive,
+          z: z.number().describe("Underkant av delen, målt fra underkant av tverrsnittet."),
+          hole: z.boolean().describe("true for en utsparing som trekkes fra."),
+        }),
+      )
+      .min(1)
+      .describe("Rektangler sentrert om den vertikale symmetriaksen."),
+  }),
+]);
+
 export const Section = z.strictObject({
   id: Id,
-  E: z.number().positive().describe("Elastisitetsmodul i Pa."),
-  A: z.number().positive().describe("Areal i m²."),
-  I: z.number().positive().describe("Annet arealmoment i m⁴."),
-  assumed: z.boolean().describe("true hvis verdiene ikke er oppgitt i oppgaven."),
+  E: Positive.optional().describe("Elastisitetsmodul i Pa, hvis oppgitt."),
+  A: Positive.optional().describe("Areal i m², bare hvis det står som tall i oppgaven."),
+  I: Positive.optional().describe("Annet arealmoment i m⁴, bare hvis det står som tall i oppgaven."),
+  shape: SectionShape.optional().describe("Tverrsnittets form med målene slik de står i oppgaven. A og I regnes ut av appen."),
+  assumed: z.boolean().describe("true hvis tverrsnittet ikke er oppgitt i oppgaven."),
 });
 
 export const SupportType = z.enum(["fixed", "pinned", "roller"]);
@@ -145,6 +184,13 @@ export const Provenance = z.strictObject({
   alternatives: z.array(z.string()).optional().describe("Andre mulige verdier for feltet, f.eks. ['pinned', 'roller']."),
 });
 
+export const SymbolKind = z.enum(["length", "force", "distributed", "moment"]);
+
+export const SymbolDef = z.strictObject({
+  name: z.string().min(1).describe("Symbolet slik det står i oppgaven, f.eks. 'L', 'a', 'F', 'q', 'M0'."),
+  kind: SymbolKind.describe("length (m), force (kN), distributed (kN/m) eller moment (kNm). Symbolet er satt til 1 i denne enheten."),
+});
+
 export const Model = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
   units: Units,
@@ -155,13 +201,17 @@ export const Model = z.strictObject({
   loads: z.array(Load),
   asked: z.array(Asked).default([]),
   provenance: z.array(Provenance).default([]),
+  /** Grunnsymbolene som er satt til 1. Tom for oppgaver med bare tall. */
+  symbols: z.array(SymbolDef).default([]),
 });
 
 /** Det LLM-en sender inn med verktøyet submit_model. */
 export const SubmitModelInput = z.strictObject({
   model: Model,
+  // Påkrevd i JSON Schema-en LLM-en ser, men en utelatt liste godtas som tom i stedet for å koste et nytt forsøk.
   questions: z
     .array(z.string())
+    .default([])
     .describe("Spørsmål til studenten på norsk bokmål om ting som er tvetydige i oppgaven. Tom liste hvis ingen."),
 });
 
@@ -169,6 +219,7 @@ export type Units = z.infer<typeof Units>;
 export type Node = z.infer<typeof Node>;
 export type Member = z.infer<typeof Member>;
 export type Section = z.infer<typeof Section>;
+export type SectionShape = z.infer<typeof SectionShape>;
 export type SupportType = z.infer<typeof SupportType>;
 export type Support = z.infer<typeof Support>;
 export type PointLoad = z.infer<typeof PointLoad>;
@@ -177,6 +228,7 @@ export type MomentLoad = z.infer<typeof MomentLoad>;
 export type Load = z.infer<typeof Load>;
 export type Asked = z.infer<typeof Asked>;
 export type Provenance = z.infer<typeof Provenance>;
+export type SymbolDef = z.infer<typeof SymbolDef>;
 export type Model = z.infer<typeof Model>;
 /** Modell slik den skrives for hånd (felt med standardverdi kan utelates). */
 export type ModelInput = z.input<typeof Model>;
