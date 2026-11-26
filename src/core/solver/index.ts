@@ -18,12 +18,15 @@
 import type { Model } from "../schema";
 import { pointLoadComponents, toSI } from "../units";
 import { validateModel, type Determinacy, type Issue } from "../validate";
-import { condense, DEFAULT_SECTION, localStiffness, mulMatVec, toGlobal, transformation, vecToGlobal, type SectionProps } from "./element";
-import { extremes, internalForces, type Extremes, type Piece } from "./internal";
+import { DEFAULT_SECTION, resolveSection, type ResolvedSection } from "../sections";
+import { condense, localStiffness, mulMatVec, toGlobal, transformation, vecToGlobal } from "./element";
+import { deflection, type DeflectionPiece } from "./deflection";
+import { evalPoly, extremes, internalForces, type Extremes, type Piece } from "./internal";
 import { solveDense, zeros } from "./linalg";
 import { distributedDirection, equivalentNodalLoads, toLocal, type LocalLoad } from "./loads";
 
 export type { Extremes, Piece } from "./internal";
+export type { DeflectionPiece } from "./deflection";
 export { evalPoly } from "./internal";
 
 export interface Reaction {
@@ -46,6 +49,12 @@ export interface MemberResult {
   extremes: Extremes;
   /** Lastene på elementet i lokale akser (for tegning og videre beregninger). */
   loads: LocalLoad[];
+  /** Startnoden (i) i SI. */
+  start: { x: number; y: number };
+  /** Tverrsnittsdata som ble brukt. */
+  section: ResolvedSection;
+  /** Deformert form langs elementet i lokale akser. */
+  deflection: DeflectionPiece[];
 }
 
 export interface Equilibrium {
@@ -66,6 +75,8 @@ export type SolveResult =
       reactions: Reaction[];
       members: MemberResult[];
       equilibrium: Equilibrium;
+      /** true når minst ett element mangler oppgitt tverrsnitt: formen er riktig, men ikke størrelsen. */
+      deformationQualitative: boolean;
     }
   | { status: "invalid"; issues: Issue[] }
   | { status: "mechanism"; determinacy: Determinacy; node: string; component: DofComponent; message: string }
@@ -85,6 +96,7 @@ interface Element {
   f: Float64Array;
   T: Float64Array[];
   loads: LocalLoad[];
+  section: ResolvedSection;
 }
 
 export function solve(model: Model): SolveResult {
@@ -96,7 +108,7 @@ export function solve(model: Model): SolveResult {
   const index = new Map(si.nodes.map((n, k) => [n.id, k]));
   const nodes = si.nodes;
   const ndof = 3 * nodes.length;
-  const sections = new Map<string, SectionProps>(si.sections.map((s) => [s.id, { E: s.E, A: s.A, I: s.I }]));
+  const sections = new Map<string, ResolvedSection>(si.sections.map((s) => [s.id, resolveSection(s)]));
 
   // --- Elementer og laster på elementer
   const elements: Element[] = si.members.map((m) => {
@@ -134,7 +146,7 @@ export function solve(model: Model): SolveResult {
     let f = equivalentNodalLoads(loads, L, truss);
     const released = truss ? [] : [...(m.release?.i ? [2] : []), ...(m.release?.j ? [5] : [])];
     if (released.length) ({ k, f } = condense(k, f, released));
-    return { id: m.id, i: index.get(m.i)!, j: index.get(m.j)!, kind: m.kind, L, c, s, k, f, T: transformation(c, s), loads };
+    return { id: m.id, i: index.get(m.i)!, j: index.get(m.j)!, kind: m.kind, L, c, s, k, f, T: transformation(c, s), loads, section };
   });
 
   // --- Global stivhet og last
@@ -270,7 +282,22 @@ export function solve(model: Model): SolveResult {
     const kd = mulMatVec(e.k, dl);
     const p = Array.from(kd, (v, a) => v - e.f[a]!);
     const pieces = internalForces(p, e.loads, e.L);
-    return { id: e.id, kind: e.kind, length: e.L, cos: e.c, sin: e.s, endForces: p, pieces, extremes: extremes(pieces), loads: e.loads };
+    const shape = deflection(pieces, dl, e.L, e.section.E * e.section.I, e.section.E * e.section.A, e.kind === "truss");
+    const start = nodes[e.i]!;
+    return {
+      id: e.id,
+      kind: e.kind,
+      length: e.L,
+      cos: e.c,
+      sin: e.s,
+      endForces: p,
+      pieces,
+      extremes: extremes(pieces),
+      loads: e.loads,
+      start: { x: start.x, y: start.y },
+      section: e.section,
+      deflection: shape,
+    };
   });
 
   const equilibrium = checkEquilibrium(si, elements, reactions, index);
@@ -278,7 +305,19 @@ export function solve(model: Model): SolveResult {
 
   const displacements: Record<string, { ux: number; uy: number; rz: number }> = {};
   nodes.forEach((n, k) => (displacements[n.id] = { ux: u[3 * k]!, uy: u[3 * k + 1]!, rz: inactive.has(3 * k + 2) ? 0 : u[3 * k + 2]! }));
-  return { status: "ok", determinacy, displacements, reactions, members, equilibrium };
+  const deformationQualitative = elements.some((e) => e.section.assumed);
+  return { status: "ok", determinacy, displacements, reactions, members, equilibrium, deformationQualitative };
+}
+
+/**
+ * Punkt på den deformerte formen i globale koordinater (SI), x meter fra i-enden.
+ * `scale` forstørrer forskyvningene for tegning.
+ */
+export function displacedPoint(m: MemberResult, x: number, scale = 1): { x: number; y: number } {
+  const piece = m.deflection.find((p) => x <= p.x1 + 1e-12) ?? m.deflection[m.deflection.length - 1]!;
+  const u = evalPoly(piece.u, x) * scale;
+  const w = evalPoly(piece.w, x) * scale;
+  return { x: m.start.x + (x + u) * m.cos - w * m.sin, y: m.start.y + (x + u) * m.sin + w * m.cos };
 }
 
 /** ΣFx, ΣFy og ΣM om origo for alle påførte laster og reaksjoner, regnet direkte fra modellen. */

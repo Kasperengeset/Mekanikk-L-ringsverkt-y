@@ -59,12 +59,46 @@ export const Member = z.strictObject({
   release: Release.optional(),
 });
 
+const Positive = z.number().positive();
+
+export const SectionShape = z.discriminatedUnion("type", [
+  z.strictObject({
+    type: z.literal("rectangle"),
+    b: Positive.describe("Bredde (vinkelrett på rammens plan)."),
+    h: Positive.describe("Høyde (i rammens plan, bøyes om denne)."),
+    unit: LengthUnit,
+  }),
+  z.strictObject({ type: z.literal("circle"), D: Positive.describe("Diameter."), unit: LengthUnit }),
+  z.strictObject({ type: z.literal("tube"), D: Positive.describe("Ytre diameter."), t: Positive.describe("Veggtykkelse."), unit: LengthUnit }),
+  z.strictObject({
+    type: z.literal("profile"),
+    name: z.string().min(1).describe("Profilnavn som i oppgaven, f.eks. 'IPE300'."),
+    axis: z.enum(["strong", "weak"]).describe("Akse profilet bøyes om. strong er vanlig for bjelker."),
+  }),
+  z.strictObject({
+    type: z.literal("composite"),
+    unit: LengthUnit,
+    parts: z
+      .array(
+        z.strictObject({
+          b: Positive,
+          h: Positive,
+          z: z.number().describe("Underkant av delen, målt fra underkant av tverrsnittet."),
+          hole: z.boolean().describe("true for en utsparing som trekkes fra."),
+        }),
+      )
+      .min(1)
+      .describe("Rektangler sentrert om den vertikale symmetriaksen."),
+  }),
+]);
+
 export const Section = z.strictObject({
   id: Id,
-  E: z.number().positive().describe("Elastisitetsmodul i Pa."),
-  A: z.number().positive().describe("Areal i m²."),
-  I: z.number().positive().describe("Annet arealmoment i m⁴."),
-  assumed: z.boolean().describe("true hvis verdiene ikke er oppgitt i oppgaven."),
+  E: Positive.optional().describe("Elastisitetsmodul i Pa, hvis oppgitt."),
+  A: Positive.optional().describe("Areal i m², bare hvis det står som tall i oppgaven."),
+  I: Positive.optional().describe("Annet arealmoment i m⁴, bare hvis det står som tall i oppgaven."),
+  shape: SectionShape.optional().describe("Tverrsnittets form med målene slik de står i oppgaven. A og I regnes ut av appen."),
+  assumed: z.boolean().describe("true hvis tverrsnittet ikke er oppgitt i oppgaven."),
 });
 
 export const SupportType = z.enum(["fixed", "pinned", "roller"]);
@@ -185,6 +219,7 @@ export type Units = z.infer<typeof Units>;
 export type Node = z.infer<typeof Node>;
 export type Member = z.infer<typeof Member>;
 export type Section = z.infer<typeof Section>;
+export type SectionShape = z.infer<typeof SectionShape>;
 export type SupportType = z.infer<typeof SupportType>;
 export type Support = z.infer<typeof Support>;
 export type PointLoad = z.infer<typeof PointLoad>;

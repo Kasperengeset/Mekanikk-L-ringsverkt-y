@@ -20,6 +20,37 @@ import sys
 from anastruct import SystemElements
 
 DEFAULT_SECTION = {"E": 210e9, "A": 1.0, "I": 1e-4}
+PROFILES = json.load(open(os.path.join(os.path.dirname(__file__), "..", "..", "src", "core", "data", "ipe.json")))["profiles"]
+
+
+def shape_properties(shape):
+    """Samme formler som src/core/sections.ts. A i m², I i m⁴."""
+    u = LENGTH.get(shape.get("unit", "m"), 1.0)
+    t = shape["type"]
+    if t == "rectangle":
+        b, h = shape["b"] * u, shape["h"] * u
+        return b * h, b * h**3 / 12
+    if t == "circle":
+        D = shape["D"] * u
+        return math.pi * D**2 / 4, math.pi * D**4 / 64
+    if t == "tube":
+        D = shape["D"] * u
+        d = D - 2 * shape["t"] * u
+        return math.pi * (D**2 - d**2) / 4, math.pi * (D**4 - d**4) / 64
+    if t == "profile":
+        p = PROFILES[shape["name"].replace(" ", "").upper()]
+        return p["A"] * 1e-6, (p["Iz"] if shape["axis"] == "weak" else p["Iy"]) * 1e-12
+    parts = [((-1 if q["hole"] else 1) * q["b"] * q["h"] * u * u, (q["z"] + q["h"] / 2) * u, (-1 if q["hole"] else 1) * q["b"] * q["h"] ** 3 / 12 * u**4) for q in shape["parts"]]
+    A = sum(a for a, _, _ in parts)
+    zc = sum(a * z for a, z, _ in parts) / A
+    return A, sum(i0 + a * (z - zc) ** 2 for a, z, i0 in parts)
+
+
+def resolve_section(sec):
+    if sec is None:
+        return DEFAULT_SECTION
+    A, I = (shape_properties(sec["shape"]) if "shape" in sec else (None, None))
+    return {"E": sec.get("E", DEFAULT_SECTION["E"]), "A": sec.get("A", A if A is not None else DEFAULT_SECTION["A"]), "I": sec.get("I", I if I is not None else DEFAULT_SECTION["I"])}
 LENGTH = {"mm": 1e-3, "cm": 1e-2, "m": 1.0}
 FORCE = {"N": 1.0, "kN": 1e3, "MN": 1e6}
 
@@ -31,7 +62,7 @@ def reference(model):
     ss = SystemElements()
     eid = {}
     for m in model["members"]:
-        sec = sections.get(m.get("section"), DEFAULT_SECTION)
+        sec = resolve_section(sections.get(m.get("section")))
         loc = [list(nodes[m["i"]]), list(nodes[m["j"]])]
         if m["kind"] == "truss":
             eid[m["id"]] = ss.add_truss_element(location=loc, EA=sec["E"] * sec["A"])

@@ -36,10 +36,14 @@ pnpm dev                    # frontend (plassholder til uke 3)
 
 ## Status
 
-- **Uke 1 / Port 1:** tolkningen ga 20 av 21 helt riktige modeller på holdout-delen av øvingsoppgavene
-  (21 av 21 etter at én feil i fasiten ble rettet). Prompt `8f99ae83aad1`.
+- **Uke 1 / Port 1:** med prompt `7a74cac12d27` (tverrsnitt som form) ble 21 av 21 holdout-oppgaver og
+  10 av 10 tuning-oppgaver tolket helt riktig. Forrige prompt (`8f99ae83aad1`) ga 20 av 21, der avviket
+  var en feil i fasiten.
 - **Uke 2 / Port 2:** løseren stemmer med anaStruct på alle 35 oppgaver i testsettet innenfor 1e-6
   relativt, også statisk ubestemte. Største oppgave (42 frihetsgrader) løses på 0,24 ms.
+- **Deformasjon og tverrsnitt:** eksakt nedbøyning w(x) og lengdeendring u(x) langs hvert element.
+  Tverrsnitt kan gis som form (rektangel, sirkel, rør, IPE-profil, sammensatt), og A og I regnes ut av
+  appen. Kontrollert mot svarantydningene i øving 9, 11, 12 og 13.
 - **Neste:** uke 3, visning og interaksjon.
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter

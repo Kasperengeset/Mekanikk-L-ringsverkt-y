@@ -5,6 +5,7 @@
  * Rangsjekken av stivhetsmatrisen (geometrisk ustabile systemer med n_s ≥ 0) hører til løseren.
  */
 import type { Model } from "./schema";
+import { shapeProperties } from "./sections";
 
 export type IssueLevel = "error" | "warning";
 
@@ -51,6 +52,16 @@ export function validateModel(model: Model): ValidationResult {
     ["load", model.loads.map((l) => l.id)],
   ] as const) {
     for (const id of duplicates(ids)) error("duplicate_id", `Id '${id}' er brukt av flere ${what}-entiteter.`, id);
+  }
+
+  for (const sec of model.sections) {
+    if (!sec.shape) continue;
+    try {
+      const { A, I } = shapeProperties(sec.shape);
+      if (!(A > 0 && I > 0)) error("bad_section", `Tverrsnittet '${sec.id}' får ikke positivt areal og arealmoment.`, sec.id);
+    } catch (e) {
+      error("bad_section", `Tverrsnittet '${sec.id}': ${e instanceof Error ? e.message : String(e)}.`, sec.id);
+    }
   }
 
   const nodes = new Map(model.nodes.map((n) => [n.id, n]));

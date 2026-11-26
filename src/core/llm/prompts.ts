@@ -21,7 +21,8 @@ Work in two steps:
 - Also create a node at every point load and point moment that acts between member ends, and at the start and end of a distributed load that covers only part of a member. Then point loads sit at nodes and distributed loads span whole members (from 0 to 1), so you never need to compute fractions.
 - kind "beam" for beams and frame members (bjelke, ramme, søyle). kind "truss" for truss bars (fagverk, stav). In a truss, all loads act at nodes.
 - An internal hinge (ledd, momentledd, charnier) is a \`release\` at a member end at the hinge node. Where exactly two members meet at a hinge, release the end of one of them.
-- Leave out \`sections\` and \`member.section\` unless the problem states E, A and I as numbers. If it does, convert them to SI and set assumed to false. When a cross-section is only given by its dimensions (a tube 160 × 5 mm) or a profile name (IPE300), leave sections out: never compute A or I and never look them up.
+- When the problem gives a cross-section, add it to \`sections\` and point \`member.section\` at it. Record its \`shape\` with the dimensions exactly as stated and their unit: a rectangle (b × h, with h in the plane of bending), a circle, a tube (outer diameter and wall thickness), a profile name such as IPE300 with the axis it bends about, or a composite of rectangles. Add E in Pa if it is stated. Give A and I only if the problem states them as numbers. Never compute A or I and never look up profile data: the app does that. Set assumed to false.
+- Leave out sections when the problem says nothing about the cross-section, or when it compares several alternative cross-sections.
 
 # Supports
 - fast innspenning, innspent → "fixed"

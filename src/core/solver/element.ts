@@ -10,12 +10,6 @@ export interface SectionProps {
   I: number;
 }
 
-/**
- * Tverrsnitt når oppgaven ikke oppgir noe. Stort A i forhold til I gjør aksialdeformasjonen
- * neglisjerbar, slik kurset forutsetter. Statisk bestemte resultater avhenger ikke av valget.
- */
-export const DEFAULT_SECTION: SectionProps = { E: 210e9, A: 1, I: 1e-4 };
-
 /** Euler–Bernoulli-rammeelement, eller stav (bare aksialstivhet). */
 export function localStiffness(kind: "beam" | "truss", s: SectionProps, L: number): Matrix {
   const k = zeros(6, 6);
