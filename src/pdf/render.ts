@@ -18,6 +18,16 @@ export interface PdfImageOptions {
   maxDpi?: number;
 }
 
+/**
+ * Hvor pdf.js finner dekodere og fonter (med avsluttende skråstrek). Uten wasmUrl blir JBIG2- og
+ * JPEG 2000-bilder (vanlig i skannede PDF-er) stille utelatt fra rendringen. I nettleseren må
+ * mappene pdfjs-dist/wasm og pdfjs-dist/standard_fonts serveres som statiske filer.
+ */
+export interface PdfAssets {
+  wasmUrl: string;
+  standardFontDataUrl: string;
+}
+
 export interface RasterCanvas {
   /** 2D-konteksten pdf.js tegner i. */
   context: unknown;
@@ -46,10 +56,11 @@ export async function renderPdfPages(
   getDocument: typeof GetDocument,
   data: Uint8Array,
   createCanvas: CanvasFactory,
+  assets: PdfAssets,
   options: PdfImageOptions = {},
 ): Promise<RenderedPage[]> {
   // pdf.js tar over bufferen og godtar ikke Node-Buffer, så dataene kopieres til en ny Uint8Array.
-  const task = getDocument({ data: new Uint8Array(data) });
+  const task = getDocument({ data: new Uint8Array(data), ...assets });
   const doc = await task.promise;
   try {
     const pages = options.pages ?? Array.from({ length: doc.numPages }, (_, i) => i + 1);
