@@ -7,6 +7,7 @@
  */
 import { create } from "zustand";
 import { setParams, type EditResult } from "../../core/edit";
+import type { Attempt } from "../../core/pedagogy";
 import type { Model } from "../../core/schema";
 
 export type EntityKind = "node" | "member" | "support" | "load" | "section";
@@ -43,6 +44,36 @@ export interface Change {
   value: unknown;
 }
 
+/** Glidebryter lagt til av agenten (add_control) eller av appen. */
+export interface Control {
+  path: string;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+}
+
+/** Spådomsspørsmål fra agenten (ask_prediction), vist til studenten svarer. */
+export interface PredictionRequest {
+  id: string;
+  question: string;
+  /** Tom liste betyr fritekst. */
+  options: string[];
+}
+
+export interface PredictionAnswer {
+  text: string;
+  optionIndex?: number;
+}
+
+/** Et punkt i et diagram som skal utheves (agentens highlight-verktøy). */
+export interface DiagramPoint {
+  member: string;
+  quantity: "N" | "V" | "M";
+  /** Andel av elementlengden fra i-enden. */
+  at: number;
+}
+
 interface AppState {
   phase: Phase;
   model: Model | null;
@@ -53,8 +84,18 @@ interface AppState {
   selection: EntityRef | null;
   /** Uthevinger fra agenten eller bekreftelsessteget. */
   highlights: EntityRef[];
-  /** Tall for størrelsene i model.asked vises først når studenten har gjort et forsøk (uke 4). */
-  revealed: boolean;
+  /** Utheving av et punkt i et diagram (agenten). */
+  diagramHighlight: DiagramPoint | null;
+  /**
+   * Studentens forsøk per indeks i model.asked. Tallene for et spørsmål vises først når det finnes
+   * et forsøk (se src/core/pedagogy.ts: hiddenValues).
+   */
+  attempts: Record<number, Attempt>;
+  controls: Control[];
+  /** Åpent spådomsspørsmål, eller null. */
+  prediction: PredictionRequest | null;
+  /** Svar på spådomsspørsmål, etter id. */
+  predictionAnswers: Record<string, PredictionAnswer>;
   diagrams: DiagramSettings;
   interpretation: InterpretationState;
 
@@ -76,7 +117,13 @@ interface AppState {
   redo(): void;
   select(ref: EntityRef | null): void;
   setHighlights(refs: EntityRef[]): void;
-  setRevealed(revealed: boolean): void;
+  setDiagramHighlight(point: DiagramPoint | null): void;
+  recordAttempt(index: number, attempt: Attempt): void;
+  addControl(control: Control): void;
+  removeControl(path: string): void;
+  /** null lukker et åpent spørsmål uten svar. */
+  askPrediction(request: PredictionRequest | null): void;
+  answerPrediction(id: string, answer: PredictionAnswer): void;
   setDiagrams(partial: Partial<DiagramSettings>): void;
   setInterpretation(partial: Partial<InterpretationState>): void;
 }
@@ -93,12 +140,29 @@ export const useStore = create<AppState>()((set, get) => ({
   gestureStart: null,
   selection: null,
   highlights: [],
-  revealed: false,
+  diagramHighlight: null,
+  attempts: {},
+  controls: [],
+  prediction: null,
+  predictionAnswers: {},
   diagrams: { N: true, V: true, M: true, deformed: true, deformationScale: "auto" },
   interpretation: { status: "idle", description: "", questions: [] },
 
   setPhase: (phase) => set({ phase }),
-  loadModel: (model, phase = "explore") => set({ model, phase, past: [], future: [], selection: null, highlights: [], gestureStart: null }),
+  loadModel: (model, phase = "explore") =>
+    set({
+      model,
+      phase,
+      past: [],
+      future: [],
+      selection: null,
+      highlights: [],
+      diagramHighlight: null,
+      gestureStart: null,
+      attempts: {},
+      controls: [],
+      prediction: null,
+    }),
   reset: () =>
     set({
       model: null,
@@ -108,7 +172,10 @@ export const useStore = create<AppState>()((set, get) => ({
       gestureStart: null,
       selection: null,
       highlights: [],
-      revealed: false,
+      diagramHighlight: null,
+      attempts: {},
+      controls: [],
+      prediction: null,
       interpretation: { status: "idle", description: "", questions: [] },
     }),
 
@@ -159,7 +226,15 @@ export const useStore = create<AppState>()((set, get) => ({
 
   select: (selection) => set({ selection }),
   setHighlights: (highlights) => set({ highlights }),
-  setRevealed: (revealed) => set({ revealed }),
+  setDiagramHighlight: (diagramHighlight) => set({ diagramHighlight }),
+  recordAttempt: (index, attempt) => set({ attempts: { ...get().attempts, [index]: attempt } }),
+  addControl: (control) => set({ controls: [...get().controls.filter((c) => c.path !== control.path), control] }),
+  removeControl: (path) => set({ controls: get().controls.filter((c) => c.path !== path) }),
+  askPrediction: (prediction) => set({ prediction }),
+  answerPrediction: (id, answer) => {
+    const { prediction, predictionAnswers } = get();
+    set({ predictionAnswers: { ...predictionAnswers, [id]: answer }, prediction: prediction?.id === id ? null : prediction });
+  },
   setDiagrams: (partial) => set({ diagrams: { ...get().diagrams, ...partial } }),
   setInterpretation: (partial) => set({ interpretation: { ...get().interpretation, ...partial } }),
 }));
