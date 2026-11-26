@@ -2,7 +2,7 @@
  * Rendrer en SVG-komponent med en eksempelmodell til PNG, uten nettleser.
  * Komponenten får CanvasProps ({ model, result, viewport }) og må ha <svg> som rot.
  *
- *   pnpm snapshot --component src/ui/structure/StructureView.tsx#StructureView --fixture gerber
+ *   pnpm snapshot --component src/ui/structure/StructureSvg.tsx#StructureSvg --fixture gerber
  *   pnpm snapshot --component src/ui/diagrams/DiagramsView.tsx#DiagramsView --fixture ramme --width 900 --height 400
  *
  * PNG-en skrives til --out (standard: eval/results/snapshots/<komponent>-<eksempel>.png) og kan åpnes

@@ -30,7 +30,7 @@ Fundamentet (denne grenen) definerer grensesnittene. Tre spor bygger parallelt, 
 ## Verktøy
 
 - `pnpm dev` og åpne `/?eksempel=gerber` (se `src/ui/fixtures.ts` for navn).
-- `pnpm snapshot --component src/ui/structure/StructureView.tsx#StructureView --fixture treledd` gir en PNG i
+- `pnpm snapshot --component src/ui/structure/StructureSvg.tsx#StructureSvg --fixture treledd` gir en PNG i
   `eval/results/snapshots/` som kan åpnes og sjekkes visuelt.
 - `pnpm typecheck && pnpm lint && pnpm test` skal være grønt før et spor er ferdig.
 
