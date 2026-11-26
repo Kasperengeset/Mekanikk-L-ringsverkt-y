@@ -1,0 +1,80 @@
+/*
+ * Konstruksjonsvisningen. StructureSvg setter fargene som attributter (det er det pnpm snapshot ser);
+ * her overstyres de med temaets variabler, så lys og mørk modus virker i appen. Alt tegnes med currentColor.
+ */
+.structure {
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.structure .st-visual {
+  pointer-events: none;
+}
+
+/* Grunnfarger */
+.structure .st-member,
+.structure .st-support {
+  color: var(--fg);
+}
+.structure .st-node {
+  color: var(--muted);
+}
+.structure .st-load {
+  color: var(--load);
+}
+.structure .st-mechanism {
+  color: var(--warning);
+}
+.structure .st-bg {
+  fill: var(--bg);
+}
+.structure .st-halo {
+  stroke: var(--bg);
+}
+
+/* Uthevinger: usikre entiteter og uthevinger fra agenten, deretter valgt entitet (vinner). */
+.structure .is-uncertain {
+  color: var(--uncertain);
+}
+.structure .is-selected {
+  color: var(--accent);
+}
+
+/* Treff-laget: usynlig, men fanger pekeren. */
+.structure .st-hit {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
+  cursor: grab;
+}
+.structure .st-hit[data-entity^="member:"] {
+  cursor: pointer;
+}
+.structure .st-hit[data-entity^="support:"] {
+  cursor: pointer;
+}
+.structure .st-hit[data-part="tail"] {
+  cursor: crosshair;
+}
+.structure .st-hit[data-part="from"],
+.structure .st-hit[data-part="to"] {
+  cursor: ew-resize;
+}
+.structure .st-hit-handle:hover {
+  fill: var(--accent);
+  fill-opacity: 0.2;
+}
+line.st-hit-handle:hover {
+  stroke: var(--accent);
+  stroke-opacity: 0.2;
+}
+.structure.is-dragging,
+.structure.is-dragging .st-hit {
+  cursor: grabbing;
+}
+
+.structure .st-debug {
+  fill: var(--muted);
+  font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
