@@ -46,15 +46,15 @@ async function readBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-/** Node-forespørsel → Web Request → handleren i api/interpret.ts → strømmet svar tilbake. */
-async function serveApi(server: ViteDevServer, req: IncomingMessage, res: ServerResponse): Promise<void> {
+/** Node-forespørsel → Web Request → handleren i api/<navn>.ts → strømmet svar tilbake. */
+async function serveApi(server: ViteDevServer, module: "/api/interpret.ts" | "/api/agent.ts", req: IncomingMessage, res: ServerResponse): Promise<void> {
   const abort = new AbortController();
   res.on("close", () => {
     if (!res.writableFinished) abort.abort();
   });
   try {
     // Lastes for hver forespørsel, så endringer i api/ og server/ virker uten omstart.
-    const { POST } = (await server.ssrLoadModule("/api/interpret.ts")) as typeof import("./api/interpret");
+    const { POST } = (await server.ssrLoadModule(module)) as typeof import("./api/interpret") | typeof import("./api/agent");
     const headers = new Headers();
     for (const [key, value] of Object.entries(req.headers)) {
       if (typeof value === "string") headers.set(key, value);
@@ -81,7 +81,7 @@ async function serveApi(server: ViteDevServer, req: IncomingMessage, res: Server
     }
     res.end();
   } catch (err) {
-    server.config.logger.error(`/api/interpret: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`);
+    server.config.logger.error(`${module}: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`);
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader("content-type", "application/json");
@@ -90,7 +90,7 @@ async function serveApi(server: ViteDevServer, req: IncomingMessage, res: Server
   }
 }
 
-/** Monterer /api/interpret i `pnpm dev`, så tolkningen virker lokalt uten Vercel CLI. Leser .env med loadEnv. */
+/** Monterer /api/interpret og /api/agent i `pnpm dev`, så de virker lokalt uten Vercel CLI. Leser .env med loadEnv. */
 function devApi(): Plugin {
   return {
     name: "dev-api",
@@ -98,9 +98,10 @@ function devApi(): Plugin {
     configureServer(server) {
       if (process.env.VITEST) return;
       // En verdi som allerede er satt i skallet, går foran .env (som i eval-skriptet).
-      const env = loadEnv(server.config.mode, server.config.envDir, ["ANTHROPIC_", "INTERPRET_"]);
+      const env = loadEnv(server.config.mode, server.config.envDir, ["ANTHROPIC_", "INTERPRET_", "AGENT_"]);
       for (const [key, value] of Object.entries(env)) if (value && !process.env[key]) process.env[key] = value;
-      server.middlewares.use("/api/interpret", (req, res) => void serveApi(server, req, res));
+      server.middlewares.use("/api/interpret", (req, res) => void serveApi(server, "/api/interpret.ts", req, res));
+      server.middlewares.use("/api/agent", (req, res) => void serveApi(server, "/api/agent.ts", req, res));
     },
   };
 }
