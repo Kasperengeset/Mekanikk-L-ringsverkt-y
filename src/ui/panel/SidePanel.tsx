@@ -9,6 +9,7 @@ export function SidePanel({ model, result }: { model: Model; result: SolveResult
   const redo = useStore((s) => s.redo);
   const canUndo = useStore((s) => s.past.length > 0);
   const canRedo = useStore((s) => s.future.length > 0);
+  const reset = useStore((s) => s.reset);
   return (
     <div className="side-panel">
       <div className="toolbar">
@@ -17,6 +18,9 @@ export function SidePanel({ model, result }: { model: Model; result: SolveResult
         </button>
         <button onClick={redo} disabled={!canRedo} title="Gjør om (Ctrl+Shift+Z)">
           Gjør om
+        </button>
+        <button onClick={reset} title="Last opp en ny oppgave">
+          Ny oppgave
         </button>
       </div>
       {result.status === "ok" ? (

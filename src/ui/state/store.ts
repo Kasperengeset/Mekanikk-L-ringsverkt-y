@@ -61,6 +61,8 @@ interface AppState {
   setPhase(phase: Phase): void;
   /** Ny modell uten historikk (f.eks. etter tolkning eller fra URL). */
   loadModel(model: Model, phase?: Phase): void;
+  /** Tilbake til opplastingen uten modell (ny oppgave). */
+  reset(): void;
   /** Endring med ett steg i angre-historikken. */
   edit(changes: Change | Change[]): EditResult;
   /** Bytter hele modellen med ett steg i historikken (f.eks. når et element deles). */
@@ -97,6 +99,18 @@ export const useStore = create<AppState>()((set, get) => ({
 
   setPhase: (phase) => set({ phase }),
   loadModel: (model, phase = "explore") => set({ model, phase, past: [], future: [], selection: null, highlights: [], gestureStart: null }),
+  reset: () =>
+    set({
+      model: null,
+      phase: "upload",
+      past: [],
+      future: [],
+      gestureStart: null,
+      selection: null,
+      highlights: [],
+      revealed: false,
+      interpretation: { status: "idle", description: "", questions: [] },
+    }),
 
   edit: (changes) => {
     const { model, past } = get();

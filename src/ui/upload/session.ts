@@ -239,16 +239,6 @@ export function cancelInterpretation(): void {
 
 /** «Last opp på nytt»: tilbake til opplastingen med de samme vedleggene og tekstene. */
 export function resetToUpload(): void {
-  // Storen har ingen egen handling for å fjerne modellen, så tilstanden settes direkte.
-  useStore.setState({
-    model: null,
-    phase: "upload",
-    past: [],
-    future: [],
-    gestureStart: null,
-    selection: null,
-    highlights: [],
-    interpretation: { status: "idle", description: "", questions: [] },
-  });
+  useStore.getState().reset();
   set({ meta: null, progress: null, notice: null });
 }
