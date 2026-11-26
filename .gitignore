@@ -6,3 +6,12 @@ dist
 .vercel
 eval/results/*.json
 .DS_Store
+
+# Kursoppgaver (øvinger og eksamener) er opphavsrettslig beskyttet og skal bare brukes internt.
+# Bare README og egne eksempler (ex-*) committes så lenge repoet er offentlig.
+testset/*
+!testset/README.md
+!testset/ex-*/
+
+# Python-miljø for anaStruct-referansen
+.venv

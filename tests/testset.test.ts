@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { validateModel } from "../src/core/validate";
 import { loadTestset } from "../eval/testset";
 
-const { cases, errors } = await loadTestset();
+const { cases, errors } = await loadTestset("testset", { inputs: false });
 
 describe("testsettet", () => {
   it("alle mapper i testset/ kan leses", () => {

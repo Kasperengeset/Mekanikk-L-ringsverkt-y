@@ -22,7 +22,7 @@ describe("schema", () => {
   it("felt med standardverdi er påkrevd i LLM-skjemaet", () => {
     const schema = toLlmJsonSchema(SubmitModelInput) as { properties: { model: { required: string[] } } };
     expect(schema.properties.model.required).toEqual(
-      expect.arrayContaining(["sections", "asked", "provenance", "supports", "loads"]),
+      expect.arrayContaining(["sections", "asked", "provenance", "symbols", "supports", "loads"]),
     );
   });
 
@@ -61,6 +61,33 @@ describe("schema", () => {
       model: { schemaVersion: 1, units: { length: "m", force: "kN" }, nodes: [{ id: "A", x: 0, y: 0 }], members: [], supports: [], loads: [] },
     });
     expect(parsed.questions).toEqual([]);
+  });
+
+  it("godtar en symbolsk oppgave med grunnsymbolene satt til 1", () => {
+    const parsed = Model.parse({
+      schemaVersion: 1,
+      units: { length: "m", force: "kN" },
+      nodes: [
+        { id: "A", x: 0, y: 0 },
+        { id: "B", x: 0.25, y: 0 },
+        { id: "C", x: 1, y: 0 },
+      ],
+      members: [
+        { id: "AB", i: "A", j: "B", kind: "beam" },
+        { id: "BC", i: "B", j: "C", kind: "beam" },
+      ],
+      supports: [
+        { node: "A", type: "pinned" },
+        { node: "C", type: "roller" },
+      ],
+      loads: [{ id: "F", type: "point", node: "B", P: 1, angle_deg: -143.13 }],
+      symbols: [
+        { name: "F", kind: "force" },
+        { name: "L", kind: "length" },
+      ],
+    });
+    expect(parsed.symbols.map((s) => s.name)).toEqual(["F", "L"]);
+    expect(Model.parse({ ...parsed, symbols: undefined }).symbols).toEqual([]);
   });
 
   it("avviser ukjente felt", () => {

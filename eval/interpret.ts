@@ -4,6 +4,7 @@
  *   pnpm eval:interpret                       alle oppgaver (uten eksempler)
  *   pnpm eval:interpret --examples            ta med eksemplene
  *   pnpm eval:interpret --only bjelke-01,ramme-03
+ *   pnpm eval:interpret --split tuning        bare oppgavene prompten justeres på (holdout: Port 1)
  *   pnpm eval:interpret --model claude-sonnet-5-5 --effort medium
  *   pnpm eval:interpret --consistency always --runs 3
  *   pnpm eval:interpret --dry-run             vis hva som ville blitt kjørt, uten API-kall
@@ -11,7 +12,10 @@
  * Hver kjøring koster penger. Resultatene skrives til eval/results/.
  */
 import Anthropic from "@anthropic-ai/sdk";
+import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { INTERPRET_SYSTEM_PROMPT } from "../src/core/llm/prompts";
+import { SUBMIT_MODEL_TOOL } from "../src/core/llm/tools";
 import { parseArgs } from "node:util";
 import { COMPARE_KINDS, compareModels, type CompareResult, type EntityComparison } from "../src/core/compare";
 import { ClaudeProvider } from "../server/llm/claude";
@@ -29,6 +33,7 @@ const { values: args } = parseArgs({
   options: {
     only: { type: "string" },
     examples: { type: "boolean", default: false },
+    split: { type: "string" },
     model: { type: "string" },
     effort: { type: "string" },
     consistency: { type: "string", default: "low_confidence" },
@@ -40,6 +45,8 @@ const { values: args } = parseArgs({
 });
 
 const LOW = Number(args["low-confidence"]);
+/** Fingeravtrykk av prompt og verktøyskjema, så hver kjøring kan knyttes til en promptversjon. */
+const PROMPT_HASH = createHash("sha256").update(INTERPRET_SYSTEM_PROMPT).update(JSON.stringify(SUBMIT_MODEL_TOOL)).digest("hex").slice(0, 12);
 
 interface CaseResult {
   id: string;
@@ -130,7 +137,7 @@ function report(results: CaseResult[], provider: string): string {
   const lines: string[] = [];
   lines.push(`# Tolkningseval – ${new Date().toISOString().slice(0, 16).replace("T", " ")}`);
   lines.push("");
-  lines.push(`Leverandør: \`${provider}\` · self-consistency: ${args.consistency} (${args.runs} kjøringer) · ${n} oppgaver`);
+  lines.push(`Leverandør: \`${provider}\` · prompt \`${PROMPT_HASH}\` · self-consistency: ${args.consistency} (${args.runs} kjøringer) · ${n} oppgaver${args.split ? ` · ${args.split}` : ""}`);
   lines.push("");
 
   const rate = n ? exact / n : 0;
@@ -186,7 +193,9 @@ async function main() {
   const { cases: all, errors } = await loadTestset();
   for (const e of errors) console.error(`Hopper over ${e.id}: ${e.message}`);
   const only = args.only?.split(",").map((s) => s.trim());
-  const cases = all.filter((c) => (only ? only.includes(c.id) : args.examples || !c.meta.example));
+  const cases = all.filter(
+    (c) => (only ? only.includes(c.id) : args.examples || !c.meta.example) && (!args.split || c.meta.split === args.split),
+  );
   if (cases.length === 0) {
     console.error("Ingen oppgaver å kjøre. Legg oppgaver i testset/ (se testset/README.md), eller bruk --examples.");
     process.exit(1);
@@ -210,7 +219,7 @@ async function main() {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const base = `eval/results/${stamp}-${provider.name.replace(/[^a-z0-9.-]+/gi, "_")}`;
   mkdirSync("eval/results", { recursive: true });
-  writeFileSync(`${base}.json`, JSON.stringify({ provider: provider.name, args, results }, null, 2));
+  writeFileSync(`${base}.json`, JSON.stringify({ provider: provider.name, promptHash: PROMPT_HASH, args, results }, null, 2));
   writeFileSync(`${base}.md`, md);
   console.log(`\n${md}\n\nLagret: ${base}.md og .json`);
 }

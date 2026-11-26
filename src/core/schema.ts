@@ -7,6 +7,11 @@
  *
  * Koordinater: x mot høyre, y oppover. Vinkler i grader, positivt mot klokka fra +x.
  *
+ * Symbolske oppgaver (F, q, L, a i stedet for tall): hvert grunnsymbol settes til 1 i m og kN
+ * (L = 1 m, F = 1 kN, q = 1 kN/m, M0 = 1 kNm), og alt annet skrives som multipler (0,25L → 0.25,
+ * 2F → P: 2, F = qL → P: 1). Tall som står i oppgaven, beholdes. `symbols` sier hvilke symboler
+ * som er satt til 1, så visningen kan skrive resultatene symbolsk (f.eks. 0,1125 FL).
+ *
  * Avvik fra skjemaet i spesifikasjonen (se docs/spesifikasjon.pdf, s. 2):
  *  - Punktlast er gitt som størrelse `P` og retning `angle_deg` i stedet for Fx/Fy, så
  *    LLM-en slipper å dekomponere skrå laster selv. Kan stå i en node eller på et element (`member` + `at`).
@@ -145,6 +150,13 @@ export const Provenance = z.strictObject({
   alternatives: z.array(z.string()).optional().describe("Andre mulige verdier for feltet, f.eks. ['pinned', 'roller']."),
 });
 
+export const SymbolKind = z.enum(["length", "force", "distributed", "moment"]);
+
+export const SymbolDef = z.strictObject({
+  name: z.string().min(1).describe("Symbolet slik det står i oppgaven, f.eks. 'L', 'a', 'F', 'q', 'M0'."),
+  kind: SymbolKind.describe("length (m), force (kN), distributed (kN/m) eller moment (kNm). Symbolet er satt til 1 i denne enheten."),
+});
+
 export const Model = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
   units: Units,
@@ -155,6 +167,8 @@ export const Model = z.strictObject({
   loads: z.array(Load),
   asked: z.array(Asked).default([]),
   provenance: z.array(Provenance).default([]),
+  /** Grunnsymbolene som er satt til 1. Tom for oppgaver med bare tall. */
+  symbols: z.array(SymbolDef).default([]),
 });
 
 /** Det LLM-en sender inn med verktøyet submit_model. */
@@ -179,6 +193,7 @@ export type MomentLoad = z.infer<typeof MomentLoad>;
 export type Load = z.infer<typeof Load>;
 export type Asked = z.infer<typeof Asked>;
 export type Provenance = z.infer<typeof Provenance>;
+export type SymbolDef = z.infer<typeof SymbolDef>;
 export type Model = z.infer<typeof Model>;
 /** Modell slik den skrives for hånd (felt med standardverdi kan utelates). */
 export type ModelInput = z.input<typeof Model>;

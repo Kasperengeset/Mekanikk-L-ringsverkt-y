@@ -21,7 +21,7 @@ Work in two steps:
 - Also create a node at every point load and point moment that acts between member ends, and at the start and end of a distributed load that covers only part of a member. Then point loads sit at nodes and distributed loads span whole members (from 0 to 1), so you never need to compute fractions.
 - kind "beam" for beams and frame members (bjelke, ramme, søyle). kind "truss" for truss bars (fagverk, stav). In a truss, all loads act at nodes.
 - An internal hinge (ledd, momentledd, charnier) is a \`release\` at a member end at the hinge node. Where exactly two members meet at a hinge, release the end of one of them.
-- Leave out \`sections\` and \`member.section\` unless the problem gives E, A or I. If it does, convert them to SI and set assumed to false.
+- Leave out \`sections\` and \`member.section\` unless the problem states E, A and I as numbers. If it does, convert them to SI and set assumed to false. When a cross-section is only given by its dimensions (a tube 160 × 5 mm) or a profile name (IPE300), leave sections out: never compute A or I and never look them up.
 
 # Supports
 - fast innspenning, innspent → "fixed"
@@ -34,6 +34,13 @@ Work in two steps:
 - Distributed load: w_start and w_end in force per length, signed along \`direction\`, so gravity-type loads in global_y are negative. A triangular load is 0 at one end.
   - basis "projection" when the intensity is given per horizontal length on an inclined member (typically snow); basis "length" when it is per length along the member (typically self-weight).
   - direction "local_y" for loads perpendicular to the member (typically wind on an inclined roof). Local +y is 90° counterclockwise from the direction i → j.
+
+# Symbolic problems
+- Many problems use symbols (F, q, L, a, H, M0) instead of numbers. Set each basic symbol to 1: lengths in m, forces in kN, distributed loads in kN/m, moments in kNm, so \`units\` is m and kN.
+- Basic symbols are one length symbol (the one dimensions are given in) and each load symbol that is not defined from the others. A load defined from others is a multiple: F = qL gives P = 1, F = 3qH gives P = 3.
+- Write everything else as multiples of the basic symbols: 0.25L gives 0.25, 2F gives P = 2, 4a gives 4, qa gives 1.
+- Keep the numbers the problem does state. If the geometry is in a but P = 100 kN, then a = 1 m and P = 100.
+- List the basic symbols in \`symbols\` with their kind. Use an empty list when the problem has only numbers.
 
 # What is asked
 - Fill \`asked\` with what the problem asks for: reactions at nodes, member forces, N, V and M diagrams, maximum moment, and so on.

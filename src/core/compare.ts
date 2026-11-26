@@ -515,6 +515,9 @@ export function compareModels(truthModel: Model, candidateModel: Model, options:
       const cs = cm.section;
       const ok = !!cs && relClose(cs.E, tm.section.E, valueTol) && relClose(cs.A, tm.section.A, valueTol) && relClose(cs.I, tm.section.I, valueTol);
       push("section", cs ? (ok ? "match" : "mismatch") : "missing", tm.ids, cs ? cm.ids : [], ok ? undefined : "E, A eller I avviker");
+    } else if (cm.section && !cm.section.assumed) {
+      // Oppgaven oppgir ikke tverrsnittet som tall, så LLM-en må ha regnet det ut eller slått det opp.
+      push("section", "extra", [], cm.ids, "tverrsnitt som ikke står som tall i oppgaven");
     }
   }
   const matchedTruthMembers = new Set(memberMap.values());
