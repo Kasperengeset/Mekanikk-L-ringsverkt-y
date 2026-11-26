@@ -24,6 +24,9 @@ pnpm dev                    # frontend (plassholder til uke 3)
 | `src/core/validate.ts` | Referanser, geometri og statisk ubestemthetsgrad. |
 | `src/core/compare.ts` | Sammenligner to modeller entitet for entitet (eval og self-consistency). |
 | `src/core/consistency.ts` | Velger tolkningen flest er enige i, og markerer uenighet. |
+| `src/core/solver/` | Løseren: direkte stivhetsmetode, ledd, skrå opplagre, eksakte snittkrefter, mekanismesjekk og likevektskontroll. |
+| `src/pdf/render.ts` | PDF-sider til bilder, felles for nettleser og eval. |
+| `eval/anastruct/` | Uavhengig referanse for løseren (Python, anaStruct). |
 | `src/core/llm/` | Prompter og verktøydefinisjoner. |
 | `server/llm/` | Adapterlaget mot LLM-leverandøren (`claude.ts`) og pristabell. |
 | `server/interpret.ts` | Tolkningsløpet med valgfri self-consistency. |
@@ -33,5 +36,11 @@ pnpm dev                    # frontend (plassholder til uke 3)
 
 ## Status
 
-Uke 1: skjema, validering, sammenligning, tolkning med Claude og eval-skript er på plass.
-Testsettet (30 oppgaver) gjenstår.
+- **Uke 1 / Port 1:** tolkningen ga 20 av 21 helt riktige modeller på holdout-delen av øvingsoppgavene
+  (21 av 21 etter at én feil i fasiten ble rettet). Prompt `8f99ae83aad1`.
+- **Uke 2 / Port 2:** løseren stemmer med anaStruct på alle 35 oppgaver i testsettet innenfor 1e-6
+  relativt, også statisk ubestemte. Største oppgave (42 frihetsgrader) løses på 0,24 ms.
+- **Neste:** uke 3, visning og interaksjon.
+
+Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter
+`python3 -m venv .venv && .venv/bin/pip install -r eval/anastruct/requirements.txt`.
