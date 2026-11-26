@@ -405,7 +405,8 @@ export function StructureSvg(props: StructureSvgProps) {
       if (near(g.pB, p)) blocked.push(g.outward, unit(add(g.outward, unit(sub(g.pA, g.pB)))));
     }
     const hasMoment = moments.some((g) => near(g.center, p));
-    return { node: n, at: placeText(p, labelDirection(blocked), hasMoment ? MOMENT_R + 5 : 10, FONT), p };
+    if (hasMoment) blocked.push({ x: 0, y: -1 }); // etiketten til momentet står over
+    return { node: n, at: placeText(p, labelDirection(blocked), hasMoment ? MOMENT_R + 12 : 10, FONT), p };
   });
 
   const svgClass = ["structure", interactive && "is-interactive", props.className].filter(Boolean).join(" ");
@@ -586,7 +587,11 @@ interface HitLayerProps {
   screen: Map<string, Point>;
 }
 
-/** Usynlige, brede flater over det som kan klikkes eller dras. Rekkefølgen bestemmer hva som ligger øverst. */
+/**
+ * Usynlige, brede flater over det som kan klikkes eller dras. Rekkefølgen bestemmer hva som ligger øverst.
+ * Attributtene fill/stroke="none" holder dem usynlige uten stilark; structure.css gjør dem treffbare
+ * (pointer-events: all) og viser håndtakene ved hover.
+ */
 function HitLayer({ model, ends, dists, points, moments, supportDirs, screen }: HitLayerProps) {
   const seg = (a: Point, b: Point, width: number, entity: string, part: string, extra = "") => (
     <line
@@ -605,7 +610,7 @@ function HitLayer({ model, ends, dists, points, moments, supportDirs, screen }: 
   /** Håndtaket i enden av en fordelt last må kunne gripes også når intensiteten er liten der. */
   const grip = (p: Point, tail: Point, outward: Point) => (length(sub(tail, p)) < 12 ? add(p, mul(outward, 12)) : tail);
   return (
-    <g className="st-hits">
+    <g className="st-hits" fill="none" stroke="none">
       {dists.map((g) => (
         <polygon
           key={g.load.id}
