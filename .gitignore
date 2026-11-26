@@ -4,7 +4,6 @@ dist
 .env.*
 !.env.example
 .vercel
-eval/results/*.json
 .DS_Store
 
 # Kursoppgaver (øvinger og eksamener) er opphavsrettslig beskyttet og skal bare brukes internt.
@@ -15,3 +14,8 @@ testset/*
 
 # Python-miljø for anaStruct-referansen
 .venv
+
+# Resultater fra eval-kjøringer og skjermbilder (pnpm snapshot)
+eval/results/
+# Agentenes worktrees
+.claude/worktrees/
