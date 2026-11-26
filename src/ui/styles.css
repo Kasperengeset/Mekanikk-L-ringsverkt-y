@@ -1,0 +1,132 @@
+/* Felles stiler og fargevariabler. Sporene legger egne stiler i sin egen mappe (f.eks. structure/structure.css). */
+:root {
+  --bg: #ffffff;
+  --fg: #1d2330;
+  --muted: #667085;
+  --line: #d0d5dd;
+  --panel: #f7f8fa;
+  --accent: #2463eb;
+  --warning: #b42318;
+  --uncertain: #f79009;
+  --tension: #d92d20;
+  --compression: #2463eb;
+  --load: #067647;
+  --diagram-N: #2463eb;
+  --diagram-V: #067647;
+  --diagram-M: #d92d20;
+  --deformed: #7a5af8;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f131a;
+    --fg: #e6e9ef;
+    --muted: #98a2b3;
+    --line: #344054;
+    --panel: #161b24;
+    --accent: #6f9bff;
+    --warning: #f97066;
+    --uncertain: #fdb022;
+    --tension: #f97066;
+    --compression: #6f9bff;
+    --load: #47cd89;
+    --diagram-N: #6f9bff;
+    --diagram-V: #47cd89;
+    --diagram-M: #f97066;
+    --deformed: #a48afb;
+    color-scheme: dark;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+}
+.app-header {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.app-header h1 {
+  font-size: 18px;
+  margin: 0;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  min-height: 0;
+}
+.canvas {
+  position: relative;
+  overflow: auto;
+  min-width: 0;
+}
+.canvas svg {
+  display: block;
+  color: var(--fg);
+}
+.panel {
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  padding: 12px 16px;
+  overflow: auto;
+}
+@media (max-width: 800px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .panel {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+}
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+button {
+  font: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.muted {
+  color: var(--muted);
+}
+.warning {
+  color: var(--warning);
+}
+.reactions th {
+  text-align: left;
+  padding-right: 8px;
+}
+.reactions td {
+  padding-right: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.upload {
+  padding: 24px 16px;
+  max-width: 640px;
+}

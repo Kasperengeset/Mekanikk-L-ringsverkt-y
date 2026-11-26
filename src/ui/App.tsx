@@ -1,9 +1,66 @@
-/** Plassholder til visningen bygges i uke 3. */
+/**
+ * Appens skall. Eies av fundamentet; sporene fyller inn komponentene:
+ *   A: structure/StructureView   B: diagrams/DiagramsView   C: upload/UploadPanel og upload/ConfirmPanel
+ */
+import { useEffect } from "react";
+import { DiagramsView } from "./diagrams/DiagramsView";
+import { fixtureFromUrl } from "./fixtures";
+import { fitViewport } from "./geometry";
+import { SidePanel } from "./panel/SidePanel";
+import { useStore } from "./state/store";
+import { useSolveResult } from "./state/useSolveResult";
+import { StructureView } from "./structure/StructureView";
+import { ConfirmPanel } from "./upload/ConfirmPanel";
+import { UploadPanel } from "./upload/UploadPanel";
+import { useElementSize } from "./useElementSize";
+
+/** Høyden til konstruksjonspanelet som andel av lerretet; resten går til diagrammene. */
+const STRUCTURE_SHARE = 0.5;
+
 export function App() {
+  const model = useStore((s) => s.model);
+  const phase = useStore((s) => s.phase);
+  const loadModel = useStore((s) => s.loadModel);
+  const result = useSolveResult();
+  const [canvasRef, size] = useElementSize<HTMLDivElement>();
+
+  useEffect(() => {
+    const fixture = fixtureFromUrl(window.location.search);
+    if (fixture) loadModel(fixture);
+  }, [loadModel]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+      e.preventDefault();
+      if (e.shiftKey) useStore.getState().redo();
+      else useStore.getState().undo();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const structureHeight = Math.max(240, Math.round(size.height * STRUCTURE_SHARE));
+  const viewport = model && size.width > 0 ? fitViewport(model, size.width, structureHeight) : null;
+
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif", maxWidth: 640, margin: "4rem auto", padding: "0 16px" }}>
-      <h1>Mekanikk-intuisjon</h1>
-      <p>Visningen kommer i uke 3. I uke 1 testes tolkningen med <code>pnpm eval:interpret</code>.</p>
-    </main>
+    <div className="app">
+      <header className="app-header">
+        <h1>Mekanikk-intuisjon</h1>
+      </header>
+      <main className="workspace">
+        <section className="canvas" ref={canvasRef}>
+          {model && result && viewport ? (
+            <>
+              <StructureView model={model} result={result} viewport={viewport} />
+              {phase === "explore" && <DiagramsView model={model} result={result} viewport={viewport} />}
+            </>
+          ) : (
+            <UploadPanel />
+          )}
+        </section>
+        <aside className="panel">{model && result ? phase === "confirm" ? <ConfirmPanel /> : <SidePanel model={model} result={result} /> : null}</aside>
+      </main>
+    </div>
   );
 }
