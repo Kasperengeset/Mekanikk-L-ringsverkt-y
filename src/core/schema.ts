@@ -160,8 +160,10 @@ export const Model = z.strictObject({
 /** Det LLM-en sender inn med verktøyet submit_model. */
 export const SubmitModelInput = z.strictObject({
   model: Model,
+  // Påkrevd i JSON Schema-en LLM-en ser, men en utelatt liste godtas som tom i stedet for å koste et nytt forsøk.
   questions: z
     .array(z.string())
+    .default([])
     .describe("Spørsmål til studenten på norsk bokmål om ting som er tvetydige i oppgaven. Tom liste hvis ingen."),
 });
 

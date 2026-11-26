@@ -54,6 +54,15 @@ describe("schema", () => {
     expect(parsed.loads).toHaveLength(3);
   });
 
+  it("en utelatt questions-liste godtas som tom, men er påkrevd i LLM-skjemaet", () => {
+    const schema = toLlmJsonSchema(SubmitModelInput) as { required: string[] };
+    expect(schema.required).toContain("questions");
+    const parsed = SubmitModelInput.parse({
+      model: { schemaVersion: 1, units: { length: "m", force: "kN" }, nodes: [{ id: "A", x: 0, y: 0 }], members: [], supports: [], loads: [] },
+    });
+    expect(parsed.questions).toEqual([]);
+  });
+
   it("avviser ukjente felt", () => {
     expect(() =>
       Model.parse({ schemaVersion: 1, units: { length: "m", force: "kN" }, nodes: [{ id: "A", x: 0, y: 0, z: 1 }], members: [], supports: [], loads: [] }),

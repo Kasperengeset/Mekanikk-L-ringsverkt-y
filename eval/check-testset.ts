@@ -5,7 +5,7 @@
 import { validateModel } from "../src/core/validate";
 import { loadTestset } from "./testset";
 
-const { cases, errors } = loadTestset();
+const { cases, errors } = await loadTestset();
 let failed = errors.length > 0;
 
 for (const e of errors) console.log(`✗ ${e.id}\n${e.message.replace(/^/gm, "    ")}`);

@@ -11,10 +11,13 @@ testset/
     meta.json      kategori og kilde
     truth.json     fasitmodellen
     figure.png     figuren slik studenten ville lastet den opp (png, jpg, webp eller gif)
+    oppgave.pdf    eller hele eksamenssiden som PDF (alle .pdf-filer i mappen brukes)
     problem.txt    oppgaveteksten (valgfri, hvis den ikke står i figuren)
 ```
 
-Flere figurer: `figure-1.png`, `figure-2.png` osv. Mappenavnet er oppgavens id. Mapper som begynner
+Flere figurer: `figure-1.png`, `figure-2.png` osv. En PDF rendres til bilder på samme måte som i
+appen, med så høy oppløsning som Claude tar imot. Står det flere oppgaver på siden, skriv f.eks.
+«Løs oppgave 2.» i `problem.txt`, slik en student ville gjort. Velg sider med `"pages": [2]` i meta.json. Mappenavnet er oppgavens id. Mapper som begynner
 med `ex-` er eksempler (`"example": true` i meta.json) og teller ikke i testsettet.
 
 `meta.json`:
@@ -51,6 +54,7 @@ regner slike skrivemåter som like.
 
 ```
 pnpm testset:check                  sjekker at alle fasitmodellene er gyldige (kjøres også i CI)
+pnpm pdf:render oppgave.pdf         lagrer sidene som PNG, så du ser hva tolkningen får
 pnpm eval:interpret --dry-run       viser hvilke oppgaver som blir kjørt
 pnpm eval:interpret                 kjører tolkningen mot alle 30 (koster penger)
 pnpm eval:interpret --only bjelke-01

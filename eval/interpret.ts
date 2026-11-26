@@ -183,7 +183,7 @@ function report(results: CaseResult[], provider: string): string {
 }
 
 async function main() {
-  const { cases: all, errors } = loadTestset();
+  const { cases: all, errors } = await loadTestset();
   for (const e of errors) console.error(`Hopper over ${e.id}: ${e.message}`);
   const only = args.only?.split(",").map((s) => s.trim());
   const cases = all.filter((c) => (only ? only.includes(c.id) : args.examples || !c.meta.example));
