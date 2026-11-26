@@ -8,7 +8,8 @@
  *   progress     { stage, message }       fremdrift, meldingen er klar til visning
  *   text         { delta }                Claudes beskrivelse, fortløpende
  *   description  { text }                 erstatter beskrivelsen så langt (etter at et kall ble sendt på nytt)
- *   partial      { model }                delvis modell mens verktøyargumentene strømmer (ufullstendig, ikke validert)
+ *   partial      { model }                delvis modell mens verktøyargumentene strømmer (ufullstendig, ikke validert);
+ *                                        null når et nytt forsøk starter
  *   result       InterpretResponse        sluttresultatet; strømmen lukkes etterpå
  *   error        { code, message }        feil; strømmen lukkes etterpå
  * Linjer som begynner med kolon er hjerteslag (holder forbindelsen åpen mens Claude tenker).

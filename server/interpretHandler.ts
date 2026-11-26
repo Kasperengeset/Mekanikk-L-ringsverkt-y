@@ -182,6 +182,10 @@ export function createInterpretHandler(deps: InterpretHandlerDeps): (req: Reques
             described = false;
             modelling = false;
             latest = undefined;
+            if (partialTimer) clearTimeout(partialTimer);
+            partialTimer = undefined;
+            // Den delvise modellen fra forrige forsøk gjelder ikke lenger.
+            if (e.attempt > 1 || e.resend) send({ event: "partial", data: { model: null } });
           } else if (e.type === "text") {
             if (!described) {
               described = true;
@@ -207,7 +211,16 @@ export function createInterpretHandler(deps: InterpretHandlerDeps): (req: Reques
           name: "interpret-stream",
           async interpret(i) {
             calls++;
-            if (calls === 1) return deps.createProvider({ onEvent, signal: abort.signal }).interpret(i);
+            if (calls === 1) {
+              try {
+                return await deps.createProvider({ onEvent, signal: abort.signal }).interpret(i);
+              } finally {
+                // Den delvise modellen er utdatert når tolkningen er ferdig (resultatet kommer, eller flere kjøringer).
+                if (partialTimer) clearTimeout(partialTimer);
+                partialTimer = undefined;
+                latest = undefined;
+              }
+            }
             if (calls === 2) progress("consistency");
             silent ??= deps.createProvider({ signal: abort.signal });
             return silent.interpret(i);

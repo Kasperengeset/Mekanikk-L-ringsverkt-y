@@ -5,11 +5,12 @@ import { createInterpretHandler, type InterpretHandlerDeps, type ProviderOptions
 import { EMPTY_USAGE, InterpretError, type InterpretInput, type InterpretResult, type InterpretStreamEvent } from "../server/llm/adapter";
 import { ClaudeProvider } from "../server/llm/claude";
 import type { Model } from "../src/core/schema";
+import { InterpretApiError, interpretRemote } from "../src/ui/api/interpret";
 import type { ServerEvent } from "../src/ui/api/protocol";
 import { createSseParser, encodeSseEvent } from "../src/ui/api/sse";
 import { simpleBeam } from "./helpers";
 
-const PNG = { mediaType: "image/png", data: "iVBORw0KGgo=" };
+const PNG = { mediaType: "image/png", data: "iVBORw0KGgo=" } as const;
 
 function result(model: Model, extra: Partial<InterpretResult> = {}): InterpretResult {
   return {
@@ -180,6 +181,8 @@ describe("strømmen", () => {
     const stages = ev.flatMap((e) => (e.event === "progress" ? [e.data.stage] : []));
     expect(stages).toContain("retry");
     expect(stages).toContain("resend");
+    // Den delvise modellen nullstilles ved hvert nye forsøk.
+    expect(ev.filter((e) => e.event === "partial" && e.data.model === null)).toHaveLength(2);
 
     // Spill av hendelsene slik klienten gjør, og sammenlign med beskrivelsen i resultatet.
     let shown = "";
@@ -315,6 +318,66 @@ describe("ClaudeProvider med onEvent (falsk klient)", () => {
       },
     }).interpret({ images: [], text: "Bjelke" });
     expect(r.attempts).toBe(1);
+  });
+});
+
+describe("klienten mot handleren", () => {
+  const viaHandler = (deps: InterpretHandlerDeps): typeof fetch => {
+    const handle = createInterpretHandler(deps);
+    return (input, init) => handle(new Request(new URL(String(input), "http://localhost"), init));
+  };
+
+  it("leser hendelsene fortløpende og returnerer resultatet", async () => {
+    const model = simpleBeam();
+    const { deps } = fakeDeps(
+      async (emit) => {
+        emit({ type: "request", attempt: 1, resend: false });
+        emit({ type: "text", delta: "En " });
+        emit({ type: "text", delta: "bjelke." });
+        emit({ type: "input_json", delta: "{", snapshot: { model: { nodes: [{ id: "A" }] } } });
+        await tick();
+        return result(model);
+      },
+      { interpretOptions: { consistency: "never" } },
+    );
+    const seen: string[] = [];
+    const r = await interpretRemote(
+      { images: [PNG], text: "Bjelke" },
+      {
+        onProgress: (p) => seen.push(`progress:${p.stage}`),
+        onText: (d) => seen.push(`text:${d}`),
+        onPartial: (m) => seen.push(`partial:${JSON.stringify(m)}`),
+      },
+      { fetch: viaHandler(deps) },
+    );
+    expect(r.model).toEqual(model);
+    expect(seen).toEqual([
+      "progress:start",
+      "progress:describing",
+      "text:En ",
+      "text:bjelke.",
+      "progress:modelling",
+      'partial:{"nodes":[{"id":"A"}]}',
+    ]);
+  });
+
+  it("valideringsfeil og feil i strømmen blir InterpretApiError med meldingen fra serveren", async () => {
+    const { deps } = fakeDeps(async () => {
+      throw new InterpretError("x", "refusal", EMPTY_USAGE, 0, 1, 1);
+    });
+    const f = viaHandler(deps);
+    await expect(interpretRemote({ images: Array(5).fill(PNG) }, {}, { fetch: f })).rejects.toMatchObject({
+      name: "InterpretApiError",
+      code: "bad_request",
+      message: "Høyst 4 bilder per tolkning.",
+    });
+    await expect(interpretRemote({ images: [], text: "Bjelke" }, {}, { fetch: f })).rejects.toMatchObject({ code: "refusal" });
+  });
+
+  it("en modell som ikke følger skjemaet, avvises i klienten", async () => {
+    const broken = { ...simpleBeam(), nodes: [] } as unknown as Model;
+    const { deps } = fakeDeps(async () => result(broken), { interpretOptions: { consistency: "never" } });
+    await expect(interpretRemote({ images: [], text: "Bjelke" }, {}, { fetch: viaHandler(deps) })).rejects.toBeInstanceOf(InterpretApiError);
   });
 });
 
