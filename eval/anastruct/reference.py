@@ -138,6 +138,27 @@ def reference(model):
     return out
 
 
+def rounded(ref):
+    """Runder til 10 gjeldende siffer relativt til største verdi, så flyttallsstøy mellom
+    plattformer (macOS/Linux) ikke gir forskjeller i filene. Testene bruker toleranse 1e-6."""
+    values = [abs(v) for r in ref["reactions"].values() for v in r.values()]
+    values += [abs(m["N"] or 0) for m in ref["members"].values()]
+    values += [abs(v) for m in ref["members"].values() for v in m.get("M_ends_abs", [])]
+    scale = max(values + [1.0])
+    digits = 10 - int(math.floor(math.log10(scale)))
+
+    def r(v):
+        return round(v, digits) + 0.0  # + 0.0 gjør -0.0 til 0.0
+
+    return {
+        "reactions": {k: {c: r(v) for c, v in x.items()} for k, x in ref["reactions"].items()},
+        "members": {
+            k: {**m, "N": None if m["N"] is None else r(m["N"]), **({"M_ends_abs": [r(v) for v in m["M_ends_abs"]]} if "M_ends_abs" in m else {})}
+            for k, m in ref["members"].items()
+        },
+    }
+
+
 def main(ids):
     paths = [f"testset/{i}/truth.json" for i in ids] if ids else sorted(glob.glob("testset/*/truth.json"))
     for p in paths:
@@ -148,7 +169,7 @@ def main(ids):
             print(f"✗ {cid}: {exc}")
             continue
         with open(os.path.join(os.path.dirname(p), "reference.json"), "w") as fh:
-            json.dump({"source": "anastruct", **ref}, fh, indent=2)
+            json.dump({"source": "anastruct", **rounded(ref)}, fh, indent=2)
             fh.write("\n")
         print(f"✓ {cid}")
 
