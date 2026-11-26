@@ -8,7 +8,16 @@ import { SubmitModelInput } from "../../src/core/schema";
 import { formatIssues, validateModel } from "../../src/core/validate";
 import { INTERPRET_SYSTEM_PROMPT, interpretUserText, invalidModelFeedback, missingToolCallReminder } from "../../src/core/llm/prompts";
 import { SUBMIT_MODEL_TOOL } from "../../src/core/llm/tools";
-import { addUsage, EMPTY_USAGE, InterpretError, type InterpretInput, type InterpretProvider, type InterpretResult, type Usage } from "./adapter";
+import {
+  addUsage,
+  EMPTY_USAGE,
+  InterpretError,
+  type InterpretInput,
+  type InterpretProvider,
+  type InterpretResult,
+  type InterpretStreamEvent,
+  type Usage,
+} from "./adapter";
 import { costUsd } from "./pricing";
 
 type Effort = "low" | "medium" | "high" | "xhigh" | "max";
@@ -27,6 +36,10 @@ export interface ClaudeOptions {
    */
   strict?: boolean;
   client?: Anthropic;
+  /** Tekst- og verktøy-JSON-delta fra strømmen, for fortløpende visning. Endrer ikke tolkningen. */
+  onEvent?: (event: InterpretStreamEvent) => void;
+  /** Avbryter pågående kall, f.eks. når klienten kobler fra. */
+  signal?: AbortSignal;
 }
 
 const EFFORTS: Effort[] = ["low", "medium", "high", "xhigh", "max"];
@@ -50,6 +63,8 @@ export class ClaudeProvider implements InterpretProvider {
   private readonly maxAttempts: number;
   private readonly client: Anthropic;
   private readonly tool: Anthropic.Beta.BetaTool;
+  private readonly onEvent: ((event: InterpretStreamEvent) => void) | undefined;
+  private readonly signal: AbortSignal | undefined;
 
   constructor(options: ClaudeOptions = {}) {
     this.model = options.model ?? (process.env.INTERPRET_MODEL || "claude-opus-5-5");
@@ -57,6 +72,8 @@ export class ClaudeProvider implements InterpretProvider {
     this.effort = options.effort ?? (envEffort && EFFORTS.includes(envEffort) ? envEffort : "high");
     this.maxAttempts = options.maxAttempts ?? 3;
     this.client = options.client ?? new Anthropic();
+    this.onEvent = options.onEvent;
+    this.signal = options.signal;
     this.name = `claude:${this.model}@${this.effort}`;
     this.tool = {
       name: SUBMIT_MODEL_TOOL.name,
@@ -96,7 +113,7 @@ export class ClaudeProvider implements InterpretProvider {
       new InterpretError(message, reason, usage, cost, attempts, performance.now() - started);
 
     for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
-      const message = await this.send(messages);
+      const message = await this.send(messages, attempt);
       const u = toUsage(message.usage);
       usage = addUsage(usage, u);
       const c = costUsd(message.model, u);
@@ -148,22 +165,40 @@ export class ClaudeProvider implements InterpretProvider {
     throw fail(`Ingen gyldig modell etter ${this.maxAttempts} forsøk. Siste feil:\n${lastProblem}`, "invalid_model", this.maxAttempts);
   }
 
+  /** Sender en hendelse til onEvent. En feil i mottakeren skal ikke stoppe tolkningen. */
+  private emit(event: InterpretStreamEvent): void {
+    try {
+      this.onEvent?.(event);
+    } catch {
+      // Ignoreres: visningen er ikke viktigere enn tolkningen.
+    }
+  }
+
   /** Ett strømmet kall. Tool-input som ikke lar seg tolke som JSON, gir et nytt kall (maks 2). */
-  private async send(messages: Anthropic.Beta.BetaMessageParam[]): Promise<Anthropic.Beta.BetaMessage> {
+  private async send(messages: Anthropic.Beta.BetaMessageParam[], attempt: number): Promise<Anthropic.Beta.BetaMessage> {
     for (let retry = 0; ; retry++) {
-      const stream = this.client.beta.messages.stream({
-        model: this.model,
-        max_tokens: 64000,
-        ...(supportsFallbacks(this.model)
-          ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
-          : {}),
-        thinking: { type: "adaptive" },
-        output_config: { effort: this.effort },
-        system: [{ type: "text", text: INTERPRET_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-        tools: [this.tool],
-        tool_choice: { type: "auto", disable_parallel_tool_use: true },
-        messages,
-      });
+      this.emit({ type: "request", attempt, resend: retry > 0 });
+      const stream = this.client.beta.messages.stream(
+        {
+          model: this.model,
+          max_tokens: 64000,
+          ...(supportsFallbacks(this.model)
+            ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
+            : {}),
+          thinking: { type: "adaptive" },
+          output_config: { effort: this.effort },
+          system: [{ type: "text", text: INTERPRET_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+          tools: [this.tool],
+          tool_choice: { type: "auto", disable_parallel_tool_use: true },
+          messages,
+        },
+        this.signal ? { signal: this.signal } : undefined,
+      );
+      if (this.onEvent) {
+        // Lytterne registreres bare ved behov: inputJson tolker den delvise JSON-en for hver delta.
+        stream.on("text", (delta) => this.emit({ type: "text", delta }));
+        stream.on("inputJson", (delta, snapshot) => this.emit({ type: "input_json", delta, snapshot }));
+      }
       try {
         return await stream.finalMessage();
       } catch (err) {
