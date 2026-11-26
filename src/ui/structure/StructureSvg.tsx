@@ -32,13 +32,17 @@ import {
   nodePoint,
   perpCCW,
   placeText,
+  overlaps,
   placeTextOffLine,
   pointLoadVector,
   screenDir,
+  segmentRect,
   sub,
   supportDirection,
+  textRect,
   unit,
   type LoadScales,
+  type Rect,
   type TextPlacement,
 } from "./layout";
 
@@ -255,7 +259,10 @@ interface LabelSpec extends TextPlacement {
   up: boolean;
 }
 
-function distLabels(group: DistGeom[], model: Model): LabelSpec[] {
+/** Plassene langs omhylningen en felles etikett prøves i, til den ikke kolliderer med andre laster. */
+const LABEL_POSITIONS = [0.5, 0.35, 0.65, 0.2, 0.8, 0.1, 0.9];
+
+function distLabels(group: DistGeom[], model: Model, obstacles: Rect[]): LabelSpec[] {
   const first = group[0]!;
   const { load } = first;
   const toSI = forceFactor(model.units) / lengthFactor(model.units);
@@ -270,7 +277,10 @@ function distLabels(group: DistGeom[], model: Model): LabelSpec[] {
     let pair: [Point, Point] = [first.tailA, first.tailB];
     for (const p of ends) for (const q of ends) if (length(sub(p, q)) > length(sub(pair[0], pair[1]))) pair = [p, q];
     const lines = [quantityLabel("lineLoad", load.w_start * toSI, model), ...extra];
-    return [{ ...placeTextOffLine(lerp(pair[0], pair[1], 0.5), unit(sub(pair[1], pair[0])), first.outward, lines, FONT), lines }];
+    const dir = unit(sub(pair[1], pair[0]));
+    const at = (t: number) => ({ ...placeTextOffLine(lerp(pair[0], pair[1], t), dir, first.outward, lines, FONT), lines });
+    const free = LABEL_POSITIONS.map(at).find((l) => !obstacles.some((o) => overlaps(textRect(l, lines, FONT, l.up), o)));
+    return [free ?? at(0.5)];
   }
   const labels: LabelSpec[] = [];
   for (const [w, tail] of [
@@ -380,6 +390,24 @@ export function StructureSvg(props: StructureSvgProps) {
   }
   const supportDirs = new Map(model.supports.map((s) => [s.node, supportDirection(model, s)]));
 
+  // Etikettene til punktlaster og momenter plasseres først; etikettene til fordelte laster går utenom dem.
+  const f = forceFactor(model.units);
+  const lf = lengthFactor(model.units);
+  const pointLabels = new Map(
+    points.map((g) => [g.load.id, { at: placeText(g.tail, mul(g.dir, -1), 5), lines: [quantityLabel("force", g.load.P * f, model)] }]),
+  );
+  const momentLabels = new Map(
+    moments.map((g) => [
+      g.load.id,
+      { at: placeText({ x: g.center.x, y: g.center.y - MOMENT_R }, { x: 0, y: -1 }, 5), lines: [quantityLabel("moment", g.load.M * f * lf, model)] },
+    ]),
+  );
+  const corner = { x: MOMENT_R, y: MOMENT_R };
+  const obstacles: Rect[] = [
+    ...points.flatMap((g) => [segmentRect(g.tail, g.tip, 4), textRect(pointLabels.get(g.load.id)!.at, pointLabels.get(g.load.id)!.lines, FONT)]),
+    ...moments.flatMap((g) => [segmentRect(sub(g.center, corner), add(g.center, corner), 2), textRect(momentLabels.get(g.load.id)!.at, momentLabels.get(g.load.id)!.lines, FONT)]),
+  ];
+
   // Fagverksknutepunkt: noder der bare staver møtes, tegnes som små ledd.
   const trussJoints = model.nodes.filter((n) => {
     const ms = model.members.filter((m) => m.i === n.id || m.j === n.id);
@@ -449,7 +477,7 @@ export function StructureSvg(props: StructureSvgProps) {
           const mark = group.length === 1 ? markOf(`load:${first.load.id}`) : undefined;
           return (
             <g key={first.load.id} {...look("st-load st-load-label", palette.load, mark, palette)}>
-              {distLabels(group, model).map((l, k) => (
+              {distLabels(group, model, obstacles).map((l, k) => (
                 <Label key={k} at={l} lines={l.lines} palette={palette} up={l.up} bounds={viewport} />
               ))}
             </g>
@@ -530,31 +558,22 @@ export function StructureSvg(props: StructureSvgProps) {
         {/* Momenter og punktlaster */}
         {moments.map((g) => {
           const path = momentPath(g.center, g.load.M >= 0);
-          const lf = lengthFactor(model.units);
+          const label = momentLabels.get(g.load.id)!;
           return (
             <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load", palette.load, markOf(`load:${g.load.id}`), palette)}>
               <path d={path.d} fill="none" stroke="currentColor" strokeWidth={2} />
               <ArrowHead tip={path.tip} dir={path.tangent} />
-              <Label
-                at={placeText({ x: g.center.x, y: g.center.y - MOMENT_R }, { x: 0, y: -1 }, 5)}
-                lines={[quantityLabel("moment", g.load.M * forceFactor(model.units) * lf, model)]}
-                palette={palette}
-                bounds={viewport}
-              />
+              <Label at={label.at} lines={label.lines} palette={palette} bounds={viewport} />
             </g>
           );
         })}
         {points.map((g) => {
           const mark = markOf(`load:${g.load.id}`);
+          const label = pointLabels.get(g.load.id)!;
           return (
             <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load", palette.load, mark, palette)}>
               <Arrow tail={g.tail} tip={g.tip} width={2.2} />
-              <Label
-                at={placeText(g.tail, mul(g.dir, -1), 5)}
-                lines={[quantityLabel("force", g.load.P * forceFactor(model.units), model)]}
-                palette={palette}
-                bounds={viewport}
-              />
+              <Label at={label.at} lines={label.lines} palette={palette} bounds={viewport} />
               {interactive && mark === "selected" && (
                 <circle cx={r2(g.tail.x)} cy={r2(g.tail.y)} r={4.5} fill={palette.bg} className="st-bg" stroke="currentColor" strokeWidth={1.6} />
               )}

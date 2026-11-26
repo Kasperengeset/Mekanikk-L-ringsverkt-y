@@ -194,6 +194,28 @@ export function placeTextOffLine(
   return { ...placeText(mid, out, gap, fontSize), up: out.y < -0.35 };
 }
 
+export interface Rect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** Omtrentlig boks rundt en etikett (samme konvensjon som placeText og Label i StructureSvg). */
+export function textRect(at: TextPlacement, lines: string[], fontSize: number, up = false): Rect {
+  const w = Math.max(...lines.map((l) => textWidth(l, fontSize)));
+  const x0 = at.anchor === "start" ? at.x : at.anchor === "end" ? at.x - w : at.x - w / 2;
+  const extra = (lines.length - 1) * (fontSize + 2);
+  return { x0, x1: x0 + w, y0: at.y - fontSize * 0.72 - (up ? extra : 0), y1: at.y + 3 + (up ? 0 : extra) };
+}
+
+/** Boksen rundt et linjestykke, med `pad` piksler luft. */
+export function segmentRect(a: Point, b: Point, pad: number): Rect {
+  return { x0: Math.min(a.x, b.x) - pad, x1: Math.max(a.x, b.x) + pad, y0: Math.min(a.y, b.y) - pad, y1: Math.max(a.y, b.y) + pad };
+}
+
+export const overlaps = (a: Rect, b: Rect) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+
 /** Flytter en etikett inn i tegneflaten om den stikker ut. */
 export function clampText(at: TextPlacement, lines: string[], fontSize: number, width: number, height: number, up = false): TextPlacement {
   const w = Math.max(...lines.map((l) => textWidth(l, fontSize)));

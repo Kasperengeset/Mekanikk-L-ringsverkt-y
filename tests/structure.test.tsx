@@ -171,6 +171,19 @@ describe("StructureSvg", () => {
     expect(hit(dist, "load:q_AB", "to")).toBeDefined();
   });
 
+  it("etiketten til en fordelt last viker for en punktlast midt på", () => {
+    const base = FIXTURES.utkrager!.model;
+    const m: Model = {
+      ...base,
+      loads: base.loads.map((l) => (l.type === "point" ? { id: l.id, type: "point" as const, member: "AB", at: 0.5, P: l.P, angle_deg: l.angle_deg } : l)),
+    };
+    const doc = render(m, { interactive: true });
+    const arrowX = num(hit(doc, "load:P1")!, "x1");
+    const label = findAll(doc, (e) => e.tag === "text" && textContent(e) === "3 kN/m")[0]!;
+    // Etiketten er sentrert; halv bredde ≈ 20 px, så midten må ligge godt unna pilen.
+    expect(Math.abs(num(label, "x") - arrowX)).toBeGreaterThan(40);
+  });
+
   it("etikettene holder seg innenfor tegneflaten", () => {
     for (const f of Object.values(FIXTURES)) {
       const doc = render(f.model);
