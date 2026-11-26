@@ -4,13 +4,17 @@
  *
  * Panelene bruker konstruksjonens skala og venstrekant (samme x-akse som oppgaven). Hvert panel
  * er så høyt som innholdet krever, så ingenting havner utenfor.
+ *
+ * Skjulte tall (options.hidden, fra hiddenValues i src/core/pedagogy.ts): formen tegnes som før,
+ * men tallene byttes med «?» på de samme karakteristiske punktene, så studenten ser hvor tallene står.
  */
+import { isDiagramValueHidden, type HiddenValues } from "../../core/pedagogy";
 import type { Model, SupportType } from "../../core/schema";
-import { displacedPoint, type MemberResult, type SolveResult } from "../../core/solver";
+import { displacedPoint, evalPoly, type MemberResult, type SolveResult } from "../../core/solver";
 import { positiveSide, type Quantity } from "../convention";
 import { formatNumber, formatQuantity } from "../format";
 import { fitViewport, originXOf, type Point, type Viewport } from "../geometry";
-import type { DiagramSettings } from "../state/store";
+import type { DiagramPoint, DiagramSettings } from "../state/store";
 import { placeLabels, pointsBox, textWidth, unionBox, type Box, type LabelRequest, type PlacedLabel, type Segment } from "./labels";
 import { characteristicPoints, joinPieces, maxAbs, samplePieces, signChanges, signRegions, valueAt } from "./sampling";
 
@@ -96,6 +100,12 @@ interface PanelBase {
   notes: Note[];
 }
 
+/** Uthevet punkt i et diagram: punktet på kurven og punktet på aksen under det. */
+export interface DiagramMarker {
+  point: Point;
+  base: Point;
+}
+
 export interface ForcePanel extends PanelBase {
   kind: Quantity;
   /** true: størrelsen er null overalt, og panelet har bare overskrift. */
@@ -109,6 +119,8 @@ export interface ForcePanel extends PanelBase {
   symbols: ActionSymbol[];
   /** M-panelet: nullpunkter med fortegnsskifte (vendepunktene i den deformerte formen), på aksen. */
   inflections: Point[];
+  /** Punktet som er uthevet (options.highlight), når det hører til dette panelet. */
+  highlight?: DiagramMarker;
 }
 
 export interface DeformedPanel extends PanelBase {
@@ -125,6 +137,8 @@ export interface DeformedPanel extends PanelBase {
   /** Største forskyvning i meter. */
   maxDisplacement: number;
   qualitative: boolean;
+  /** true: tallet for største forskyvning er skjult (studenten har ikke prøvd ennå). */
+  valueHidden: boolean;
   /** Klippeflate: forskyvninger med svært stor forstørrelse kuttes ved panelkanten. */
   clip: Box;
 }
@@ -146,7 +160,14 @@ export interface DiagramLayout {
 export interface LayoutOptions {
   /** Plass over panelene (f.eks. til en verktøylinje). */
   top?: number;
+  /** Tall som er skjult til studenten har prøvd selv. Uten den vises alle tall. */
+  hidden?: HiddenValues;
+  /** Punkt i et diagram som skal utheves (agentens highlight). */
+  highlight?: DiagramPoint | null;
 }
+
+/** Tekst i stedet for et skjult tall. */
+export const HIDDEN_TEXT = "?";
 
 type OkResult = Extract<SolveResult, { status: "ok" }>;
 
@@ -164,6 +185,8 @@ interface Context {
   pxPerMeter: number;
   maxAbs: Record<Quantity, number>;
   maxDimSI: number;
+  hidden?: HiddenValues;
+  highlight?: DiagramPoint | null;
 }
 
 const DEG = 180 / Math.PI;
@@ -189,6 +212,8 @@ export function layoutDiagrams(model: Model, result: SolveResult, viewport: View
     pxPerMeter: vp.scale / vp.lengthFactor,
     maxAbs: { N: maxAbs(result.members, "N"), V: maxAbs(result.members, "V"), M: maxAbs(result.members, "M") },
     maxDimSI: Math.max(spanX, spanY) * vp.lengthFactor,
+    hidden: options.hidden,
+    highlight: options.highlight,
   };
 
   const panels: Panel[] = [];
@@ -380,7 +405,19 @@ interface Content {
   labels: PlacedLabel[];
   symbols: ActionSymbol[];
   inflections: Point[];
+  highlight?: DiagramMarker;
   bbox: Box;
+}
+
+/** Startpunktet (lokal x fra kjedens i-ende) for hvert element i en kjede. */
+function chainOffsets(chain: MemberResult[]): number[] {
+  const out: number[] = [];
+  let x = 0;
+  for (const m of chain) {
+    out.push(x);
+    x += m.length;
+  }
+  return out;
 }
 
 function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Content {
@@ -395,6 +432,7 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
   const inflections: Point[] = [];
   const requests: LabelRequest[] = [];
   const kind = q === "M" ? "moment" : "force";
+  let highlight: DiagramMarker | undefined;
 
   for (const chain of memberChains(model, ctx.result.members)) {
     const first = chain[0]!;
@@ -409,13 +447,32 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
       const a = axis(x);
       return { x: a.x + normal.x * v * px, y: a.y + normal.y * v * px };
     };
+    const offsets = chainOffsets(chain);
+    const eps = 1e-9 * length;
+    // Et tall i en node mellom to elementer er skjult når det er skjult i ett av dem.
+    const hiddenAt = (x: number) =>
+      ctx.hidden !== undefined && chain.some((m, k) => x >= offsets[k]! - eps && x <= offsets[k]! + m.length + eps && isDiagramValueHidden(ctx.hidden!, q, m.id));
+
+    // Uthevingen bruker elementets egne biter; i et sprang gjelder verdien like før (som valueAt).
+    const hl = ctx.highlight;
+    const hk = hl && hl.quantity === q ? chain.findIndex((m) => m.id === hl.member) : -1;
+    if (hl && hk >= 0) {
+      const m = chain[hk]!;
+      const xLocal = Math.min(1, Math.max(0, hl.at)) * m.length;
+      const piece = m.pieces.find((p) => xLocal <= p.x1) ?? m.pieces[m.pieces.length - 1];
+      const v = piece ? evalPoly(piece[q], xLocal) : 0;
+      const x = offsets[hk]! + xLocal;
+      highlight = { point: at(x, v), base: axis(x) };
+    }
+
     const samples = samplePieces(pieces, q, step);
     if (samples.every((s) => Math.abs(s.value) <= tol)) {
       // Nullstav i et fagverk: skriv 0, det er en del av svaret.
       if (first.kind === "truss") {
         for (const [k, m] of chain.entries()) {
-          const offset = chain.slice(0, k).reduce((sum, mm) => sum + mm.length, 0);
-          requests.push({ text: "0", anchor: axis(offset + m.length / 2), normal, tangent, shift: 0, priority: 3, magnitude: 0, depth: 0, group });
+          const masked = ctx.hidden !== undefined && isDiagramValueHidden(ctx.hidden, q, m.id);
+          const text = masked ? HIDDEN_TEXT : "0";
+          requests.push({ text, anchor: axis(offsets[k]! + m.length / 2), normal, tangent, shift: 0, priority: 3, magnitude: 0, depth: 0, group, masked });
         }
       }
       continue;
@@ -433,8 +490,9 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
 
     for (const cp of characteristicPoints(pieces, q, tol)) {
       const sign = cp.value > 0 ? 1 : -1;
+      const masked = hiddenAt(cp.x);
       requests.push({
-        text: formatQuantity(kind, Math.abs(cp.value), model),
+        text: masked ? HIDDEN_TEXT : formatQuantity(kind, Math.abs(cp.value), model),
         anchor: at(cp.x, cp.value),
         normal: { x: normal.x * sign, y: normal.y * sign },
         tangent,
@@ -442,8 +500,9 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
         priority: PRIORITY[cp.kind],
         magnitude: Math.abs(cp.value),
         depth: Math.abs(cp.value) * px,
-        emphasis: Math.abs(cp.value) >= max * (1 - 1e-9),
+        emphasis: !masked && Math.abs(cp.value) >= max * (1 - 1e-9),
         group,
+        masked,
       });
     }
 
@@ -489,7 +548,7 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
       pointsBox(inflections, 4),
     ].filter((b): b is Box => b !== undefined),
   )!;
-  return { sketch: sk, diagrams, labels, symbols, inflections, bbox };
+  return { sketch: sk, diagrams, labels, symbols, inflections, highlight, bbox };
 }
 
 function forcePanel(ctx: Context, q: Quantity, top: number, truss: boolean): ForcePanel {
@@ -563,7 +622,7 @@ export function deformationScaleFor(maxDisplacementSI: number, maxDimSI: number,
   return maxDisplacementSI > 0 ? (LAYOUT.autoDeformation * maxDimSI) / maxDisplacementSI : 0;
 }
 
-function deformedContent(ctx: Context, map: Mapper, scale: number, max: ReturnType<typeof maxDisplacement>, quantitative: boolean): DeformedContent {
+function deformedContent(ctx: Context, map: Mapper, scale: number, max: ReturnType<typeof maxDisplacement>, quantitative: boolean, masked: boolean): DeformedContent {
   const { sketch: sk, boxes } = sketch(ctx, map);
   const shapes = ctx.result.members.map((m) => deformationStations(m, ctx.pxPerMeter).map((x) => map.si(displacedPoint(m, x, scale))));
   const inflections: Point[] = [];
@@ -585,7 +644,7 @@ function deformedContent(ctx: Context, map: Mapper, scale: number, max: ReturnTy
     labels = placeLabels(
       [
         {
-          text: formatQuantity("displacement", max.value, ctx.model),
+          text: masked ? HIDDEN_TEXT : formatQuantity("displacement", max.value, ctx.model),
           anchor: maxPoint,
           normal: { x: dir.x / len, y: dir.y / len },
           tangent: { x: m.cos, y: -m.sin },
@@ -593,7 +652,8 @@ function deformedContent(ctx: Context, map: Mapper, scale: number, max: ReturnTy
           priority: 0,
           magnitude: max.value,
           depth: 0,
-          emphasis: true,
+          emphasis: !masked,
+          masked,
         },
       ],
       { boxes, segments },
@@ -610,12 +670,15 @@ function deformedPanel(ctx: Context, setting: number | "auto", top: number): Def
   const max = maxDisplacement(result, ctx.pxPerMeter);
   const scale = deformationScaleFor(max.value, ctx.maxDimSI, setting);
   const qualitative = result.deformationQualitative;
+  // Forstørrelsen ved «auto» gir største forskyvning via konstruksjonens mål, så den skjules også.
+  const valueHidden = (ctx.hidden?.displacementNodes.size ?? 0) > 0;
   const items: Omit<Note, "x" | "y">[] = [];
   if (max.value <= 0) items.push({ text: "Ingen forskyvninger.", tone: "muted" });
   else if (qualitative) items.push({ text: "Kvalitativ form – tverrsnitt er ikke oppgitt", tone: "warning" });
+  else if (valueHidden) items.push({ text: `Største forskyvning: ${HIDDEN_TEXT} (vises når du har prøvd selv)`, tone: "muted" });
   else items.push({ text: `Største forskyvning ${formatQuantity("displacement", max.value, model)} (forstørret ×${formatNumber(scale, 2)})`, tone: "muted" });
 
-  const first = deformedContent(ctx, mapper(ctx, 0), scale, max, !qualitative);
+  const first = deformedContent(ctx, mapper(ctx, 0), scale, max, !qualitative, valueHidden);
   if (first.inflections.length) items.push({ text: "vendepunkt (M skifter fortegn)", tone: "muted", glyph: "inflection" });
   items.push({ text: "stiplet: udeformert", tone: "muted" });
   const { notes, height: headerHeight } = flowNotes(items, top, ctx.width);
@@ -625,7 +688,7 @@ function deformedPanel(ctx: Context, setting: number | "auto", top: number): Def
   const clampBox = (b: Box, s: Box): Box => ({ x0: b.x0, x1: b.x1, y0: Math.max(b.y0, s.y0 - limit), y1: Math.min(b.y1, s.y1 + limit) });
   const firstBox = clampBox(first.bbox, first.structureBox);
   const contentTop = top + headerHeight + LAYOUT.pad;
-  const content = deformedContent(ctx, mapper(ctx, contentTop - firstBox.y0), scale, max, !qualitative);
+  const content = deformedContent(ctx, mapper(ctx, contentTop - firstBox.y0), scale, max, !qualitative, valueHidden);
   const box = clampBox(content.bbox, content.structureBox);
   const height = headerHeight + 2 * LAYOUT.pad + (box.y1 - box.y0);
   return {
@@ -642,6 +705,7 @@ function deformedPanel(ctx: Context, setting: number | "auto", top: number): Def
     scale,
     maxDisplacement: max.value,
     qualitative,
+    valueHidden,
     clip: { x0: 0, y0: top + headerHeight, x1: ctx.width, y1: top + height },
   };
 }
