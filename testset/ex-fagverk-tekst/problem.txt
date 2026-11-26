@@ -1,0 +1,5 @@
+Et plant fagverk har knutepunktene A (0, 0), B (4,0 m, 0) og C (2,0 m, 3,0 m). Stavene er AB, AC og BC.
+
+A er et fastlager, og B er et rullelager på horisontalt underlag. I C virker en vertikal last på 20 kN rettet nedover.
+
+Finn kreftene i alle stavene.

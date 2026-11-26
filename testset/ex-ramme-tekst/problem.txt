@@ -1,0 +1,7 @@
+En portalramme ABCD består av søylen AB, bjelken BC og søylen CD. Søylene er 4,0 m høye og bjelken er 6,0 m lang. Søylene står vertikalt, og bjelken er horisontal.
+
+A er fast innspent, og D er et fastlager. Begge står på samme nivå.
+
+I B virker en horisontal punktlast på 5 kN mot høyre. Hele bjelken BC har en jevnt fordelt last på 3 kN/m rettet nedover.
+
+Tegn M-diagrammet for rammen.

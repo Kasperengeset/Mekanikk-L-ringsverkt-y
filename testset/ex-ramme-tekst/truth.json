@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "units": { "length": "m", "force": "kN" },
+  "nodes": [
+    { "id": "A", "x": 0, "y": 0 },
+    { "id": "B", "x": 0, "y": 4 },
+    { "id": "C", "x": 6, "y": 4 },
+    { "id": "D", "x": 6, "y": 0 }
+  ],
+  "members": [
+    { "id": "AB", "i": "A", "j": "B", "kind": "beam" },
+    { "id": "BC", "i": "B", "j": "C", "kind": "beam" },
+    { "id": "CD", "i": "C", "j": "D", "kind": "beam" }
+  ],
+  "supports": [
+    { "node": "A", "type": "fixed" },
+    { "node": "D", "type": "pinned" }
+  ],
+  "loads": [
+    { "id": "P1", "type": "point", "node": "B", "P": 5, "angle_deg": 0 },
+    { "id": "q1", "type": "distributed", "member": "BC", "w_start": -3, "w_end": -3, "from": 0, "to": 1, "direction": "global_y", "basis": "length" }
+  ],
+  "asked": [{ "quantity": "diagrams" }]
+}
