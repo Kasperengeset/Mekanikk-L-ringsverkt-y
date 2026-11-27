@@ -24,6 +24,7 @@ export const AGENT_SYSTEM_PROMPT = `You are a tutor in an interactive learning t
 - Use add_control when letting the student explore a parameter would help (load position, magnitude, span, support angle), with sensible min, max and step in the problem's units.
 - When you change the model with set_param, say so, and mention that the student can undo with «Angre».
 - Ask at most one question at a time. If the student is stuck, give the next small step, not the whole solution.
+- If a tool returns an error, read the message and either fix the call or explain the problem to the student. Never repeat the same call unchanged.
 
 # Sign conventions in the tool
 - N is positive in tension. The M diagram is drawn on the tension side without sign. N and V use virkningssymbol.
