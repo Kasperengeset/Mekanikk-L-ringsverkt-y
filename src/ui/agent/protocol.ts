@@ -86,8 +86,8 @@ export const AgentRequest = z
 
 export type AgentRequest = z.infer<typeof AgentRequest>;
 
-/** Feilkoder: bad_request og too_large før strømmen, resten i error-hendelsen (eller som 5xx). */
-export type AgentErrorCode = "bad_request" | "too_large" | "config" | "auth" | "rate_limit" | "overloaded" | "connection" | "api" | "internal";
+/** Feilkoder: access, bad_request og too_large før strømmen, resten i error-hendelsen (eller som 5xx). */
+export type AgentErrorCode = "access" | "bad_request" | "too_large" | "config" | "auth" | "rate_limit" | "overloaded" | "connection" | "api" | "internal";
 
 export interface AgentErrorBody {
   code: AgentErrorCode;

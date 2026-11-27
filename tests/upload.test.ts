@@ -3,7 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getParam } from "../src/core/edit.js";
 import type { Model, Provenance } from "../src/core/schema.js";
 import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS } from "../src/pdf/render.js";
-import { base64DecodedSize } from "../src/ui/api/protocol.js";
+import { ACCESS_MISSING } from "../server/access.js";
+import { clearAccessCode, submitAccessCode, useAccess } from "../src/ui/api/access.js";
+import { ACCESS_HEADER, base64DecodedSize } from "../src/ui/api/protocol.js";
 import { FIXTURES } from "../src/ui/fixtures.js";
 import { useStore } from "../src/ui/state/store.js";
 import {
@@ -302,6 +304,27 @@ describe("opplastingsflyten mot storen", () => {
     expect(useStore.getState()).toMatchObject({ phase: "upload", model: null, highlights: [] });
     expect(useStore.getState().interpretation.status).toBe("idle");
     expect(session.useUploadSession.getState()).toMatchObject({ problemText: "Bjelke A–B på 6 m.", which: "Løs oppgave 2" });
+  });
+
+  it("uten tilgangskode bes det om koden, og tolkningen kjøres på nytt med den", async () => {
+    const session = await import("../src/ui/upload/session.js");
+    const inner = globalThis.fetch;
+    const sent: (string | null)[] = [];
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      const code = new Headers(init?.headers).get(ACCESS_HEADER);
+      sent.push(code);
+      return code === "ola-7f3k" ? inner(input, init) : Promise.resolve(Response.json({ error: { code: "access", message: ACCESS_MISSING } }, { status: 401 }));
+    });
+    session.setProblemText("Bjelke A–B på 6 m.");
+    await session.startInterpretation();
+    expect(useStore.getState().interpretation).toMatchObject({ status: "error", error: ACCESS_MISSING });
+    expect(useAccess.getState().message).toBe(ACCESS_MISSING);
+
+    submitAccessCode("ola-7f3k");
+    await vi.waitFor(() => expect(useStore.getState().phase).toBe("confirm"));
+    expect(sent).toEqual([null, "ola-7f3k"]);
+    clearAccessCode();
+    session.resetToUpload();
   });
 
   it("uten bilde og uten oppgavetekst sendes ingenting", async () => {

@@ -33,6 +33,8 @@ export interface ProviderOptions {
 
 export interface InterpretHandlerDeps {
   createProvider(options: ProviderOptions): InterpretProvider;
+  /** Tilgangskontroll før forespørselen leses; en melding her gir 401 med koden access (se server/access.ts). */
+  authorize?(req: Request): string | undefined;
   /** Sjekkes før strømmen starter; en melding her gir 500 med koden config (f.eks. manglende API-nøkkel). */
   checkConfig?(): string | undefined;
   interpretOptions?: InterpretOptions;
@@ -114,6 +116,8 @@ export function createInterpretHandler(deps: InterpretHandlerDeps): (req: Reques
 
   return async function handle(req: Request): Promise<Response> {
     if (req.method !== "POST") return jsonError(405, "bad_request", "Bruk POST.");
+    const denied = deps.authorize?.(req);
+    if (denied) return jsonError(401, "access", denied);
 
     const length = Number(req.headers.get("content-length") ?? 0);
     if (length > MAX_REQUEST_BYTES) return jsonError(413, "too_large", tooLargeMessage());

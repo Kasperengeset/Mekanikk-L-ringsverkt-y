@@ -23,6 +23,7 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
 | Variabel | Verdi | Merknad |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | nøkkelen | Påkrevd. Uten den svarer funksjonene med en forklarende feilmelding. |
+| `ACCESS_CODES` | `ola-7f3k, kari-9x2m` | Tilgangskoder, én per testbruker (se under). Uten denne er API-et åpent for alle som har adressen. |
 | `ENABLE_EXPERIMENTAL_COREPACK` | `1` | Vercel bruker da pnpm 11.8.0 fra `packageManager` i `package.json`, samme som lokalt og i CI. |
 | `INTERPRET_MODEL` | `claude-opus-5-5` | Valgfri. |
 | `INTERPRET_EFFORT` | `high` | Valgfri. |
@@ -30,16 +31,29 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
 | `AGENT_MODEL` | `claude-opus-5-5` | Valgfri. |
 | `AGENT_EFFORT` | `medium` | Valgfri. |
 
-## Kostnad og misbruk
+## Tilgangskoder og personlige lenker
 
-Adressen er offentlig, og alle som har den, kan bruke API-nøkkelen. Før lenken deles:
+Adressen er offentlig. Med `ACCESS_CODES` satt avviser `/api/interpret` og `/api/agent` alle
+forespørsler uten en gyldig kode (401) før noe sendes til Claude. Eksemplene (`?eksempel=…`) virker
+uten kode, siden de ikke bruker API-et.
+
+1. Lag én kode per testbruker. Bruk bokstavene a–z, tall, bindestrek og understrek, for eksempel
+   navn pluss noen tilfeldige tegn: `node -e "console.log('ola-' + require('crypto').randomBytes(3).toString('hex'))"`.
+2. Legg kodene i `ACCESS_CODES`, skilt med komma, og deploy på nytt. Endringer i miljøvariabler gjelder
+   først etter en ny deploy.
+3. Send hver testbruker sin personlige lenke: `https://<adresse>/?kode=ola-7f3k`. Appen lagrer koden i
+   nettleseren og fjerner den fra adresselinjen. Mangler koden, eller er den feil, ber appen om den og
+   sender forespørselen på nytt når den er skrevet inn.
+4. For å stenge ute én testbruker fjerner du koden fra listen og deployer på nytt.
+
+Store og små bokstaver regnes som like.
+
+## Kostnad
 
 - Lag et eget arbeidsområde (workspace) og en egen nøkkel i Anthropic Console, med en månedlig
-  forbruksgrense. Da blir det verste tilfellet en kjent sum.
+  forbruksgrense. Da blir det verste tilfellet en kjent sum, også om en kode kommer på avveie.
 - Vurder `INTERPRET_CONSISTENCY=never` under testen. Det er billigst, men usikre tolkninger får da
   ikke spørsmål fra self-consistency.
-- Appen har ingen innlogging eller tilgangskode ennå. En enkel delt kode for testbrukerne kan legges til
-  før lenken deles bredere.
 
 ## Grenser
 

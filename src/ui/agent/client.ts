@@ -1,4 +1,5 @@
 /** Klient for /api/agent: sender samtalen og leser Server-Sent Events fortløpende (se protocol.ts). */
+import { accessHeaders } from "../api/access.js";
 import { SSE_CONTENT_TYPE } from "../api/protocol.js";
 import { createSseParser } from "../api/sse.js";
 import type { AgentErrorBody, AgentErrorCode, AgentMessage, AgentReply, AgentServerEvent, AgentToolUseEvent } from "./protocol.js";
@@ -61,7 +62,7 @@ export function createAgentTransport(options: AgentClientOptions = {}): AgentTra
     try {
       res = await doFetch(options.endpoint ?? "/api/agent", {
         method: "POST",
-        headers: { "content-type": "application/json", accept: SSE_CONTENT_TYPE },
+        headers: { "content-type": "application/json", accept: SSE_CONTENT_TYPE, ...accessHeaders() },
         body: JSON.stringify({ messages }),
         signal,
       });

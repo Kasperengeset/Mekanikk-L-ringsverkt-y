@@ -60,9 +60,10 @@ export const InterpretRequest = z
 
 export type InterpretRequest = z.infer<typeof InterpretRequest>;
 
-/** Feilkoder: bad_request og too_large før strømmen, resten i error-hendelsen (eller som 5xx). */
+/** Feilkoder: access, bad_request og too_large før strømmen, resten i error-hendelsen (eller som 5xx). */
 export type ErrorCode =
   | "bad_request"
+  | "access"
   | "too_large"
   | "config"
   | "auth"
@@ -117,6 +118,11 @@ export interface ServerEventMap {
 export type ServerEvent = { [K in keyof ServerEventMap]: { event: K; data: ServerEventMap[K] } }[keyof ServerEventMap];
 
 export const SSE_CONTENT_TYPE = "text/event-stream";
+
+/** Tilgangskoden sendes i denne headeren når serveren har ACCESS_CODES (se server/access.ts). */
+export const ACCESS_HEADER = "x-access-code";
+/** Lovlige tegn i en tilgangskode, så den kan stå i en lenke og i en header uten koding. */
+export const ACCESS_CODE_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** Grensen for hele forespørselen (base64 er 4/3 av bildene, pluss tekst og JSON). */
 export const MAX_REQUEST_BYTES = Math.ceil((MAX_TOTAL_BYTES * 4) / 3) + MAX_TEXT_LENGTH * 4 + 64 * 1024;

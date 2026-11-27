@@ -16,6 +16,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const work = mkdtempSync(join(tmpdir(), "check-api-"));
 const out = join(work, "out");
 delete process.env.ANTHROPIC_API_KEY;
+delete process.env.ACCESS_CODES;
 
 /** En gyldig forespørsel til hver funksjon, så sjekken kommer forbi valideringen og til konfigurasjonen. */
 const requests = {

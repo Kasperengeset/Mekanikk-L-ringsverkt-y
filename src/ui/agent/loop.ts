@@ -7,7 +7,7 @@
  * thinking-blokkene er bundet til samtalen før dem, så tidligere meldinger endres aldri.
  */
 import type Anthropic from "@anthropic-ai/sdk";
-import type { AgentStreamHandlers, AgentTransport } from "./client.js";
+import { AgentApiError, type AgentStreamHandlers, type AgentTransport } from "./client.js";
 import type { AgentMessage, AgentReply, AgentToolResult } from "./protocol.js";
 import { runAgentTool, type AgentAction } from "./tools.js";
 
@@ -36,7 +36,8 @@ export type LoopOutcome =
   /** Svaret ble kuttet (max_tokens eller full kontekst). Svaret er forkastet. */
   | { status: "max_tokens" }
   | { status: "aborted" }
-  | { status: "error"; message: string };
+  /** code: feilkoden fra serveren eller klienten (f.eks. access når tilgangskoden mangler). */
+  | { status: "error"; message: string; code?: AgentApiError["code"] };
 
 export interface AgentLoopOptions {
   transport: AgentTransport;
@@ -73,6 +74,7 @@ export async function runAgentLoop(initial: AgentMessage[], options: AgentLoopOp
       reply = await transport(messages, events, signal);
     } catch (err) {
       if (signal.aborted) return finish({ status: "aborted" });
+      if (err instanceof AgentApiError) return finish({ status: "error", message: err.message, code: err.code });
       return finish({ status: "error", message: err instanceof Error ? err.message : "Noe gikk galt hos veilederen." });
     }
     events.onReply?.(reply);

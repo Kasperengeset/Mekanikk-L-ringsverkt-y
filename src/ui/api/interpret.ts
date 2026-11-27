@@ -1,5 +1,6 @@
 /** Klient for /api/interpret: sender bildene og leser Server-Sent Events fortløpende (se protocol.ts). */
 import { Model } from "../../core/schema.js";
+import { accessHeaders } from "./access.js";
 import { SSE_CONTENT_TYPE, type ApiErrorBody, type ErrorCode, type InterpretRequest, type InterpretResponse, type Progress, type ServerEvent } from "./protocol.js";
 import { createSseParser } from "./sse.js";
 
@@ -59,7 +60,7 @@ export async function interpretRemote(
   try {
     res = await doFetch(options.endpoint ?? "/api/interpret", {
       method: "POST",
-      headers: { "content-type": "application/json", accept: SSE_CONTENT_TYPE },
+      headers: { "content-type": "application/json", accept: SSE_CONTENT_TYPE, ...accessHeaders() },
       body: JSON.stringify(request),
       ...(options.signal ? { signal: options.signal } : {}),
     });
