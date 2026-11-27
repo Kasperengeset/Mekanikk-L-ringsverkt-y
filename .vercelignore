@@ -1,0 +1,11 @@
+# Det som aldri skal lastes opp ved `vercel deploy` fra kommandolinjen (samme regler som .gitignore).
+# Kursmaterialet (øvinger og løsningsforslag) brukes bare internt, og .env har API-nøkkelen.
+.env
+.env.*
+!.env.example
+testset/*
+!testset/README.md
+!testset/ex-*/
+eval/results/
+.claude/
+.venv/
