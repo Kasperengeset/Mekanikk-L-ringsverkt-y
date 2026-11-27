@@ -1,0 +1,195 @@
+/* «Prøv selv», glidebrytere og spådomskort (spor E). Fargene kommer fra variablene i styles.css. */
+.pedagogy-panel {
+  margin-top: 16px;
+}
+.pedagogy-panel h3 {
+  margin: 0 0 6px;
+}
+.pedagogy-panel h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.pd-hidden-note {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg);
+  font-size: 13px;
+}
+.pd-convention {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+.pd-target {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.pd-target p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.pd-component {
+  margin-bottom: 8px;
+}
+.pd-component label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+.pd-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pd-input input {
+  width: 9em;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+}
+.pd-input input[aria-invalid="true"] {
+  border-color: var(--warning);
+}
+.pd-unit {
+  color: var(--muted);
+  font-size: 13px;
+}
+.pd-target .pd-verdict {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.pd-verdict strong {
+  color: var(--fg);
+}
+.pd-verdict.pd-correct strong,
+.pd-summary.pd-correct {
+  color: var(--load);
+}
+.pd-verdict.pd-wrong_sign strong {
+  color: var(--uncertain);
+}
+.pd-verdict.pd-wrong strong {
+  color: var(--warning);
+}
+.pd-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pd-summary {
+  font-size: 13px;
+}
+.pd-feedback {
+  color: var(--load);
+}
+.pd-error,
+.pd-target .pd-error {
+  margin: 4px 0;
+  color: var(--warning);
+  font-size: 12px;
+}
+button.pd-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+button.pd-link {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+/* Glidebrytere */
+.pd-controls {
+  margin-top: 12px;
+}
+.pd-control {
+  margin-bottom: 10px;
+}
+.pd-control-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+.pd-control-head label {
+  flex: 1;
+}
+.pd-control-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.pd-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.pd-control-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+/* Spådomskortet */
+.pd-prediction {
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+}
+.pd-prediction-kicker {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.pd-prediction-question {
+  margin: 4px 0 10px;
+  font-weight: 600;
+}
+.pd-prediction-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.pd-prediction-options button {
+  text-align: left;
+}
+.pd-prediction-options button:hover,
+.pd-prediction-options button:focus-visible {
+  border-color: var(--accent);
+}
+.pd-prediction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.pd-prediction-form textarea {
+  font: inherit;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  resize: vertical;
+}
+.pd-prediction-form button {
+  align-self: flex-start;
+}

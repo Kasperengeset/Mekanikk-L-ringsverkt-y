@@ -16,6 +16,8 @@ export interface Palette {
   background: string;
   line: string;
   accent: string;
+  /** Utheving av et punkt (agenten), samme farge som uthevinger i konstruksjonen. */
+  highlight: string;
 }
 
 export const DEFAULT_PALETTE: Palette = {
@@ -29,4 +31,5 @@ export const DEFAULT_PALETTE: Palette = {
   background: "#ffffff",
   line: "#d0d5dd",
   accent: "#2463eb",
+  highlight: "#f79009",
 };

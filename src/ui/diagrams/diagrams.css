@@ -84,3 +84,33 @@
   stroke: var(--accent);
   stroke-width: 2;
 }
+
+/* Skjulte tall og utheving (uke 4) */
+.diagrams .dg-hidden-value {
+  fill: var(--muted);
+  cursor: help;
+}
+.diagrams .dg-highlight-stroke {
+  stroke: var(--uncertain);
+}
+.diagrams .dg-highlight-ring {
+  fill: var(--uncertain);
+  stroke: var(--uncertain);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-pulse 1.6s ease-in-out 3;
+}
+.diagrams .dg-highlight-dot {
+  fill: var(--uncertain);
+  stroke: var(--bg);
+}
+@keyframes dg-pulse {
+  50% {
+    transform: scale(1.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagrams .dg-highlight-ring {
+    animation: none;
+  }
+}
