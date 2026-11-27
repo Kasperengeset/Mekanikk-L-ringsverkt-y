@@ -5,8 +5,8 @@
  * resvg ikke kjenner CSS-variabler) og som klasse som structure.css overstyrer med temaets variabler
  * i appen. Tegningen bruker currentColor, så begge veier gir samme farge.
  */
-import type { Model } from "../../core/schema";
-import type { EntityRef, Phase } from "../state/store";
+import type { Model } from "../../core/schema.js";
+import type { EntityRef, Phase } from "../state/store.js";
 
 export interface Palette {
   /** Bakgrunnen (fyll i ledd og glorie bak tekst). */

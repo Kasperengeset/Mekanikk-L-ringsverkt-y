@@ -4,10 +4,10 @@
  * beskrivelse fortløpende. Resultatet går videre til bekreftelsessteget (ConfirmPanel).
  */
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { MAX_IMAGES } from "../api/protocol";
-import { FIXTURES } from "../fixtures";
-import { useStore } from "../state/store";
-import { summarizePartial } from "./logic";
+import { MAX_IMAGES } from "../api/protocol.js";
+import { FIXTURES } from "../fixtures.js";
+import { useStore } from "../state/store.js";
+import { summarizePartial } from "./logic.js";
 import {
   addFiles,
   appendText,
@@ -21,7 +21,7 @@ import {
   togglePdfPage,
   useUploadSession,
   type Attachment,
-} from "./session";
+} from "./session.js";
 import "./upload.css";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain,.pdf,.txt,.md";

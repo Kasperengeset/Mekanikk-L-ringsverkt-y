@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validateModel } from "../src/core/validate";
-import { model, simpleBeam } from "./helpers";
+import { validateModel } from "../src/core/validate.js";
+import { model, simpleBeam } from "./helpers.js";
 
 const ns = (m: Parameters<typeof validateModel>[0]) => validateModel(m).determinacy?.n_s;
 

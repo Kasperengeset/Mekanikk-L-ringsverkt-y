@@ -6,7 +6,7 @@
  * altså nedbøyning for en fritt opplagt bjelke med last nedover.
  * Randbetingelsene er forskyvningene i endene, så et momentledd gir automatisk en knekk.
  */
-import { evalPoly, type Piece, type Poly } from "./internal";
+import { evalPoly, type Piece, type Poly } from "./internal.js";
 
 export interface DeflectionPiece {
   x0: number;

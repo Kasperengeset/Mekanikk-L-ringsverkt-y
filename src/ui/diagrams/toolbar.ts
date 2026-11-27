@@ -1,5 +1,5 @@
 /** Knappene i diagrammenes verktøylinje: hvilke diagram som vises, og forstørrelsen av deformasjonen. */
-import type { DiagramSettings } from "../state/store";
+import type { DiagramSettings } from "../state/store.js";
 
 export interface Chip {
   label: string;

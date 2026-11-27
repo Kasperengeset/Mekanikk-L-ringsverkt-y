@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cycleSupportType, getParam, setParam, setParams, snap } from "../src/core/edit";
-import { simpleBeam } from "./helpers";
+import { cycleSupportType, getParam, setParam, setParams, snap } from "../src/core/edit.js";
+import { simpleBeam } from "./helpers.js";
 
 describe("setParam", () => {
   it("endrer en last og lar resten av modellen være urørt", () => {

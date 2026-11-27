@@ -2,10 +2,10 @@
  * Bekreftelsessteget: usikre entiteter fra model.provenance, stien en endring skal gå til
  * (grammatikken i src/core/edit.ts), og alternativer som tekst → verdi. Ren logikk, testes uten nettleser.
  */
-import { getParam } from "../../core/edit";
-import type { Model, Provenance } from "../../core/schema";
-import { formatNumber } from "../format";
-import type { EntityRef } from "../state/store";
+import { getParam } from "../../core/edit.js";
+import type { Model, Provenance } from "../../core/schema.js";
+import { formatNumber } from "../format.js";
+import type { EntityRef } from "../state/store.js";
 
 /** Under denne sikkerheten vises entiteten for studenten (samme terskel som i tolkningen). */
 export const LOW_CONFIDENCE = 0.7;

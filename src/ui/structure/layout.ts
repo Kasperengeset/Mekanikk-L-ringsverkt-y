@@ -2,8 +2,8 @@
  * Geometri for tegningen av konstruksjonen. Modellpunkter er i modellens enheter med y opp;
  * skjermpunkter og -retninger er i piksler med y ned (som i SVG).
  */
-import type { DistributedLoad, Load, Member, Model, MomentLoad, PointLoad, Support } from "../../core/schema";
-import type { Point } from "../geometry";
+import type { DistributedLoad, Load, Member, Model, MomentLoad, PointLoad, Support } from "../../core/schema.js";
+import type { Point } from "../geometry.js";
 
 export const add = (a: Point, b: Point): Point => ({ x: a.x + b.x, y: a.y + b.y });
 export const sub = (a: Point, b: Point): Point => ({ x: a.x - b.x, y: a.y - b.y });

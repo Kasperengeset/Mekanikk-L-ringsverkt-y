@@ -5,8 +5,8 @@
  * Miljø: ANTHROPIC_API_KEY (påkrevd), INTERPRET_MODEL, INTERPRET_EFFORT og INTERPRET_CONSISTENCY
  * (never | low_confidence | always) er valgfrie.
  */
-import { consistencyFromEnv, createInterpretHandler } from "../server/interpretHandler";
-import { ClaudeProvider } from "../server/llm/claude";
+import { consistencyFromEnv, createInterpretHandler } from "../server/interpretHandler.js";
+import { ClaudeProvider } from "../server/llm/claude.js";
 
 export const POST = createInterpretHandler({
   createProvider: ({ onEvent, signal }) => new ClaudeProvider({ signal, ...(onEvent ? { onEvent } : {}) }),

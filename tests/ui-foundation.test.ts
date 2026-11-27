@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { positiveSide } from "../src/ui/convention";
-import { FIXTURES } from "../src/ui/fixtures";
-import { formatNumber, formatQuantity } from "../src/ui/format";
-import { fitViewport } from "../src/ui/geometry";
-import { useStore } from "../src/ui/state/store";
-import { solve } from "../src/core/solver";
-import { simpleBeam } from "./helpers";
+import { positiveSide } from "../src/ui/convention.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { formatNumber, formatQuantity } from "../src/ui/format.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import { useStore } from "../src/ui/state/store.js";
+import { solve } from "../src/core/solver/index.js";
+import { simpleBeam } from "./helpers.js";
 
 describe("eksempelmodellene", () => {
   it.each(Object.entries(FIXTURES))("%s løses", (_name, f) => {

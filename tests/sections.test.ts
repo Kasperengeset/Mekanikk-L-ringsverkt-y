@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { centroidFromBottom, PROFILES, resolveSection, shapeProperties } from "../src/core/sections";
-import { validateModel } from "../src/core/validate";
-import { simpleBeam } from "./helpers";
+import { centroidFromBottom, PROFILES, resolveSection, shapeProperties } from "../src/core/sections.js";
+import { validateModel } from "../src/core/validate.js";
+import { simpleBeam } from "./helpers.js";
 
 describe("IPE-tabellen", () => {
   // Kontroll av tabellverdiene mot geometrien (flenser, steg og fire hulkiler med radius r).

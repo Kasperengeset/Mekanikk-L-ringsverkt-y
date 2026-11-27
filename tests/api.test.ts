@@ -1,14 +1,14 @@
 /** /api/interpret med falske leverandører – ingen kall mot det ekte Claude-API-et. */
 import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { createInterpretHandler, type InterpretHandlerDeps, type ProviderOptions } from "../server/interpretHandler";
-import { EMPTY_USAGE, InterpretError, type InterpretInput, type InterpretResult, type InterpretStreamEvent } from "../server/llm/adapter";
-import { ClaudeProvider } from "../server/llm/claude";
-import type { Model } from "../src/core/schema";
-import { InterpretApiError, interpretRemote } from "../src/ui/api/interpret";
-import type { ServerEvent } from "../src/ui/api/protocol";
-import { createSseParser, encodeSseEvent } from "../src/ui/api/sse";
-import { simpleBeam } from "./helpers";
+import { createInterpretHandler, type InterpretHandlerDeps, type ProviderOptions } from "../server/interpretHandler.js";
+import { EMPTY_USAGE, InterpretError, type InterpretInput, type InterpretResult, type InterpretStreamEvent } from "../server/llm/adapter.js";
+import { ClaudeProvider } from "../server/llm/claude.js";
+import type { Model } from "../src/core/schema.js";
+import { InterpretApiError, interpretRemote } from "../src/ui/api/interpret.js";
+import type { ServerEvent } from "../src/ui/api/protocol.js";
+import { createSseParser, encodeSseEvent } from "../src/ui/api/sse.js";
+import { simpleBeam } from "./helpers.js";
 
 const PNG = { mediaType: "image/png", data: "iVBORw0KGgo=" } as const;
 

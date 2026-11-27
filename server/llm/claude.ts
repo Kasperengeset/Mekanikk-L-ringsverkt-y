@@ -4,10 +4,10 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { SubmitModelInput } from "../../src/core/schema";
-import { formatIssues, validateModel } from "../../src/core/validate";
-import { INTERPRET_SYSTEM_PROMPT, interpretUserText, invalidModelFeedback, missingToolCallReminder } from "../../src/core/llm/prompts";
-import { SUBMIT_MODEL_TOOL } from "../../src/core/llm/tools";
+import { SubmitModelInput } from "../../src/core/schema.js";
+import { formatIssues, validateModel } from "../../src/core/validate.js";
+import { INTERPRET_SYSTEM_PROMPT, interpretUserText, invalidModelFeedback, missingToolCallReminder } from "../../src/core/llm/prompts.js";
+import { SUBMIT_MODEL_TOOL } from "../../src/core/llm/tools.js";
 import {
   addUsage,
   EMPTY_USAGE,
@@ -17,8 +17,8 @@ import {
   type InterpretResult,
   type InterpretStreamEvent,
   type Usage,
-} from "./adapter";
-import { costUsd } from "./pricing";
+} from "./adapter.js";
+import { costUsd } from "./pricing.js";
 
 type Effort = "low" | "medium" | "high" | "xhigh" | "max";
 

@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check:api": "node scripts/check-api.mjs",
     "eval:interpret": "tsx eval/interpret.ts",
     "testset:check": "tsx eval/check-testset.ts",
     "pdf:render": "tsx eval/render-pdf.ts",

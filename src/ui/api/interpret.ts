@@ -1,7 +1,7 @@
 /** Klient for /api/interpret: sender bildene og leser Server-Sent Events fortløpende (se protocol.ts). */
-import { Model } from "../../core/schema";
-import { SSE_CONTENT_TYPE, type ApiErrorBody, type ErrorCode, type InterpretRequest, type InterpretResponse, type Progress, type ServerEvent } from "./protocol";
-import { createSseParser } from "./sse";
+import { Model } from "../../core/schema.js";
+import { SSE_CONTENT_TYPE, type ApiErrorBody, type ErrorCode, type InterpretRequest, type InterpretResponse, type Progress, type ServerEvent } from "./protocol.js";
+import { createSseParser } from "./sse.js";
 
 export class InterpretApiError extends Error {
   constructor(

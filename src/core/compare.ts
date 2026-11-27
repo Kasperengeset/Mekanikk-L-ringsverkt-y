@@ -12,9 +12,9 @@
  *  - momentledd på ulike elementender som gir samme ledd i noden,
  *  - en bjelke med ledd i begge ender og uten last mot en fagverksstav.
  */
-import type { Model, SupportType } from "./schema";
-import { resolveSection } from "./sections";
-import { pointLoadComponents, toSI } from "./units";
+import type { Model, SupportType } from "./schema.js";
+import { resolveSection } from "./sections.js";
+import { pointLoadComponents, toSI } from "./units.js";
 
 export type CompareKind = "node" | "member" | "section" | "support" | "hinge" | "load";
 export type MatchStatus = "match" | "mismatch" | "missing" | "extra";

@@ -1,4 +1,4 @@
-import { Model, type ModelInput } from "../src/core/schema";
+import { Model, type ModelInput } from "../src/core/schema.js";
 
 /** Bygger en gyldig modell; schemaVersion og enheter (m, kN) fylles inn hvis de mangler. */
 export function model(input: Omit<ModelInput, "schemaVersion" | "units"> & Partial<Pick<ModelInput, "units">>): Model {

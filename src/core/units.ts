@@ -2,7 +2,7 @@
  * Omregning mellom oppgavens enheter (`model.units`) og SI (m, N).
  * Løseren og sammenligningen jobber alltid på SI-modellen.
  */
-import type { Load, Model, Units } from "./schema";
+import type { Load, Model, Units } from "./schema.js";
 
 const LENGTH_TO_M: Record<Units["length"], number> = { mm: 1e-3, cm: 1e-2, m: 1 };
 const FORCE_TO_N: Record<Units["force"], number> = { N: 1, kN: 1e3, MN: 1e6 };

@@ -5,7 +5,7 @@
  * M > 0 gir strekk på siden −y' (til høyre når man går fra i mot j), altså underkanten for en
  * bjelke tegnet fra venstre mot høyre. Presentasjonen kan snu dette til kursets konvensjon.
  */
-import type { LocalLoad } from "./loads";
+import type { LocalLoad } from "./loads.js";
 
 /** Polynomkoeffisienter c0 + c1 x + c2 x² + c3 x³. */
 export type Poly = number[];

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Model } from "../src/core/schema";
-import { evalPoly, solve, type SolveResult } from "../src/core/solver";
-import { model } from "./helpers";
+import type { Model } from "../src/core/schema.js";
+import { evalPoly, solve, type SolveResult } from "../src/core/solver/index.js";
+import { model } from "./helpers.js";
 
 const kN = 1e3;
 

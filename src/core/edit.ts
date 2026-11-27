@@ -10,8 +10,8 @@
  * En mekanisme er en gyldig modell (løseren rapporterer den), så den stoppes ikke her.
  */
 import { z } from "zod";
-import { Model, type SupportType } from "./schema";
-import { validateModel, type Issue } from "./validate";
+import { Model, type SupportType } from "./schema.js";
+import { validateModel, type Issue } from "./validate.js";
 
 export type EditResult = { ok: true; model: Model } | { ok: false; error: string; issues?: Issue[] };
 

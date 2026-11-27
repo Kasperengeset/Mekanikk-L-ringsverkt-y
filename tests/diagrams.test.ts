@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Model } from "../src/core/schema";
-import { evalPoly, solve, type MemberResult, type Piece, type SolveResult } from "../src/core/solver";
-import { boxesOverlap, placeLabels, segmentHitsBox, type Box, type LabelRequest } from "../src/ui/diagrams/labels";
-import { DEFAULT_SETTINGS, LAYOUT, layoutDiagrams, memberChains, type DeformedPanel, type ForcePanel, type Panel } from "../src/ui/diagrams/layout";
-import { characteristicPoints, degree, joinPieces, rootsIn, samplePieces, shiftPoly, signChanges, signRegions } from "../src/ui/diagrams/sampling";
-import { FIXTURES } from "../src/ui/fixtures";
-import { formatQuantity } from "../src/ui/format";
-import { fitViewport, type Point } from "../src/ui/geometry";
-import { model, simpleBeam } from "./helpers";
+import type { Model } from "../src/core/schema.js";
+import { evalPoly, solve, type MemberResult, type Piece, type SolveResult } from "../src/core/solver/index.js";
+import { boxesOverlap, placeLabels, segmentHitsBox, type Box, type LabelRequest } from "../src/ui/diagrams/labels.js";
+import { DEFAULT_SETTINGS, LAYOUT, layoutDiagrams, memberChains, type DeformedPanel, type ForcePanel, type Panel } from "../src/ui/diagrams/layout.js";
+import { characteristicPoints, degree, joinPieces, rootsIn, samplePieces, shiftPoly, signChanges, signRegions } from "../src/ui/diagrams/sampling.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { formatQuantity } from "../src/ui/format.js";
+import { fitViewport, type Point } from "../src/ui/geometry.js";
+import { model, simpleBeam } from "./helpers.js";
 
 type Ok = Extract<SolveResult, { status: "ok" }>;
 

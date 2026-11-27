@@ -2,21 +2,41 @@
  * N-, V- og M-diagram og deformert form som ren SVG (ingen store), så komponenten kan rendres med
  * renderToStaticMarkup (tester og `pnpm snapshot`). DiagramsView kobler den til storen.
  * All geometri regnes ut i layout.ts; her tegnes den bare.
+ *
+ * `hidden` (maske fra hiddenValues) bytter skjulte tall med «?»; formen tegnes uendret.
+ * `highlight` tegner en markør (prikk og ring) på kurven i riktig panel.
  */
 import { useId, type KeyboardEvent, type ReactNode } from "react";
-import type { Point } from "../geometry";
-import type { DiagramSettings } from "../state/store";
-import type { CanvasProps } from "../types";
-import type { Box, PlacedLabel } from "./labels";
-import { DEFAULT_SETTINGS, LAYOUT, layoutDiagrams, type ActionSymbol, type DeformedPanel, type DiagramLayout, type ForcePanel, type Note, type Sketch, type SupportGlyph } from "./layout";
-import { DEFAULT_PALETTE, type Palette } from "./palette";
-import { toolbarChips } from "./toolbar";
+import type { HiddenValues } from "../../core/pedagogy.js";
+import type { Point } from "../geometry.js";
+import type { DiagramPoint, DiagramSettings } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import type { Box, PlacedLabel } from "./labels.js";
+import {
+  DEFAULT_SETTINGS,
+  LAYOUT,
+  layoutDiagrams,
+  type ActionSymbol,
+  type DeformedPanel,
+  type DiagramLayout,
+  type DiagramMarker,
+  type ForcePanel,
+  type Note,
+  type Sketch,
+  type SupportGlyph,
+} from "./layout.js";
+import { DEFAULT_PALETTE, type Palette } from "./palette.js";
+import { toolbarChips } from "./toolbar.js";
 
 export interface DiagramsSvgProps extends CanvasProps {
   settings?: DiagramSettings;
   palette?: Partial<Palette>;
   /** Gis den, vises en verktøylinje for å slå diagrammene av og på og endre forstørrelsen. */
   onSettingsChange?: (change: Partial<DiagramSettings>) => void;
+  /** Tall som er skjult til studenten har prøvd selv (hiddenValues). Uten den vises alle tall. */
+  hidden?: HiddenValues;
+  /** Punkt i et diagram som skal utheves. */
+  highlight?: DiagramPoint | null;
 }
 
 const FONT = "system-ui, -apple-system, Helvetica, Arial, sans-serif";
@@ -24,10 +44,10 @@ const FONT = "system-ui, -apple-system, Helvetica, Arial, sans-serif";
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const pathOf = (pts: Point[], close = false) => pts.map((p, k) => `${k ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join("") + (close ? "Z" : "");
 
-export function DiagramsSvg({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange }: DiagramsSvgProps) {
+export function DiagramsSvg({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange, hidden, highlight }: DiagramsSvgProps) {
   const pal: Palette = { ...DEFAULT_PALETTE, ...palette };
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const layout = layoutDiagrams(model, result, viewport, settings, { top: onSettingsChange ? LAYOUT.toolbar : 0 });
+  const layout = layoutDiagrams(model, result, viewport, settings, { top: onSettingsChange ? LAYOUT.toolbar : 0, hidden, highlight });
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -122,6 +142,7 @@ function SupportView({ glyph, pal }: { glyph: SupportGlyph; pal: Palette }) {
   );
 }
 
+/** Tallene i et panel. Et skjult tall er et lite «?» på samme sted, så studenten ser hvor tallet står. */
 function Labels({ labels, pal }: { labels: PlacedLabel[]; pal: Palette }) {
   return (
     <g className="dg-labels">
@@ -132,17 +153,31 @@ function Labels({ labels, pal }: { labels: PlacedLabel[]; pal: Palette }) {
           y={r1(l.y + 4.2)}
           textAnchor="middle"
           fontSize={12}
-          fontWeight={l.emphasis ? 700 : 400}
-          fill={pal.fg}
+          fontWeight={l.emphasis || l.masked ? 700 : 400}
+          fill={l.masked ? pal.muted : pal.fg}
           stroke={pal.background}
           strokeWidth={3}
           strokeLinejoin="round"
           paintOrder="stroke"
-          className="dg-label"
+          className={l.masked ? "dg-label dg-hidden-value" : "dg-label"}
         >
+          {l.masked && <title>Tallet vises når du har prøvd selv</title>}
           {l.text}
         </text>
       ))}
+    </g>
+  );
+}
+
+/** Uthevet punkt: strek fra aksen, ring og prikk på kurven. */
+function MarkerView({ marker, pal }: { marker: DiagramMarker; pal: Palette }) {
+  const { point: p, base: b } = marker;
+  const showStem = Math.hypot(p.x - b.x, p.y - b.y) > 3;
+  return (
+    <g className="dg-highlight">
+      {showStem && <line x1={r1(b.x)} y1={r1(b.y)} x2={r1(p.x)} y2={r1(p.y)} stroke={pal.highlight} strokeWidth={2} strokeDasharray="3 2" className="dg-highlight-stroke" />}
+      <circle cx={r1(p.x)} cy={r1(p.y)} r={11} fill={pal.highlight} fillOpacity={0.15} stroke={pal.highlight} strokeWidth={2.5} className="dg-highlight-ring" />
+      <circle cx={r1(p.x)} cy={r1(p.y)} r={4} fill={pal.highlight} stroke={pal.background} strokeWidth={1.5} className="dg-highlight-dot" />
     </g>
   );
 }
@@ -224,6 +259,7 @@ function ForcePanelView({ panel, first, width, pal }: { panel: ForcePanel; first
           {panel.inflections.map((p, k) => (
             <InflectionDot key={k} p={p} pal={pal} />
           ))}
+          {panel.highlight && <MarkerView marker={panel.highlight} pal={pal} />}
           <Labels labels={panel.labels} pal={pal} />
         </>
       )}

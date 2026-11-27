@@ -9,13 +9,13 @@
  * bruker for å finne ut hva som dras.
  */
 import type { PointerEventHandler, ReactNode, Ref } from "react";
-import type { DistributedLoad, Member, Model, MomentLoad, PointLoad, Support } from "../../core/schema";
-import { forceFactor, lengthFactor } from "../../core/units";
-import { formatQuantity, type QuantityKind } from "../format";
-import type { Point, Viewport } from "../geometry";
-import type { EntityRef } from "../state/store";
-import type { CanvasProps } from "../types";
-import { DEFAULT_PALETTE, entityKey, type Palette } from "./highlight";
+import type { DistributedLoad, Member, Model, MomentLoad, PointLoad, Support } from "../../core/schema.js";
+import { forceFactor, lengthFactor } from "../../core/units.js";
+import { formatQuantity, type QuantityKind } from "../format.js";
+import type { Point, Viewport } from "../geometry.js";
+import type { EntityRef } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import { DEFAULT_PALETTE, entityKey, type Palette } from "./highlight.js";
 import {
   add,
   dirOfAngle,
@@ -44,7 +44,7 @@ import {
   type LoadScales,
   type Rect,
   type TextPlacement,
-} from "./layout";
+} from "./layout.js";
 
 export interface StructureSvgProps extends CanvasProps {
   selection?: EntityRef | null;

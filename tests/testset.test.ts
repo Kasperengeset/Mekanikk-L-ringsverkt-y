@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validateModel } from "../src/core/validate";
-import { loadTestset } from "../eval/testset";
+import { validateModel } from "../src/core/validate.js";
+import { loadTestset } from "../eval/testset.js";
 
 const { cases, errors } = await loadTestset("testset", { inputs: false });
 

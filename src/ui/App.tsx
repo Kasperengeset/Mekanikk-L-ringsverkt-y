@@ -3,16 +3,16 @@
  *   A: structure/StructureView   B: diagrams/DiagramsView   C: upload/UploadPanel og upload/ConfirmPanel
  */
 import { useEffect } from "react";
-import { DiagramsView } from "./diagrams/DiagramsView";
-import { fixtureFromUrl } from "./fixtures";
-import { fitViewport } from "./geometry";
-import { SidePanel } from "./panel/SidePanel";
-import { useStore } from "./state/store";
-import { useSolveResult } from "./state/useSolveResult";
-import { StructureView } from "./structure/StructureView";
-import { ConfirmPanel } from "./upload/ConfirmPanel";
-import { UploadPanel } from "./upload/UploadPanel";
-import { useElementSize } from "./useElementSize";
+import { DiagramsView } from "./diagrams/DiagramsView.js";
+import { fixtureFromUrl } from "./fixtures.js";
+import { fitViewport } from "./geometry.js";
+import { SidePanel } from "./panel/SidePanel.js";
+import { useStore } from "./state/store.js";
+import { useSolveResult } from "./state/useSolveResult.js";
+import { StructureView } from "./structure/StructureView.js";
+import { ConfirmPanel } from "./upload/ConfirmPanel.js";
+import { UploadPanel } from "./upload/UploadPanel.js";
+import { useElementSize } from "./useElementSize.js";
 
 /** Høyden til konstruksjonspanelet som andel av lerretet; resten går til diagrammene. */
 const STRUCTURE_SHARE = 0.5;

@@ -2,7 +2,7 @@
  * Plassering av tallene i diagrammene med en enkel kollisjonssjekk: viktigste tall først, og hvert
  * tall prøver noen posisjoner rundt kurvepunktet til det finner en ledig plass.
  */
-import type { Point } from "../geometry";
+import type { Point } from "../geometry.js";
 
 /** Akseparallelt rektangel i skjermkoordinater. */
 export interface Box {
@@ -91,6 +91,8 @@ export interface LabelRequest {
   emphasis?: boolean;
   /** Kurven tallet hører til (f.eks. elementkjeden). */
   group?: string;
+  /** true: tallet er skjult, og teksten er bare en plassholder («?»). */
+  masked?: boolean;
 }
 
 export interface PlacedLabel {
@@ -104,6 +106,7 @@ export interface PlacedLabel {
   y: number;
   box: Box;
   emphasis: boolean;
+  masked: boolean;
 }
 
 export interface Obstacles {
@@ -154,7 +157,7 @@ export function placeLabels(requests: LabelRequest[], obstacles: Obstacles, boun
     const w = textWidth(r.text, fontSize);
     const boxes = candidates(r, w, h).map((c) => ({ c, box: boxAround(c, w, h) }));
     const pick = boxes.find(({ box }) => inBounds(box) && freeOfLabels(box) && freeOfLines(box)) ?? boxes.find(({ box }) => inBounds(box) && freeOfLabels(box));
-    if (pick) placed.push({ text: r.text, anchor: r.anchor, base, group: r.group, x: pick.c.x, y: pick.c.y, box: pick.box, emphasis: r.emphasis ?? false });
+    if (pick) placed.push({ text: r.text, anchor: r.anchor, base, group: r.group, x: pick.c.x, y: pick.c.y, box: pick.box, emphasis: r.emphasis ?? false, masked: r.masked ?? false });
   }
   return placed;
 }

@@ -4,13 +4,13 @@
  * modellen med store.edit, så studenten retter en feiltolkning med ett klikk.
  */
 import { useEffect, useMemo, useState } from "react";
-import { getParam } from "../../core/edit";
-import type { Model } from "../../core/schema";
-import { formatNumber } from "../format";
-import { useStore } from "../state/store";
-import { useSolveResult } from "../state/useSolveResult";
-import { entryTitle, formatValue, highlightRefs, parseAlternative, uncertainEntries, type UncertainEntry } from "./provenance";
-import { resetToUpload, useUploadSession } from "./session";
+import { getParam } from "../../core/edit.js";
+import type { Model } from "../../core/schema.js";
+import { formatNumber } from "../format.js";
+import { useStore } from "../state/store.js";
+import { useSolveResult } from "../state/useSolveResult.js";
+import { entryTitle, formatValue, highlightRefs, parseAlternative, uncertainEntries, type UncertainEntry } from "./provenance.js";
+import { resetToUpload, useUploadSession } from "./session.js";
 import "./upload.css";
 
 interface Choice {

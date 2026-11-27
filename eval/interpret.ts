@@ -14,14 +14,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { INTERPRET_SYSTEM_PROMPT } from "../src/core/llm/prompts";
-import { SUBMIT_MODEL_TOOL } from "../src/core/llm/tools";
+import { INTERPRET_SYSTEM_PROMPT } from "../src/core/llm/prompts.js";
+import { SUBMIT_MODEL_TOOL } from "../src/core/llm/tools.js";
 import { parseArgs } from "node:util";
-import { COMPARE_KINDS, compareModels, type CompareResult, type EntityComparison } from "../src/core/compare";
-import { ClaudeProvider } from "../server/llm/claude";
-import { InterpretError } from "../server/llm/adapter";
-import { interpretProblem, type ConsistencyMode, type InterpretOutcome } from "../server/interpret";
-import { loadTestset, type TestCase } from "./testset";
+import { COMPARE_KINDS, compareModels, type CompareResult, type EntityComparison } from "../src/core/compare.js";
+import { ClaudeProvider } from "../server/llm/claude.js";
+import { InterpretError } from "../server/llm/adapter.js";
+import { interpretProblem, type ConsistencyMode, type InterpretOutcome } from "../server/interpret.js";
+import { loadTestset, type TestCase } from "./testset.js";
 
 try {
   process.loadEnvFile();

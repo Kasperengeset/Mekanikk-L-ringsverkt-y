@@ -15,9 +15,9 @@
  * Linjer som begynner med kolon er hjerteslag (holder forbindelsen åpen mens Claude tenker).
  */
 import { z } from "zod";
-import type { Disagreement } from "../../core/consistency";
-import type { Model } from "../../core/schema";
-import type { Issue } from "../../core/validate";
+import type { Disagreement } from "../../core/consistency.js";
+import type { Model } from "../../core/schema.js";
+import type { Issue } from "../../core/validate.js";
 
 export const MAX_IMAGES = 4;
 /** Samlet størrelse på bildene (dekodet). */

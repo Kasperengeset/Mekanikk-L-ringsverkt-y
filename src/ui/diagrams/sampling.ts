@@ -3,8 +3,8 @@
  * og valg av karakteristiske verdier (endepunkter, sprang, ekstremer) og vendepunkter.
  * Rene funksjoner uten skjermkoordinater, så de kan testes direkte.
  */
-import { evalPoly, type MemberResult, type Piece } from "../../core/solver";
-import type { Quantity } from "../convention";
+import { evalPoly, type MemberResult, type Piece } from "../../core/solver/index.js";
+import type { Quantity } from "../convention.js";
 
 export type Poly = number[];
 

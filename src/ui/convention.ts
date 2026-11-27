@@ -6,7 +6,7 @@
  * Løseren (src/core/solver/internal.ts) bruker: N > 0 strekk, dM/dx = V, og M > 0 gir strekk på
  * −y'-siden, der y' er 90° mot klokka fra elementets retning i → j.
  */
-import type { Point } from "./geometry";
+import type { Point } from "./geometry.js";
 
 export type Quantity = "N" | "V" | "M";
 

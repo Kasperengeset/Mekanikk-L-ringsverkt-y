@@ -2,8 +2,8 @@
  * Tolkningsløpet: én tolkning, og ved behov flere parallelle tolkninger som sammenlignes
  * (self-consistency). Brukes av eval-skriptet og senere av /interpret.
  */
-import { applyDisagreements, selectConsensus, type Disagreement } from "../src/core/consistency";
-import { addUsage, type InterpretInput, type InterpretProvider, type InterpretResult } from "./llm/adapter";
+import { applyDisagreements, selectConsensus, type Disagreement } from "../src/core/consistency.js";
+import { addUsage, type InterpretInput, type InterpretProvider, type InterpretResult } from "./llm/adapter.js";
 
 export type ConsistencyMode = "never" | "low_confidence" | "always";
 

@@ -6,11 +6,11 @@
  * resultatet lastes med loadModel(model, "confirm").
  */
 import { create } from "zustand";
-import { interpretRemote } from "../api/interpret";
-import { MAX_IMAGES, type InterpretResponse, type Progress } from "../api/protocol";
-import { useStore } from "../state/store";
-import { prepareImage, type PreparedImage } from "./images";
-import { classifyFile, composeText, defaultPages, imageByteBudget, maxPagesFor, togglePage } from "./logic";
+import { interpretRemote } from "../api/interpret.js";
+import { MAX_IMAGES, type InterpretResponse, type Progress } from "../api/protocol.js";
+import { useStore } from "../state/store.js";
+import { prepareImage, type PreparedImage } from "./images.js";
+import { classifyFile, composeText, defaultPages, imageByteBudget, maxPagesFor, togglePage } from "./logic.js";
 
 /** Flere miniatyrer enn dette vises ikke (eksamenssett er sjelden lengre). */
 export const MAX_THUMBNAILS = 40;
@@ -72,7 +72,7 @@ async function loadPdf(id: string, file: File) {
   try {
     const data = new Uint8Array(await file.arrayBuffer());
     updatePdf(id, { data });
-    const pdf = await import("./pdf");
+    const pdf = await import("./pdf.js");
     const numPages = await pdf.pdfPageCount(data);
     const others = imageCount(get().attachments.filter((a) => a.id !== id));
     updatePdf(id, { numPages, selected: defaultPages(numPages).slice(0, maxPagesFor(others)) });
@@ -162,7 +162,7 @@ async function prepareAll(attachments: Attachment[], signal: AbortSignal, onProg
       onProgress({ stage: "start", message: "Gjør klar bildene …" });
       out.push(await prepareImage(a.blob, a.mediaType, budget));
     } else if (a.selected.length > 0) {
-      const pdf = await import("./pdf");
+      const pdf = await import("./pdf.js");
       for (const page of a.selected) {
         if (signal.aborted) break;
         onProgress({ stage: "start", message: `Gjør om side ${page} i ${a.name} til et bilde …` });

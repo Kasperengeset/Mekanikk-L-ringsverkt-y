@@ -2,7 +2,7 @@
  * Priser i USD per million tokens. Kilde: Anthropics prisliste per 2026-11-03.
  * Sjekk mot gjeldende priser før tallene brukes i økonomiske beslutninger.
  */
-import type { Usage } from "./adapter";
+import type { Usage } from "./adapter.js";
 
 interface Price {
   input: number;

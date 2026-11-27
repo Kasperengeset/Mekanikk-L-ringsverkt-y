@@ -1,0 +1,158 @@
+/* Samtalen med veilederen (spor D). Fargene kommer fra variablene i styles.css. */
+.agent-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+.agent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.agent-head h3 {
+  margin: 0;
+}
+.agent-new {
+  font-size: 13px;
+  padding: 2px 8px;
+}
+.agent-log {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-height: min(55vh, 520px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+.agent-intro {
+  margin: 0;
+  font-size: 14px;
+}
+.agent-msg {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.agent-student {
+  justify-self: end;
+  max-width: 90%;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  white-space: pre-wrap;
+}
+.agent-tutor {
+  justify-self: stretch;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.agent-tutor p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.agent-tutor p + p {
+  margin-top: 6px;
+}
+/* Markør mens teksten strømmer. */
+.agent-tutor.streaming p:last-of-type::after {
+  content: "▍";
+  margin-left: 1px;
+  color: var(--accent);
+  animation: agent-blink 1s steps(2, start) infinite;
+}
+@keyframes agent-blink {
+  to {
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-tutor.streaming p:last-of-type::after {
+    animation: none;
+  }
+}
+.agent-cut {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.agent-action {
+  font-size: 12px;
+  color: var(--muted);
+  padding-left: 10px;
+  border-left: 2px solid var(--accent);
+}
+.agent-action.error {
+  border-left-color: var(--warning);
+  color: var(--warning);
+}
+.agent-notice {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.agent-notice.error {
+  color: var(--warning);
+}
+.agent-status {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+.agent-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.agent-chip {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  color: var(--accent);
+}
+.agent-chip:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+}
+.agent-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: end;
+}
+.agent-composer textarea {
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 40px;
+  max-height: 160px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+}
+.agent-composer textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+.agent-send {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.agent-stop {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+.agent-cost {
+  margin: 0;
+  font-size: 11px;
+}

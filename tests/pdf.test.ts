@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { renderPdfInNode } from "../server/pdf";
-import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS, pageScale } from "../src/pdf/render";
+import { renderPdfInNode } from "../server/pdf.js";
+import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS, pageScale } from "../src/pdf/render.js";
 
 const A4 = [595.28, 841.89] as const;
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47];

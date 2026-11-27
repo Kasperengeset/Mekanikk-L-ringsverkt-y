@@ -2,8 +2,8 @@
  * Tall til tekst på norsk (desimalkomma), i oppgavens enheter. Løserens resultater er i SI.
  * For symbolske oppgaver (model.symbols) skrives resultatet som koeffisient × symboler, f.eks. 0,1125 FL.
  */
-import type { Model } from "../core/schema";
-import { forceFactor, lengthFactor } from "../core/units";
+import type { Model } from "../core/schema.js";
+import { forceFactor, lengthFactor } from "../core/units.js";
 
 export type QuantityKind = "force" | "moment" | "length" | "lineLoad" | "displacement" | "rotation";
 

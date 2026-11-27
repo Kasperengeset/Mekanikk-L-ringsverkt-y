@@ -15,10 +15,10 @@ import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { createElement, type ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { solve } from "../src/core/solver";
-import { FIXTURES } from "../src/ui/fixtures";
-import { fitViewport } from "../src/ui/geometry";
-import type { CanvasProps } from "../src/ui/types";
+import { solve } from "../src/core/solver/index.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import type { CanvasProps } from "../src/ui/types.js";
 
 const { values } = parseArgs({
   options: {
