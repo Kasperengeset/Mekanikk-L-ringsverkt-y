@@ -44,7 +44,12 @@ pnpm dev                    # frontend (plassholder til uke 3)
 - **Deformasjon og tverrsnitt:** eksakt nedbøyning w(x) og lengdeendring u(x) langs hvert element.
   Tverrsnitt kan gis som form (rektangel, sirkel, rør, IPE-profil, sammensatt), og A og I regnes ut av
   appen. Kontrollert mot svarantydningene i øving 9, 11, 12 og 13.
-- **Neste:** uke 3, visning og interaksjon.
+- **Uke 3:** konstruksjonsvisning med dra og klikk, N-, V- og M-diagram, deformert form, opplasting av
+  bilde/PDF/tekst med strømmet tolkning (`/api/interpret`) og bekreftelsessteg.
+- **Uke 4:** veilederen (`/api/agent`) med verktøyene get_state, set_param, add_control, highlight og
+  ask_prediction; «Prøv selv» der tallene for det oppgaven spør om vises først etter et eget forsøk;
+  glidebrytere og spådomskort. Prøvd ende til ende med ekte nøkkel.
+- **Neste:** preview-deploy (Vercel), 5–10 testbrukere og betalingstest (Port 4).
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter
 `python3 -m venv .venv && .venv/bin/pip install -r eval/anastruct/requirements.txt`.
