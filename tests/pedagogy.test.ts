@@ -69,6 +69,14 @@ describe("skjulte verdier", () => {
     expect(JSON.stringify(opened)).toMatch(/"value":18\b/);
   });
 
+  it("spør oppgaven bare etter diagrammene, skjules også reaksjonene (de er endeverdiene)", () => {
+    const gerber = FIXTURES.gerber!.model;
+    expect(gerber.asked).toEqual([{ quantity: "diagrams" }]);
+    const h = hiddenValues(gerber, {});
+    expect([...h.reactionNodes].sort()).toEqual(["A", "C"]);
+    expect(hiddenValues(gerber, { 0: { values: null, at: 1 } }).reactionNodes.size).toBe(0);
+  });
+
   it("stavkrefter skjules per stav", () => {
     const truss = FIXTURES.fagverk!.model;
     const h = hiddenValues(truss, {});

@@ -187,7 +187,9 @@ export function hiddenValues(model: Model, attempts: Record<number, Attempt>): H
         else (["N", "V", "M"] as const).forEach(all);
         break;
       case "diagrams":
+        // Endeverdiene i diagrammene er lik reaksjonene, så de skjules også.
         (["N", "V", "M"] as const).forEach(all);
+        model.supports.forEach((s) => hidden.reactionNodes.add(s.node));
         break;
       case "displacement":
       case "rotation":
