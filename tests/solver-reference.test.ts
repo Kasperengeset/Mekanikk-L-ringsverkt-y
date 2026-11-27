@@ -5,8 +5,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { evalPoly, solve } from "../src/core/solver";
-import { loadTestset } from "../eval/testset";
+import { evalPoly, solve } from "../src/core/solver/index.js";
+import { loadTestset } from "../eval/testset.js";
 
 interface Reference {
   reactions: Record<string, { Fx: number; Fy: number; M: number }>;

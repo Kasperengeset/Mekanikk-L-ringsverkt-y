@@ -7,11 +7,11 @@
  * modellen og hopper tilbake til siste gyldige verdi.
  */
 import { useCallback, useEffect, useId, useRef, useState, type ChangeEvent } from "react";
-import { getParam } from "../../core/edit";
-import type { Model } from "../../core/schema";
-import { formatNumber } from "../format";
-import { useStore, type Control } from "../state/store";
-import { paramUnit } from "./logic";
+import { getParam } from "../../core/edit.js";
+import type { Model } from "../../core/schema.js";
+import { formatNumber } from "../format.js";
+import { useStore, type Control } from "../state/store.js";
+import { paramUnit } from "./logic.js";
 
 function withUnit(value: number, unit: string): string {
   const v = formatNumber(value);

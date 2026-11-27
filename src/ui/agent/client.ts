@@ -1,7 +1,7 @@
 /** Klient for /api/agent: sender samtalen og leser Server-Sent Events fortløpende (se protocol.ts). */
-import { SSE_CONTENT_TYPE } from "../api/protocol";
-import { createSseParser } from "../api/sse";
-import type { AgentErrorBody, AgentErrorCode, AgentMessage, AgentReply, AgentServerEvent, AgentToolUseEvent } from "./protocol";
+import { SSE_CONTENT_TYPE } from "../api/protocol.js";
+import { createSseParser } from "../api/sse.js";
+import type { AgentErrorBody, AgentErrorCode, AgentMessage, AgentReply, AgentServerEvent, AgentToolUseEvent } from "./protocol.js";
 
 export class AgentApiError extends Error {
   constructor(

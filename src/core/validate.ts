@@ -4,8 +4,8 @@
  *
  * Rangsjekken av stivhetsmatrisen (geometrisk ustabile systemer med n_s ≥ 0) hører til løseren.
  */
-import type { Model } from "./schema";
-import { shapeProperties } from "./sections";
+import type { Model } from "./schema.js";
+import { shapeProperties } from "./sections.js";
 
 export type IssueLevel = "error" | "warning";
 

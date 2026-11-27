@@ -7,9 +7,9 @@
  * thinking-blokkene er bundet til samtalen før dem, så tidligere meldinger endres aldri.
  */
 import type Anthropic from "@anthropic-ai/sdk";
-import type { AgentStreamHandlers, AgentTransport } from "./client";
-import type { AgentMessage, AgentReply, AgentToolResult } from "./protocol";
-import { runAgentTool, type AgentAction } from "./tools";
+import type { AgentStreamHandlers, AgentTransport } from "./client.js";
+import type { AgentMessage, AgentReply, AgentToolResult } from "./protocol.js";
+import { runAgentTool, type AgentAction } from "./tools.js";
 
 /** Høyst så mange kall til veilederen per melding fra studenten. */
 export const MAX_ROUNDS = 8;

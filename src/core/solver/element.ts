@@ -2,7 +2,7 @@
  * 2D-elementer i lokale akser: x' langs elementet fra i til j, y' 90° mot klokka.
  * Frihetsgrader per element: [u1, v1, θ1, u2, v2, θ2].
  */
-import { zeros, type Matrix } from "./linalg";
+import { zeros, type Matrix } from "./linalg.js";
 
 export interface SectionProps {
   E: number;

@@ -2,8 +2,8 @@
  * Sjekker at alle fasitmodellene i testset/ følger skjemaet og er gyldige modeller.
  * Kjør: pnpm testset:check
  */
-import { validateModel } from "../src/core/validate";
-import { loadTestset } from "./testset";
+import { validateModel } from "../src/core/validate.js";
+import { loadTestset } from "./testset.js";
 
 const { cases, pending, errors } = await loadTestset();
 let failed = errors.length > 0;

@@ -1,12 +1,12 @@
 /** Agentløkken i nettleseren med falsk transport: verktøyene kjøres mot den ekte storen, ingen nettverk. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AgentTransport } from "../src/ui/agent/client";
-import { appendStudentText, isNewProblem, NOTICES, replyText, useAgentStore } from "../src/ui/agent/conversation";
-import { ABORTED_RESULT, runAgentLoop, ROUND_LIMIT_RESULT, type LoopOutcome } from "../src/ui/agent/loop";
-import type { AgentContentBlock, AgentMessage, AgentReply, AgentToolResult } from "../src/ui/agent/protocol";
-import { describePath, describeValue } from "../src/ui/agent/tools";
-import { useStore } from "../src/ui/state/store";
-import { model } from "./helpers";
+import type { AgentTransport } from "../src/ui/agent/client.js";
+import { appendStudentText, isNewProblem, NOTICES, replyText, useAgentStore } from "../src/ui/agent/conversation.js";
+import { ABORTED_RESULT, runAgentLoop, ROUND_LIMIT_RESULT, type LoopOutcome } from "../src/ui/agent/loop.js";
+import type { AgentContentBlock, AgentMessage, AgentReply, AgentToolResult } from "../src/ui/agent/protocol.js";
+import { describePath, describeValue } from "../src/ui/agent/tools.js";
+import { useStore } from "../src/ui/state/store.js";
+import { model } from "./helpers.js";
 
 /** Fritt opplagt bjelke 6 m med P = 12 kN midt på: reaksjoner 6 kN, M_max = 18 kNm. Begge spørres det etter. */
 const beam = model({

@@ -1,16 +1,16 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { hiddenValues, type Attempt } from "../src/core/pedagogy";
-import type { Model } from "../src/core/schema";
-import { solve, type SolveResult } from "../src/core/solver";
-import { DiagramsSvg } from "../src/ui/diagrams/DiagramsSvg";
-import { DEFAULT_SETTINGS, HIDDEN_TEXT, layoutDiagrams, type DeformedPanel, type ForcePanel, type Panel } from "../src/ui/diagrams/layout";
-import { FIXTURES } from "../src/ui/fixtures";
-import { formatQuantity } from "../src/ui/format";
-import { fitViewport } from "../src/ui/geometry";
-import { maxMomentPoint } from "../src/ui/pedagogy/snapshots";
-import type { DiagramPoint } from "../src/ui/state/store";
-import { model } from "./helpers";
+import { hiddenValues, type Attempt } from "../src/core/pedagogy.js";
+import type { Model } from "../src/core/schema.js";
+import { solve, type SolveResult } from "../src/core/solver/index.js";
+import { DiagramsSvg } from "../src/ui/diagrams/DiagramsSvg.js";
+import { DEFAULT_SETTINGS, HIDDEN_TEXT, layoutDiagrams, type DeformedPanel, type ForcePanel, type Panel } from "../src/ui/diagrams/layout.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { formatQuantity } from "../src/ui/format.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import { maxMomentPoint } from "../src/ui/pedagogy/snapshots.js";
+import type { DiagramPoint } from "../src/ui/state/store.js";
+import { model } from "./helpers.js";
 
 type Ok = Extract<SolveResult, { status: "ok" }>;
 const solveOk = (m: Model) => solve(m) as Ok;

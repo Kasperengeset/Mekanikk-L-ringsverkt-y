@@ -1,6 +1,6 @@
 /** Bilder i nettleseren: skalerer ned til Claudes grenser og koder på nytt ved behov (se planImage). */
-import type { ImageMediaType } from "../api/protocol";
-import { planImage, SENDABLE_TYPES, stripDataUrl, type EncodeFormat } from "./logic";
+import type { ImageMediaType } from "../api/protocol.js";
+import { planImage, SENDABLE_TYPES, stripDataUrl, type EncodeFormat } from "./logic.js";
 
 export interface PreparedImage {
   mediaType: ImageMediaType;

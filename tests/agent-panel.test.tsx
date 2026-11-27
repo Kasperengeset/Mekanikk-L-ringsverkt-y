@@ -2,13 +2,13 @@
 /** AgentPanel i jsdom med falsk transport: forslag, strømmet tekst, handlingslinjer og avbryt. */
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { solve } from "../src/core/solver";
-import { AgentPanel, SUGGESTIONS } from "../src/ui/agent/AgentPanel";
-import type { AgentTransport } from "../src/ui/agent/client";
-import { useAgentStore } from "../src/ui/agent/conversation";
-import type { AgentContentBlock, AgentReply } from "../src/ui/agent/protocol";
-import { FIXTURES } from "../src/ui/fixtures";
-import { useStore } from "../src/ui/state/store";
+import { solve } from "../src/core/solver/index.js";
+import { AgentPanel, SUGGESTIONS } from "../src/ui/agent/AgentPanel.js";
+import type { AgentTransport } from "../src/ui/agent/client.js";
+import { useAgentStore } from "../src/ui/agent/conversation.js";
+import type { AgentContentBlock, AgentReply } from "../src/ui/agent/protocol.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { useStore } from "../src/ui/state/store.js";
 
 const model = FIXTURES.gerber!.model;
 const result = solve(model);

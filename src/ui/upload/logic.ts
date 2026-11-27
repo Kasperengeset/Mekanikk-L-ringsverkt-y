@@ -1,6 +1,6 @@
 /** Ren logikk for opplastingen (testes uten nettleser): nedskalering, koding, sidevalg og tekst. */
-import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS } from "../../pdf/render";
-import { MAX_IMAGES, type ImageMediaType } from "../api/protocol";
+import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS } from "../../pdf/render.js";
+import { MAX_IMAGES, type ImageMediaType } from "../api/protocol.js";
 
 export interface Size {
   width: number;

@@ -6,7 +6,7 @@
  * når topologien endres (en nodelast som dras ut på et element, eller to elementer som slås sammen).
  * Alle posisjoner snappes: lengder til 0,1 lengdeenhet (ikke finere enn 1 cm), vinkler til 5°.
  */
-import { snap } from "../../core/edit";
+import { snap } from "../../core/edit.js";
 import {
   collinearChain,
   incidentMembers,
@@ -18,12 +18,12 @@ import {
   placeLoadOnChain,
   releasedAt,
   type Chain,
-} from "../../core/edit-ops";
-import type { Model } from "../../core/schema";
-import { lengthFactor } from "../../core/units";
-import type { Point, Viewport } from "../geometry";
-import type { Change, EntityRef } from "../state/store";
-import { dot, length, loadAnchor, nodePoint, sub, unit, type LoadScales } from "./layout";
+} from "../../core/edit-ops.js";
+import type { Model } from "../../core/schema.js";
+import { lengthFactor } from "../../core/units.js";
+import type { Point, Viewport } from "../geometry.js";
+import type { Change, EntityRef } from "../state/store.js";
+import { dot, length, loadAnchor, nodePoint, sub, unit, type LoadScales } from "./layout.js";
 
 /** Delen av en entitet som gripes: selve entiteten, halen på en punktlast eller en ende av en fordelt last. */
 export type DragPart = "body" | "tail" | "from" | "to";

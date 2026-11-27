@@ -2,8 +2,8 @@
  * Tverrsnittsdata. Modellen kan oppgi E, A og I direkte, eller formen (mål eller profilnavn).
  * A og I regnes da ut her, deterministisk, så LLM-en bare skriver av målene fra oppgaven.
  */
-import ipe from "./data/ipe.json";
-import type { Section, SectionShape } from "./schema";
+import ipe from "./data/ipe.json" with { type: "json" };
+import type { Section, SectionShape } from "./schema.js";
 
 export interface ResolvedSection {
   E: number;

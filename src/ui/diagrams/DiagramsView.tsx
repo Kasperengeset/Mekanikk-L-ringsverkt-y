@@ -8,10 +8,10 @@
  * store.diagramHighlight tegnes som en markør. Uthever agenten et panel som er slått av, slås det på.
  */
 import { useEffect, useMemo } from "react";
-import { hiddenValues } from "../../core/pedagogy";
-import { useStore } from "../state/store";
-import type { CanvasProps } from "../types";
-import { DiagramsSvg } from "./DiagramsSvg";
+import { hiddenValues } from "../../core/pedagogy.js";
+import { useStore } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import { DiagramsSvg } from "./DiagramsSvg.js";
 import "./diagrams.css";
 
 export function DiagramsView({ model, result, viewport }: CanvasProps) {

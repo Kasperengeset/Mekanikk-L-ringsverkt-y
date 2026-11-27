@@ -7,10 +7,10 @@
  * DiagramsHidden: tallene skjult slik de er før studenten har prøvd (ingen forsøk).
  * DiagramsHighlightMmax: som DiagramsHidden, med en utheving av største |M|.
  */
-import { hiddenValues } from "../../core/pedagogy";
-import type { DiagramPoint } from "../state/store";
-import type { CanvasProps } from "../types";
-import { DiagramsSvg } from "../diagrams/DiagramsSvg";
+import { hiddenValues } from "../../core/pedagogy.js";
+import type { DiagramPoint } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import { DiagramsSvg } from "../diagrams/DiagramsSvg.js";
 
 export function DiagramsHidden({ model, result, viewport }: CanvasProps) {
   return <DiagramsSvg model={model} result={result} viewport={viewport} hidden={hiddenValues(model, {})} />;

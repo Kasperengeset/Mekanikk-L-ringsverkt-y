@@ -2,7 +2,7 @@
  * Spådom som løfte: agentens ask_prediction venter her til studenten har svart i appen
  * (answerPrediction i storen). Avbrytes med en AbortSignal, f.eks. når studenten lukker samtalen.
  */
-import { useStore, type PredictionAnswer } from "./store";
+import { useStore, type PredictionAnswer } from "./store.js";
 
 let counter = 0;
 

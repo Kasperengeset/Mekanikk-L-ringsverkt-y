@@ -1,14 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { solve } from "../src/core/solver";
-import type { Model } from "../src/core/schema";
-import { DiagramsSvg } from "../src/ui/diagrams/DiagramsSvg";
-import { DiagramsView } from "../src/ui/diagrams/DiagramsView";
-import { toolbarChips, type Chip } from "../src/ui/diagrams/toolbar";
-import { FIXTURES } from "../src/ui/fixtures";
-import { fitViewport } from "../src/ui/geometry";
-import { useStore, type DiagramSettings } from "../src/ui/state/store";
-import { model } from "./helpers";
+import { solve } from "../src/core/solver/index.js";
+import type { Model } from "../src/core/schema.js";
+import { DiagramsSvg } from "../src/ui/diagrams/DiagramsSvg.js";
+import { DiagramsView } from "../src/ui/diagrams/DiagramsView.js";
+import { toolbarChips, type Chip } from "../src/ui/diagrams/toolbar.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import { useStore, type DiagramSettings } from "../src/ui/state/store.js";
+import { model } from "./helpers.js";
 
 function render(m: Model, extra: Partial<Parameters<typeof DiagramsSvg>[0]> = {}) {
   const viewport = fitViewport(m, 900, 400);

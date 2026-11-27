@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyDisagreements, selectConsensus } from "../src/core/consistency";
-import { simpleBeam } from "./helpers";
+import { applyDisagreements, selectConsensus } from "../src/core/consistency.js";
+import { simpleBeam } from "./helpers.js";
 
 describe("self-consistency", () => {
   const good = simpleBeam();

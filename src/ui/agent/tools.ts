@@ -6,14 +6,14 @@
  * Hvert kall gir et tool_result til modellen og eventuelt en kort linje til samtalen («Endret …»).
  */
 import { z } from "zod";
-import { getParam } from "../../core/edit";
-import { AgentTools, stateSummary, type AgentToolInput, type AgentToolName } from "../../core/llm/agent";
-import type { Model } from "../../core/schema";
-import { solve } from "../../core/solver";
-import { formatNumber } from "../format";
-import { requestPrediction } from "../state/prediction";
-import { useStore, type EntityRef } from "../state/store";
-import type { AgentToolResult, AgentToolUseEvent } from "./protocol";
+import { getParam } from "../../core/edit.js";
+import { AgentTools, stateSummary, type AgentToolInput, type AgentToolName } from "../../core/llm/agent.js";
+import type { Model } from "../../core/schema.js";
+import { solve } from "../../core/solver/index.js";
+import { formatNumber } from "../format.js";
+import { requestPrediction } from "../state/prediction.js";
+import { useStore, type EntityRef } from "../state/store.js";
+import type { AgentToolResult, AgentToolUseEvent } from "./protocol.js";
 
 /** Linje i samtalen for en handling veilederen gjorde. */
 export interface AgentAction {

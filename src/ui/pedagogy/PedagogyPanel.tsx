@@ -10,14 +10,14 @@
  * oppgaven spør om noe annet.
  */
 import { useId, useState, type FormEvent } from "react";
-import { anythingHidden, askedTargets, checkAttempt, hiddenValues, type AskedTarget, type Attempt } from "../../core/pedagogy";
-import type { Model } from "../../core/schema";
-import type { SolveResult } from "../../core/solver";
-import { symbolicUnits } from "../format";
-import { useStore } from "../state/store";
-import { Controls } from "./Controls";
-import { CONVENTION_TEXT, expectedText, HIDDEN_EXPLANATION, parseNumberInput, summaryText, unitLabel, VERDICT_TEXT } from "./logic";
-import { PredictionCard } from "./PredictionCard";
+import { anythingHidden, askedTargets, checkAttempt, hiddenValues, type AskedTarget, type Attempt } from "../../core/pedagogy.js";
+import type { Model } from "../../core/schema.js";
+import type { SolveResult } from "../../core/solver/index.js";
+import { symbolicUnits } from "../format.js";
+import { useStore } from "../state/store.js";
+import { Controls } from "./Controls.js";
+import { CONVENTION_TEXT, expectedText, HIDDEN_EXPLANATION, parseNumberInput, summaryText, unitLabel, VERDICT_TEXT } from "./logic.js";
+import { PredictionCard } from "./PredictionCard.js";
 import "./pedagogy.css";
 
 type Drafts = Record<number, string[]>;

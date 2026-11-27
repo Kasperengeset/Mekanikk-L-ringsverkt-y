@@ -19,10 +19,10 @@ import {
   type InterpretResponse,
   type ProgressStage,
   type ServerEvent,
-} from "../src/ui/api/protocol";
-import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse";
-import { interpretProblem, type ConsistencyMode, type InterpretOptions, type InterpretOutcome } from "./interpret";
-import { InterpretError, type InterpretProvider, type InterpretStreamEvent } from "./llm/adapter";
+} from "../src/ui/api/protocol.js";
+import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse.js";
+import { interpretProblem, type ConsistencyMode, type InterpretOptions, type InterpretOutcome } from "./interpret.js";
+import { InterpretError, type InterpretProvider, type InterpretStreamEvent } from "./llm/adapter.js";
 
 export interface ProviderOptions {
   /** Strømhendelser fra tolkningen. Bare den første tolkningen strømmes (ikke ekstra kjøringer for self-consistency). */

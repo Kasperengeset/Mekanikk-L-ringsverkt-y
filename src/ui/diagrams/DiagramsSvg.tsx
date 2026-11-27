@@ -7,11 +7,11 @@
  * `highlight` tegner en markør (prikk og ring) på kurven i riktig panel.
  */
 import { useId, type KeyboardEvent, type ReactNode } from "react";
-import type { HiddenValues } from "../../core/pedagogy";
-import type { Point } from "../geometry";
-import type { DiagramPoint, DiagramSettings } from "../state/store";
-import type { CanvasProps } from "../types";
-import type { Box, PlacedLabel } from "./labels";
+import type { HiddenValues } from "../../core/pedagogy.js";
+import type { Point } from "../geometry.js";
+import type { DiagramPoint, DiagramSettings } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import type { Box, PlacedLabel } from "./labels.js";
 import {
   DEFAULT_SETTINGS,
   LAYOUT,
@@ -24,9 +24,9 @@ import {
   type Note,
   type Sketch,
   type SupportGlyph,
-} from "./layout";
-import { DEFAULT_PALETTE, type Palette } from "./palette";
-import { toolbarChips } from "./toolbar";
+} from "./layout.js";
+import { DEFAULT_PALETTE, type Palette } from "./palette.js";
+import { toolbarChips } from "./toolbar.js";
 
 export interface DiagramsSvgProps extends CanvasProps {
   settings?: DiagramSettings;

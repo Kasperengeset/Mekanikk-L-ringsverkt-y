@@ -2,10 +2,10 @@
  * Rene hjelpere for «Prøv selv»: tolking av tallfelt, enheter, tilbakemeldingstekster og
  * enhetene til glidebryterne. Ingen React, så de kan testes direkte.
  */
-import type { AttemptCheck, ComponentVerdict, TargetComponent, Unit } from "../../core/pedagogy";
-import type { Model } from "../../core/schema";
-import { forceFactor, lengthFactor } from "../../core/units";
-import { formatQuantity, symbolicUnits } from "../format";
+import type { AttemptCheck, ComponentVerdict, TargetComponent, Unit } from "../../core/pedagogy.js";
+import type { Model } from "../../core/schema.js";
+import { forceFactor, lengthFactor } from "../../core/units.js";
+import { formatQuantity, symbolicUnits } from "../format.js";
 
 const NUMBER = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:e[+-]?\\d+)?";
 const NUMBER_RE = new RegExp(`^${NUMBER}$`, "i");

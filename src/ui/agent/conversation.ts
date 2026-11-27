@@ -5,10 +5,10 @@
  * Samtalen nullstilles når en ny oppgave lastes inn (se isNewProblem nederst).
  */
 import { create } from "zustand";
-import { useStore } from "../state/store";
-import { createAgentTransport, type AgentTransport } from "./client";
-import { MAX_ROUNDS, runAgentLoop, type LoopOutcome } from "./loop";
-import type { AgentContentBlock, AgentMessage, Usage } from "./protocol";
+import { useStore } from "../state/store.js";
+import { createAgentTransport, type AgentTransport } from "./client.js";
+import { MAX_ROUNDS, runAgentLoop, type LoopOutcome } from "./loop.js";
+import type { AgentContentBlock, AgentMessage, Usage } from "./protocol.js";
 
 export type ChatEntry =
   | { id: number; kind: "student"; text: string }

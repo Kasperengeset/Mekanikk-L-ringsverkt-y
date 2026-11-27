@@ -3,8 +3,8 @@
  * Den tolkningen som er mest enig med de andre, velges, og entitetene de andre er uenige i,
  * markeres som usikre så studenten blir spurt om dem i bekreftelsessteget.
  */
-import { compareModels, type CompareKind } from "./compare";
-import type { Model, Provenance } from "./schema";
+import { compareModels, type CompareKind } from "./compare.js";
+import type { Model, Provenance } from "./schema.js";
 
 export interface Disagreement {
   kind: CompareKind;

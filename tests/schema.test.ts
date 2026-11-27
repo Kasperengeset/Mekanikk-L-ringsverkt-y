@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Model, SubmitModelInput, toLlmJsonSchema } from "../src/core/schema";
+import { Model, SubmitModelInput, toLlmJsonSchema } from "../src/core/schema.js";
 
 function walk(node: unknown, visit: (obj: Record<string, unknown>) => void) {
   if (Array.isArray(node)) node.forEach((n) => walk(n, visit));

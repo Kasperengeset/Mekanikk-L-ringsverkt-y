@@ -12,8 +12,8 @@
  * Omgjøringene endrer ikke løsningen: reaksjoner og snittkrefter er de samme før og etter
  * (se tests/edit-ops.test.ts).
  */
-import { check, type EditResult } from "./edit";
-import type { Asked, Load, Member, Model, Node, Provenance } from "./schema";
+import { check, type EditResult } from "./edit.js";
+import type { Asked, Load, Member, Model, Node, Provenance } from "./schema.js";
 
 /** Toleranse for kollinearitet (kryssprodukt av enhetsvektorer). */
 const COLLINEAR_TOL = 1e-9;

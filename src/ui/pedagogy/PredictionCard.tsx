@@ -3,7 +3,7 @@
  * Knapper for alternativene, eller et tekstfelt når options er tom. «Vet ikke» er alltid lov.
  */
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { useStore, type PredictionRequest } from "../state/store";
+import { useStore, type PredictionRequest } from "../state/store.js";
 
 export function PredictionCard() {
   const prediction = useStore((s) => s.prediction);

@@ -1,11 +1,11 @@
 /** Sidepanel i utforskingsfasen: status fra løseren, opplagerkrefter og angre/gjør om. Agenten kommer i uke 4. */
-import { hiddenValues } from "../../core/pedagogy";
-import type { Model } from "../../core/schema";
-import type { SolveResult } from "../../core/solver";
-import { AgentPanel } from "../agent/AgentPanel";
-import { formatQuantity } from "../format";
-import { PedagogyPanel } from "../pedagogy/PedagogyPanel";
-import { useStore } from "../state/store";
+import { hiddenValues } from "../../core/pedagogy.js";
+import type { Model } from "../../core/schema.js";
+import type { SolveResult } from "../../core/solver/index.js";
+import { AgentPanel } from "../agent/AgentPanel.js";
+import { formatQuantity } from "../format.js";
+import { PedagogyPanel } from "../pedagogy/PedagogyPanel.js";
+import { useStore } from "../state/store.js";
 
 export function SidePanel({ model, result }: { model: Model; result: SolveResult }) {
   const undo = useStore((s) => s.undo);

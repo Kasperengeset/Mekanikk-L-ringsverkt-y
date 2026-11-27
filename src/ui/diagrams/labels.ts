@@ -2,7 +2,7 @@
  * Plassering av tallene i diagrammene med en enkel kollisjonssjekk: viktigste tall først, og hvert
  * tall prøver noen posisjoner rundt kurvepunktet til det finner en ledig plass.
  */
-import type { Point } from "../geometry";
+import type { Point } from "../geometry.js";
 
 /** Akseparallelt rektangel i skjermkoordinater. */
 export interface Box {

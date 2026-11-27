@@ -10,14 +10,14 @@
  * Med ?debug=1 vises tiden per oppdatering (endring + løsning + tegning, til React har skrevet DOM-en).
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { cycleSupportType } from "../../core/edit";
-import type { Point, Viewport } from "../geometry";
-import { useStore } from "../state/store";
-import type { CanvasProps } from "../types";
-import { dragTo, startDrag, type DragPart, type DragSession } from "./drag";
-import { highlightProps, parseEntityKey } from "./highlight";
-import { length, loadScales, sub, type LoadScales } from "./layout";
-import { StructureSvg } from "./StructureSvg";
+import { cycleSupportType } from "../../core/edit.js";
+import type { Point, Viewport } from "../geometry.js";
+import { useStore } from "../state/store.js";
+import type { CanvasProps } from "../types.js";
+import { dragTo, startDrag, type DragPart, type DragSession } from "./drag.js";
+import { highlightProps, parseEntityKey } from "./highlight.js";
+import { length, loadScales, sub, type LoadScales } from "./layout.js";
+import { StructureSvg } from "./StructureSvg.js";
 import "./structure.css";
 
 /** Så langt (piksler) pekeren kan flytte seg før et klikk blir et drag. */

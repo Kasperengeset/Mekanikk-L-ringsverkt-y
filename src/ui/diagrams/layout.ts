@@ -8,15 +8,15 @@
  * Skjulte tall (options.hidden, fra hiddenValues i src/core/pedagogy.ts): formen tegnes som før,
  * men tallene byttes med «?» på de samme karakteristiske punktene, så studenten ser hvor tallene står.
  */
-import { isDiagramValueHidden, type HiddenValues } from "../../core/pedagogy";
-import type { Model, SupportType } from "../../core/schema";
-import { displacedPoint, evalPoly, type MemberResult, type SolveResult } from "../../core/solver";
-import { positiveSide, type Quantity } from "../convention";
-import { formatNumber, formatQuantity } from "../format";
-import { fitViewport, originXOf, type Point, type Viewport } from "../geometry";
-import type { DiagramPoint, DiagramSettings } from "../state/store";
-import { placeLabels, pointsBox, textWidth, unionBox, type Box, type LabelRequest, type PlacedLabel, type Segment } from "./labels";
-import { characteristicPoints, joinPieces, maxAbs, samplePieces, signChanges, signRegions, valueAt } from "./sampling";
+import { isDiagramValueHidden, type HiddenValues } from "../../core/pedagogy.js";
+import type { Model, SupportType } from "../../core/schema.js";
+import { displacedPoint, evalPoly, type MemberResult, type SolveResult } from "../../core/solver/index.js";
+import { positiveSide, type Quantity } from "../convention.js";
+import { formatNumber, formatQuantity } from "../format.js";
+import { fitViewport, originXOf, type Point, type Viewport } from "../geometry.js";
+import type { DiagramPoint, DiagramSettings } from "../state/store.js";
+import { placeLabels, pointsBox, textWidth, unionBox, type Box, type LabelRequest, type PlacedLabel, type Segment } from "./labels.js";
+import { characteristicPoints, joinPieces, maxAbs, samplePieces, signChanges, signRegions, valueAt } from "./sampling.js";
 
 export const LAYOUT = {
   /** Utslaget i piksler for største |verdi| av hver størrelse. */

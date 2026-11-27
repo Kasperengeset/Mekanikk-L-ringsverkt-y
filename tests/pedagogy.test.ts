@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { AGENT_TOOLS, stateSummary } from "../src/core/llm/agent";
-import { askedTargets, checkAttempt, hiddenValues, isDiagramValueHidden } from "../src/core/pedagogy";
-import { solve } from "../src/core/solver";
-import { FIXTURES } from "../src/ui/fixtures";
-import { requestPrediction } from "../src/ui/state/prediction";
-import { useStore } from "../src/ui/state/store";
-import { model } from "./helpers";
+import { AGENT_TOOLS, stateSummary } from "../src/core/llm/agent.js";
+import { askedTargets, checkAttempt, hiddenValues, isDiagramValueHidden } from "../src/core/pedagogy.js";
+import { solve } from "../src/core/solver/index.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { requestPrediction } from "../src/ui/state/prediction.js";
+import { useStore } from "../src/ui/state/store.js";
+import { model } from "./helpers.js";
 
 type OkSummary = Extract<ReturnType<typeof stateSummary>, { status: "ok" }>;
 const okSummary = (...args: Parameters<typeof stateSummary>) => stateSummary(...args) as OkSummary;

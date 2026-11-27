@@ -6,9 +6,9 @@
  * endGesture() ved pointerup (ett steg i angre-historikken). Klikk og glidebrytere bruker edit().
  */
 import { create } from "zustand";
-import { setParams, type EditResult } from "../../core/edit";
-import type { Attempt } from "../../core/pedagogy";
-import type { Model } from "../../core/schema";
+import { setParams, type EditResult } from "../../core/edit.js";
+import type { Attempt } from "../../core/pedagogy.js";
+import type { Model } from "../../core/schema.js";
 
 export type EntityKind = "node" | "member" | "support" | "load" | "section";
 /** Peker på en entitet. Opplager adresseres med node-id. */

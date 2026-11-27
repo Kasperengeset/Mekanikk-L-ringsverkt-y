@@ -9,7 +9,7 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { AGENT_SYSTEM_PROMPT, AGENT_TOOLS } from "../src/core/llm/agent";
+import { AGENT_SYSTEM_PROMPT, AGENT_TOOLS } from "../src/core/llm/agent.js";
 import {
   AgentRequest,
   MAX_REQUEST_BYTES,
@@ -20,10 +20,10 @@ import {
   type AgentReply,
   type AgentServerEvent,
   type Usage,
-} from "../src/ui/agent/protocol";
-import { SSE_CONTENT_TYPE } from "../src/ui/api/protocol";
-import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse";
-import { costUsd } from "./llm/pricing";
+} from "../src/ui/agent/protocol.js";
+import { SSE_CONTENT_TYPE } from "../src/ui/api/protocol.js";
+import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse.js";
+import { costUsd } from "./llm/pricing.js";
 
 export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
 const EFFORTS: Effort[] = ["low", "medium", "high", "xhigh", "max"];

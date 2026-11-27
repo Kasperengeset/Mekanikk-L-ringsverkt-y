@@ -3,11 +3,11 @@
  * for handlingene den gjør i verktøyet. Samtalen og løkken bor i conversation.ts.
  */
 import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import type { Model } from "../../core/schema";
-import type { SolveResult } from "../../core/solver";
-import { useStore } from "../state/store";
-import { useAgentStore, type ChatEntry } from "./conversation";
-import { MAX_STUDENT_TEXT } from "./protocol";
+import type { Model } from "../../core/schema.js";
+import type { SolveResult } from "../../core/solver/index.js";
+import { useStore } from "../state/store.js";
+import { useAgentStore, type ChatEntry } from "./conversation.js";
+import { MAX_STUDENT_TEXT } from "./protocol.js";
 import "./agent.css";
 
 export const SUGGESTIONS = ["Forklar M-diagrammet", "Gi meg et hint", "Hva skjer hvis jeg flytter lasten?"];

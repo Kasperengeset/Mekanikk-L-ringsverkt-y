@@ -3,8 +3,8 @@
  * (model.units.length), med y oppover; SVG har y nedover. Løserens resultater er i SI og
  * regnes om med lengthFactor.
  */
-import type { Model } from "../core/schema";
-import { lengthFactor } from "../core/units";
+import type { Model } from "../core/schema.js";
+import { lengthFactor } from "../core/units.js";
 
 export interface Bounds {
   minX: number;

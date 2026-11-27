@@ -4,8 +4,8 @@
  */
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
-import { renderPdfPages, type CanvasFactory, type PdfAssets } from "../../pdf/render";
-import { makeCanvas } from "./images";
+import { renderPdfPages, type CanvasFactory, type PdfAssets } from "../../pdf/render.js";
+import { makeCanvas } from "./images.js";
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 

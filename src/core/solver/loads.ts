@@ -2,7 +2,7 @@
  * Laster på elementer i lokale akser, og ekvivalente nodelaster (arbeidsekvivalente, eksakte
  * for punktlast, moment og lineært varierende fordelt last).
  */
-import type { DistributedLoad } from "../schema";
+import type { DistributedLoad } from "../schema.js";
 
 /** Last i elementets lokale akser. Posisjoner i meter fra i-enden. */
 export type LocalLoad =

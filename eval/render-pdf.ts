@@ -7,7 +7,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parseArgs } from "node:util";
-import { renderPdfInNode } from "../server/pdf";
+import { renderPdfInNode } from "../server/pdf.js";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,

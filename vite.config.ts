@@ -54,7 +54,7 @@ async function serveApi(server: ViteDevServer, module: "/api/interpret.ts" | "/a
   });
   try {
     // Lastes for hver forespørsel, så endringer i api/ og server/ virker uten omstart.
-    const { POST } = (await server.ssrLoadModule(module)) as typeof import("./api/interpret") | typeof import("./api/agent");
+    const { POST } = (await server.ssrLoadModule(module)) as typeof import("./api/interpret.js") | typeof import("./api/agent.js");
     const headers = new Headers();
     for (const [key, value] of Object.entries(req.headers)) {
       if (typeof value === "string") headers.set(key, value);

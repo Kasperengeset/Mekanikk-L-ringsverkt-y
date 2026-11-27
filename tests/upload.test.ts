@@ -1,11 +1,11 @@
 /** Opplasting og bekreftelsessteget: ren logikk og flyten mot storen (node-miljø, ingen ekte API-kall). */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getParam } from "../src/core/edit";
-import type { Model, Provenance } from "../src/core/schema";
-import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS } from "../src/pdf/render";
-import { base64DecodedSize } from "../src/ui/api/protocol";
-import { FIXTURES } from "../src/ui/fixtures";
-import { useStore } from "../src/ui/state/store";
+import { getParam } from "../src/core/edit.js";
+import type { Model, Provenance } from "../src/core/schema.js";
+import { CLAUDE_MAX_LONG_EDGE, CLAUDE_MAX_PIXELS } from "../src/pdf/render.js";
+import { base64DecodedSize } from "../src/ui/api/protocol.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { useStore } from "../src/ui/state/store.js";
 import {
   classifyFile,
   composeText,
@@ -17,7 +17,7 @@ import {
   stripDataUrl,
   summarizePartial,
   togglePage,
-} from "../src/ui/upload/logic";
+} from "../src/ui/upload/logic.js";
 import {
   entryTitle,
   formatValue,
@@ -27,11 +27,11 @@ import {
   provenancePath,
   provenanceRef,
   uncertainEntries,
-} from "../src/ui/upload/provenance";
-import type { Attachment } from "../src/ui/upload/session";
-import { createInterpretHandler } from "../server/interpretHandler";
-import { EMPTY_USAGE } from "../server/llm/adapter";
-import { model as buildModel } from "./helpers";
+} from "../src/ui/upload/provenance.js";
+import type { Attachment } from "../src/ui/upload/session.js";
+import { createInterpretHandler } from "../server/interpretHandler.js";
+import { EMPTY_USAGE } from "../server/llm/adapter.js";
+import { model as buildModel } from "./helpers.js";
 
 /** Bjelke A–C–B med fastlager, rullelager, punktlast og ledd, og usikre tolkninger. */
 function uncertainBeam(provenance: Provenance[]): Model {
@@ -287,7 +287,7 @@ describe("opplastingsflyten mot storen", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("tekst alene gir modell i bekreftelsessteget, og «Last opp på nytt» går tilbake med teksten intakt", async () => {
-    const session = await import("../src/ui/upload/session");
+    const session = await import("../src/ui/upload/session.js");
     session.setProblemText("Bjelke A–B på 6 m.");
     session.setWhich("Løs oppgave 2");
     await session.startInterpretation();
@@ -305,7 +305,7 @@ describe("opplastingsflyten mot storen", () => {
   });
 
   it("uten bilde og uten oppgavetekst sendes ingenting", async () => {
-    const session = await import("../src/ui/upload/session");
+    const session = await import("../src/ui/upload/session.js");
     session.setProblemText("");
     session.setWhich("Løs oppgave 2");
     await session.startInterpretation();
@@ -314,7 +314,7 @@ describe("opplastingsflyten mot storen", () => {
   });
 
   it("sidevalg i en PDF respekterer grensen på fire bilder", async () => {
-    const session = await import("../src/ui/upload/session");
+    const session = await import("../src/ui/upload/session.js");
     const pdf = (id: string, selected: number[]): Attachment => ({
       id,
       kind: "pdf",

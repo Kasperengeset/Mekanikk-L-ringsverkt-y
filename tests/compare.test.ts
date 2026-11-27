@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { compareModels, type CompareResult } from "../src/core/compare";
-import type { Model } from "../src/core/schema";
-import { model, simpleBeam } from "./helpers";
+import { compareModels, type CompareResult } from "../src/core/compare.js";
+import type { Model } from "../src/core/schema.js";
+import { model, simpleBeam } from "./helpers.js";
 
 const failures = (r: CompareResult) => r.entities.filter((e) => e.status !== "match");
 

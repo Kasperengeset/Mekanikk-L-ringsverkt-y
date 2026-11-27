@@ -10,9 +10,9 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { Model } from "../src/core/schema";
-import type { ImageMediaType, InterpretInput } from "../server/llm/adapter";
-import { renderPdfInNode } from "../server/pdf";
+import { Model } from "../src/core/schema.js";
+import type { ImageMediaType, InterpretInput } from "../server/llm/adapter.js";
+import { renderPdfInNode } from "../server/pdf.js";
 
 export const Meta = z.strictObject({
   category: z.enum(["beam", "frame", "truss"]),

@@ -2,7 +2,7 @@
  * Verktøydefinisjoner for LLM-en, generert fra Zod-skjemaet. Uavhengige av leverandør:
  * adapterne legger på leverandørspesifikke felt (f.eks. strict for Claude).
  */
-import { SubmitModelInput, toLlmJsonSchema } from "../schema";
+import { SubmitModelInput, toLlmJsonSchema } from "../schema.js";
 
 export interface ToolDefinition {
   name: string;

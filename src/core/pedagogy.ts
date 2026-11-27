@@ -9,9 +9,9 @@
  * Verdier inn og ut av studenten er i oppgavens enheter (kN, kNm, m, mm); løseren er i SI.
  * I symbolske oppgaver er tallet koeffisienten foran symbolene (0,45 betyr 0,45F).
  */
-import type { Asked, Model } from "./schema";
-import { evalPoly, type SolveResult } from "./solver";
-import { forceFactor, lengthFactor } from "./units";
+import type { Asked, Model } from "./schema.js";
+import { evalPoly, type SolveResult } from "./solver/index.js";
+import { forceFactor, lengthFactor } from "./units.js";
 
 export type Unit = "force" | "moment" | "length" | "displacement" | "rotation";
 

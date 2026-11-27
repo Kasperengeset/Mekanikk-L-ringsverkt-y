@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { solve, type SolveResult } from "../../core/solver";
-import { useStore } from "./store";
+import { solve, type SolveResult } from "../../core/solver/index.js";
+import { useStore } from "./store.js";
 
 /** Løsningen for gjeldende modell. Regnes på nytt bare når modellen endres (typisk < 1 ms). */
 export function useSolveResult(): SolveResult | null {

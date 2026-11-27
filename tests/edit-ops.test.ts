@@ -6,11 +6,11 @@ import {
   mergeAtNode,
   nodeLoadToMember,
   placeLoadOnChain,
-} from "../src/core/edit-ops";
-import type { Model } from "../src/core/schema";
-import { evalPoly, solve, type SolveResult } from "../src/core/solver";
-import { FIXTURES } from "../src/ui/fixtures";
-import { model } from "./helpers";
+} from "../src/core/edit-ops.js";
+import type { Model } from "../src/core/schema.js";
+import { evalPoly, solve, type SolveResult } from "../src/core/solver/index.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { model } from "./helpers.js";
 
 type Ok = Extract<SolveResult, { status: "ok" }>;
 

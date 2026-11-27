@@ -2,8 +2,8 @@
  * Tynt adapterlag mellom tolkningen og LLM-leverandøren. Eval-skriptet og /interpret bruker bare
  * dette grensesnittet, så flere leverandører kan sammenlignes på samme testsett.
  */
-import type { Model } from "../../src/core/schema";
-import type { Issue } from "../../src/core/validate";
+import type { Model } from "../../src/core/schema.js";
+import type { Issue } from "../../src/core/validate.js";
 
 export type ImageMediaType = "image/png" | "image/jpeg" | "image/gif" | "image/webp";
 

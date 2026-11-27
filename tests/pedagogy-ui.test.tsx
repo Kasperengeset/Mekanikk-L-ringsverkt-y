@@ -1,17 +1,17 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getParam } from "../src/core/edit";
-import type { Model } from "../src/core/schema";
-import { solve } from "../src/core/solver";
-import { DiagramsView } from "../src/ui/diagrams/DiagramsView";
-import { FIXTURES } from "../src/ui/fixtures";
-import { fitViewport } from "../src/ui/geometry";
-import { expectedText, HIDDEN_EXPLANATION, paramUnit, parseNumberInput, summaryText, unitLabel, VERDICT_TEXT } from "../src/ui/pedagogy/logic";
-import { PedagogyPanel } from "../src/ui/pedagogy/PedagogyPanel";
-import { requestPrediction } from "../src/ui/state/prediction";
-import { useStore } from "../src/ui/state/store";
-import { model } from "./helpers";
+import { getParam } from "../src/core/edit.js";
+import type { Model } from "../src/core/schema.js";
+import { solve } from "../src/core/solver/index.js";
+import { DiagramsView } from "../src/ui/diagrams/DiagramsView.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import { expectedText, HIDDEN_EXPLANATION, paramUnit, parseNumberInput, summaryText, unitLabel, VERDICT_TEXT } from "../src/ui/pedagogy/logic.js";
+import { PedagogyPanel } from "../src/ui/pedagogy/PedagogyPanel.js";
+import { requestPrediction } from "../src/ui/state/prediction.js";
+import { useStore } from "../src/ui/state/store.js";
+import { model } from "./helpers.js";
 
 /** Fritt opplagt bjelke 6 m, q = 4 kN/m: reaksjoner 12 kN, M_max = 18 kNm. */
 const beam = model({

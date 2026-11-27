@@ -1,11 +1,11 @@
 /** /api/agent med en falsk Anthropic-klient – ingen kall mot det ekte Claude-API-et. */
 import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { agentConfigFromEnv, createAgentHandler, replayContent, type AgentHandlerDeps } from "../server/agentHandler";
-import { AGENT_SYSTEM_PROMPT, AGENT_TOOLS } from "../src/core/llm/agent";
-import { AgentApiError, createAgentTransport } from "../src/ui/agent/client";
-import { MAX_MESSAGES, MAX_STUDENT_TEXT, type AgentContentBlock, type AgentMessage, type AgentServerEvent } from "../src/ui/agent/protocol";
-import { createSseParser } from "../src/ui/api/sse";
+import { agentConfigFromEnv, createAgentHandler, replayContent, type AgentHandlerDeps } from "../server/agentHandler.js";
+import { AGENT_SYSTEM_PROMPT, AGENT_TOOLS } from "../src/core/llm/agent.js";
+import { AgentApiError, createAgentTransport } from "../src/ui/agent/client.js";
+import { MAX_MESSAGES, MAX_STUDENT_TEXT, type AgentContentBlock, type AgentMessage, type AgentServerEvent } from "../src/ui/agent/protocol.js";
+import { createSseParser } from "../src/ui/api/sse.js";
 
 type Params = Record<string, unknown> & { messages: AgentMessage[] };
 

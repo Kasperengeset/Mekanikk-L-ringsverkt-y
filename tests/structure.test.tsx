@@ -1,14 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { Model } from "../src/core/schema";
-import { solve } from "../src/core/solver";
-import { FIXTURES } from "../src/ui/fixtures";
-import { fitViewport } from "../src/ui/geometry";
-import type { EntityRef } from "../src/ui/state/store";
-import { DEFAULT_PALETTE, uncertainKeys } from "../src/ui/structure/highlight";
-import { supportDirection } from "../src/ui/structure/layout";
-import { StructureSvg, type StructureSvgProps } from "../src/ui/structure/StructureSvg";
-import { findAll, hasClass, parseMarkup, textContent, within, type El } from "./structure-markup";
+import type { Model } from "../src/core/schema.js";
+import { solve } from "../src/core/solver/index.js";
+import { FIXTURES } from "../src/ui/fixtures.js";
+import { fitViewport } from "../src/ui/geometry.js";
+import type { EntityRef } from "../src/ui/state/store.js";
+import { DEFAULT_PALETTE, uncertainKeys } from "../src/ui/structure/highlight.js";
+import { supportDirection } from "../src/ui/structure/layout.js";
+import { StructureSvg, type StructureSvgProps } from "../src/ui/structure/StructureSvg.js";
+import { findAll, hasClass, parseMarkup, textContent, within, type El } from "./structure-markup.js";
 
 function render(model: Model, extra: Partial<StructureSvgProps> = {}): El {
   const markup = renderToStaticMarkup(<StructureSvg model={model} result={solve(model)} viewport={fitViewport(model, 900, 450)} {...extra} />);

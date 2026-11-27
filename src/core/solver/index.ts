@@ -15,19 +15,19 @@
  *
  * Alle resultater er i SI (N, m, Nm).
  */
-import type { Model } from "../schema";
-import { pointLoadComponents, toSI } from "../units";
-import { validateModel, type Determinacy, type Issue } from "../validate";
-import { DEFAULT_SECTION, resolveSection, type ResolvedSection } from "../sections";
-import { condense, localStiffness, mulMatVec, toGlobal, transformation, vecToGlobal } from "./element";
-import { deflection, type DeflectionPiece } from "./deflection";
-import { evalPoly, extremes, internalForces, type Extremes, type Piece } from "./internal";
-import { solveDense, zeros } from "./linalg";
-import { distributedDirection, equivalentNodalLoads, toLocal, type LocalLoad } from "./loads";
+import type { Model } from "../schema.js";
+import { pointLoadComponents, toSI } from "../units.js";
+import { validateModel, type Determinacy, type Issue } from "../validate.js";
+import { DEFAULT_SECTION, resolveSection, type ResolvedSection } from "../sections.js";
+import { condense, localStiffness, mulMatVec, toGlobal, transformation, vecToGlobal } from "./element.js";
+import { deflection, type DeflectionPiece } from "./deflection.js";
+import { evalPoly, extremes, internalForces, type Extremes, type Piece } from "./internal.js";
+import { solveDense, zeros } from "./linalg.js";
+import { distributedDirection, equivalentNodalLoads, toLocal, type LocalLoad } from "./loads.js";
 
-export type { Extremes, Piece } from "./internal";
-export type { DeflectionPiece } from "./deflection";
-export { evalPoly } from "./internal";
+export type { Extremes, Piece } from "./internal.js";
+export type { DeflectionPiece } from "./deflection.js";
+export { evalPoly } from "./internal.js";
 
 export interface Reaction {
   node: string;

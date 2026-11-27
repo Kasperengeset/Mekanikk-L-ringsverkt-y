@@ -2,10 +2,10 @@
  * Egenlagde eksempelmodeller for utvikling og skjermbilder (ikke kursoppgaver, siden repoet er offentlig).
  * Velg i appen med ?eksempel=<navn>, eller i `pnpm snapshot --fixture <navn>`.
  */
-import { Model, type ModelInput } from "../core/schema";
-import bjelke from "../../testset/ex-bjelke-figur/truth.json";
-import fagverk from "../../testset/ex-fagverk-tekst/truth.json";
-import ramme from "../../testset/ex-ramme-tekst/truth.json";
+import { Model, type ModelInput } from "../core/schema.js";
+import bjelke from "../../testset/ex-bjelke-figur/truth.json" with { type: "json" };
+import fagverk from "../../testset/ex-fagverk-tekst/truth.json" with { type: "json" };
+import ramme from "../../testset/ex-ramme-tekst/truth.json" with { type: "json" };
 
 const m = (input: Omit<ModelInput, "schemaVersion" | "units"> & Partial<Pick<ModelInput, "units">>) =>
   Model.parse({ schemaVersion: 1, units: { length: "m", force: "kN" }, ...input });

@@ -6,11 +6,11 @@
  * Verktøyene kjøres i nettleseren, der modellen og løseren bor; serveren videresender bare.
  */
 import { z } from "zod";
-import { askedTargets, checkAttempt, hiddenValues, isDiagramValueHidden, type Attempt } from "../pedagogy";
-import { toLlmJsonSchema, type Model } from "../schema";
-import type { SolveResult } from "../solver";
-import { forceFactor, lengthFactor } from "../units";
-import type { ToolDefinition } from "./tools";
+import { askedTargets, checkAttempt, hiddenValues, isDiagramValueHidden, type Attempt } from "../pedagogy.js";
+import { toLlmJsonSchema, type Model } from "../schema.js";
+import type { SolveResult } from "../solver/index.js";
+import { forceFactor, lengthFactor } from "../units.js";
+import type { ToolDefinition } from "./tools.js";
 
 export const AGENT_SYSTEM_PROMPT = `You are a tutor in an interactive learning tool for 2D statics (beams, frames, trusses) in the course Mekanikk 1 at NTNU. The student sees the structure, the N, V and M diagrams and the deformed shape, and can drag loads, nodes and supports. Reply in Norwegian bokmål, briefly: usually two to five sentences. Use the course's terms: fastlager, rullelager, fast innspenning, ledd, fritt-legeme-diagram, strekksiden, virkningssymbol.
 
