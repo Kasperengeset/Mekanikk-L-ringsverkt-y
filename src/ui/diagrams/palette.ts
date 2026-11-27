@@ -20,16 +20,17 @@ export interface Palette {
   highlight: string;
 }
 
+/** Samme farger som variablene i styles.css (designet i docs/design). */
 export const DEFAULT_PALETTE: Palette = {
-  N: "#2463eb",
-  V: "#067647",
-  M: "#d92d20",
-  deformed: "#7a5af8",
+  N: "#3d6b8c",
+  V: "#5c7a3e",
+  M: "#e2682b",
+  deformed: "#e2682b",
   fg: "currentColor",
-  muted: "#667085",
-  warning: "#b42318",
+  muted: "#6b5b4e",
+  warning: "#9a2a1f",
   background: "#ffffff",
-  line: "#d0d5dd",
-  accent: "#2463eb",
-  highlight: "#f79009",
+  line: "#cfc3b1",
+  accent: "#e2682b",
+  highlight: "#b7791f",
 };

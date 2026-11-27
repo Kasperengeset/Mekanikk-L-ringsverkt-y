@@ -1,11 +1,13 @@
-/** Sidepanel i utforskingsfasen: status fra løseren, opplagerkrefter og angre/gjør om. Agenten kommer i uke 4. */
+/** Sidepanelet i utforskingsfasen: angre og gjør om, opplagerkreftene, «Prøv selv» og veilederen. */
 import { hiddenValues } from "../../core/pedagogy.js";
 import type { Model } from "../../core/schema.js";
 import type { SolveResult } from "../../core/solver/index.js";
 import { AgentPanel } from "../agent/AgentPanel.js";
 import { formatQuantity } from "../format.js";
+import { CheckCircleIcon, InfoIcon, LockIcon, PlusIcon, RedoIcon, UndoIcon, WarningIcon } from "../icons.js";
 import { PedagogyPanel } from "../pedagogy/PedagogyPanel.js";
 import { useStore } from "../state/store.js";
+import "./panel.css";
 
 export function SidePanel({ model, result }: { model: Model; result: SolveResult }) {
   const undo = useStore((s) => s.undo);
@@ -16,55 +18,75 @@ export function SidePanel({ model, result }: { model: Model; result: SolveResult
   const attempts = useStore((s) => s.attempts);
   const hidden = hiddenValues(model, attempts);
   return (
-    <div className="side-panel">
+    <>
       <div className="toolbar">
-        <button onClick={undo} disabled={!canUndo} title="Angre (Ctrl+Z)">
+        <button type="button" onClick={undo} disabled={!canUndo} title="Angre (Ctrl+Z)">
+          <UndoIcon />
           Angre
         </button>
-        <button onClick={redo} disabled={!canRedo} title="Gjør om (Ctrl+Shift+Z)">
+        <button type="button" onClick={redo} disabled={!canRedo} title="Gjør om (Ctrl+Shift+Z)">
+          <RedoIcon />
           Gjør om
         </button>
-        <button onClick={reset} title="Last opp en ny oppgave">
+        <button type="button" className="primary push" onClick={reset} title="Last opp en ny oppgave">
+          <PlusIcon />
           Ny oppgave
         </button>
       </div>
-      {result.status === "ok" ? (
-        <>
-          <h3>Opplagerkrefter</h3>
-          <table className="reactions">
-            <tbody>
-              {result.reactions.map((r) =>
-                hidden.reactionNodes.has(r.node) ? (
-                  <tr key={r.node} className="hidden-value">
-                    <th>{r.node}</th>
-                    <td colSpan={3}>Skjult til du har prøvd selv</td>
-                  </tr>
-                ) : (
-                  <tr key={r.node}>
-                    <th>{r.node}</th>
-                    <td>H = {formatQuantity("force", r.Fx, model)}</td>
-                    <td>V = {formatQuantity("force", r.Fy, model)}</td>
-                    {r.M !== 0 && <td>M = {formatQuantity("moment", r.M, model)}</td>}
-                  </tr>
-                ),
-              )}
-            </tbody>
-          </table>
-          <p className="muted">
-            Statisk {result.determinacy.classification === "determinate" ? "bestemt" : `ubestemt (n = ${result.determinacy.n_s})`}.
-          </p>
-        </>
-      ) : (
-        <p className="warning">
-          {result.status === "mechanism"
-            ? result.message
-            : result.status === "invalid"
-              ? result.issues.map((i) => i.message).join(" ")
-              : "Likevektskontrollen feilet, så resultatene vises ikke."}
-        </p>
-      )}
-          <PedagogyPanel model={model} result={result} />
+      <section className="card" aria-labelledby="reactions-title">
+        <h2 id="reactions-title" className="card-title">
+          Opplagerkrefter
+        </h2>
+        {result.status === "ok" ? (
+          <>
+            <ul className="reactions">
+              {result.reactions.map((r) => (
+                <li key={r.node} className={hidden.reactionNodes.has(r.node) ? "hidden-value" : undefined}>
+                  <span className="node-badge">{r.node}</span>
+                  {hidden.reactionNodes.has(r.node) ? (
+                    <>
+                      <span className="reaction-text muted">Skjult til du har prøvd selv</span>
+                      <span className="reaction-lock">
+                        <LockIcon />
+                      </span>
+                    </>
+                  ) : (
+                    <span className="reaction-text">
+                      <span>H = {formatQuantity("force", r.Fx, model)}</span>
+                      <span>V = {formatQuantity("force", r.Fy, model)}</span>
+                      {r.M !== 0 && <span>M = {formatQuantity("moment", r.M, model)}</span>}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {result.determinacy.classification === "determinate" ? (
+              <p className="status-pill determinacy">
+                <CheckCircleIcon />
+                Statisk bestemt
+              </p>
+            ) : (
+              <p className="status-pill neutral determinacy">
+                <InfoIcon />
+                Statisk ubestemt (n = {result.determinacy.n_s})
+              </p>
+            )}
+          </>
+        ) : (
+          <div className="alert" role="status">
+            <WarningIcon />
+            <span>
+              {result.status === "mechanism"
+                ? result.message
+                : result.status === "invalid"
+                  ? result.issues.map((i) => i.message).join(" ")
+                  : "Likevektskontrollen feilet, så resultatene vises ikke."}
+            </span>
+          </div>
+        )}
+      </section>
+      <PedagogyPanel model={model} result={result} />
       <AgentPanel model={model} result={result} />
-    </div>
+    </>
   );
 }

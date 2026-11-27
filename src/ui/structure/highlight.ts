@@ -19,13 +19,14 @@ export interface Palette {
 }
 
 /** Samme verdier som lys modus i styles.css. Konstruksjonen selv bruker currentColor (--fg). */
+/** Samme farger som variablene i styles.css (designet i docs/design). */
 export const DEFAULT_PALETTE: Palette = {
   bg: "#ffffff",
-  muted: "#667085",
-  load: "#067647",
-  uncertain: "#f79009",
-  accent: "#2463eb",
-  warning: "#b42318",
+  muted: "#6b5b4e",
+  load: "#2a1b12",
+  uncertain: "#b7791f",
+  accent: "#e2682b",
+  warning: "#9a2a1f",
 };
 
 /** Grensen for usikre entiteter i bekreftelsessteget. */

@@ -5,6 +5,7 @@
 import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import type { Model } from "../../core/schema.js";
 import type { SolveResult } from "../../core/solver/index.js";
+import { SendIcon, StopIcon, WarningIcon } from "../icons.js";
 import { useStore } from "../state/store.js";
 import { useAgentStore, type ChatEntry } from "./conversation.js";
 import { MAX_STUDENT_TEXT } from "./protocol.js";
@@ -28,7 +29,7 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-function Entry({ entry }: { entry: ChatEntry }) {
+function Entry({ entry, onRetry }: { entry: ChatEntry; onRetry?: () => void }) {
   switch (entry.kind) {
     case "student":
       return <div className="agent-msg agent-student">{entry.text}</div>;
@@ -42,7 +43,19 @@ function Entry({ entry }: { entry: ChatEntry }) {
     case "action":
       return <div className={`agent-action${entry.error ? " error" : ""}`}>{entry.text}</div>;
     case "notice":
-      return <p className={`agent-notice ${entry.tone}`}>{entry.text}</p>;
+      return entry.tone === "error" ? (
+        <div className="alert agent-notice" role="alert">
+          <WarningIcon />
+          <span>{entry.text}</span>
+          {onRetry && (
+            <button type="button" className="btn-link" onClick={onRetry}>
+              Prøv igjen
+            </button>
+          )}
+        </div>
+      ) : (
+        <p className="agent-notice info">{entry.text}</p>
+      );
   }
 }
 
@@ -55,6 +68,9 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
   const send = useAgentStore((s) => s.send);
   const abort = useAgentStore((s) => s.abort);
   const newConversation = useAgentStore((s) => s.newConversation);
+  const retry = useAgentStore((s) => s.retry);
+  // Siste melding fra studenten fikk ikke svar (feil eller avbrudd): den kan sendes på nytt.
+  const unanswered = useAgentStore((s) => s.history.at(-1)?.role === "user");
   const waitingForPrediction = useStore((s) => s.prediction !== null);
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
@@ -91,9 +107,9 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
           : null;
 
   return (
-    <section className="agent-panel" aria-label="Veileder">
-      <div className="agent-head">
-        <h3>Veileder</h3>
+    <section className="card agent-panel" aria-label="Veileder">
+      <div className="card-head">
+        <h2 className="card-title">Veileder</h2>
         {entries.length > 0 && (
           <button type="button" className="agent-new" onClick={newConversation} title="Tøm samtalen og start på nytt">
             Ny samtale
@@ -107,14 +123,16 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
             prøvd.
           </p>
         ) : (
-          entries.map((e) => <Entry key={e.id} entry={e} />)
+          entries.map((e, k) => (
+            <Entry key={e.id} entry={e} onRetry={k === entries.length - 1 && unanswered && !busy ? () => void retry() : undefined} />
+          ))
         )}
         {status && <p className="agent-status">{status}</p>}
       </div>
       {entries.length === 0 && (
         <div className="agent-suggestions">
           {SUGGESTIONS.map((s) => (
-            <button key={s} type="button" className="agent-chip" onClick={() => submit(s)} disabled={busy}>
+            <button key={s} type="button" className="pill sm agent-chip" onClick={() => submit(s)} disabled={busy}>
               {s}
             </button>
           ))}
@@ -122,6 +140,7 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
       )}
       <form className="agent-composer" onSubmit={onSubmit}>
         <textarea
+          id="agent-input"
           aria-label="Melding til veilederen"
           placeholder="Spør veilederen …"
           rows={2}
@@ -131,12 +150,12 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
           onKeyDown={onKeyDown}
         />
         {busy ? (
-          <button type="button" className="agent-stop" onClick={abort}>
-            Avbryt
+          <button type="button" className="agent-stop" onClick={abort} aria-label="Avbryt" title="Avbryt">
+            <StopIcon />
           </button>
         ) : (
-          <button type="submit" className="agent-send" disabled={!draft.trim()}>
-            Send
+          <button type="submit" className="btn-accent agent-send" disabled={!draft.trim()} aria-label="Send" title="Send">
+            <SendIcon />
           </button>
         )}
       </form>

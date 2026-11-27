@@ -22,12 +22,14 @@ export function Controls({ model }: { model: Model }) {
   const controls = useStore((s) => s.controls);
   if (controls.length === 0) return null;
   return (
-    <div className="pd-controls">
-      <h4>Utforsk</h4>
+    <section className="card pd-controls" aria-labelledby="explore-title">
+      <h2 id="explore-title" className="card-title">
+        Utforsk
+      </h2>
       {controls.map((c) => (
         <ControlSlider key={c.path} control={c} model={model} />
       ))}
-    </div>
+    </section>
   );
 }
 

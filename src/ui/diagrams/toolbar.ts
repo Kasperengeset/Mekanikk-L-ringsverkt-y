@@ -6,6 +6,8 @@ export interface Chip {
   active: boolean;
   disabled?: boolean;
   title: string;
+  /** true: en handling (÷2, ×2), ikke en av/på-knapp. */
+  action?: boolean;
   onPress(): void;
 }
 
@@ -22,8 +24,8 @@ export function toolbarChips(settings: DiagramSettings, scale: number, onChange:
     chips.push(
       "Forstørrelse:",
       { label: "auto", active: settings.deformationScale === "auto", title: "Største forskyvning ≈ 10 % av konstruksjonen", onPress: () => onChange({ deformationScale: "auto" }) },
-      { label: "÷2", active: false, disabled: none, title: "Halver forstørrelsen", onPress: () => onChange({ deformationScale: scale / 2 }) },
-      { label: "×2", active: false, disabled: none, title: "Doble forstørrelsen", onPress: () => onChange({ deformationScale: scale * 2 }) },
+      { label: "÷2", active: false, action: true, disabled: none, title: "Halver forstørrelsen", onPress: () => onChange({ deformationScale: scale / 2 }) },
+      { label: "×2", active: false, action: true, disabled: none, title: "Doble forstørrelsen", onPress: () => onChange({ deformationScale: scale * 2 }) },
     );
   }
   return chips;

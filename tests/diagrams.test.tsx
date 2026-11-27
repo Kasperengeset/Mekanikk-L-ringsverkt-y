@@ -114,12 +114,16 @@ describe("verktøylinjen", () => {
 });
 
 describe("DiagramsView", () => {
-  it("rendres med innstillingene i storen og verktøylinjen", () => {
+  it("rendres som kort med innstillingene i storen og verktøylinjen", () => {
     const m = FIXTURES.gerber!.model;
-    const svg = renderToStaticMarkup(<DiagramsView model={m} result={solve(m)} viewport={fitViewport(m, 900, 300)} />);
+    const html = renderToStaticMarkup(<DiagramsView model={m} result={solve(m)} viewport={fitViewport(m, 900, 300)} />);
     expect(useStore.getState().diagrams).toMatchObject({ N: true, V: true, M: true, deformed: true });
-    expect(svg).toContain("M – bøyemoment");
-    expect(svg).toContain("Deformert form");
-    expect(svg).toContain("dg-chip");
+    expect(html).toContain('role="toolbar"');
+    expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>N<\/button>/);
+    expect(html).toContain('aria-label="Doble forstørrelsen"');
+    // Ett kort per diagram, med overskriften i HTML.
+    expect(html.match(/class="card figure-card diagrams dg-card /g)).toHaveLength(4);
+    expect(html).toContain("<h3>M – bøyemoment, tegnet på strekksiden</h3>");
+    expect(html).toContain("<h3>Deformert form</h3>");
   });
 });
