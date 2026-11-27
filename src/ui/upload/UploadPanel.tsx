@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { MAX_IMAGES } from "../api/protocol.js";
 import { FIXTURES } from "../fixtures.js";
 import { useStore } from "../state/store.js";
+import { WarningIcon } from "../icons.js";
 import { summarizePartial } from "./logic.js";
 import {
   addFiles,
@@ -64,8 +65,8 @@ export function UploadPanel() {
   const partial = busy ? summarizePartial(interpretation.partial) : null;
 
   return (
-    <div className="upload">
-      <h2>Last opp en oppgave</h2>
+    <div className="card upload">
+      <h2 className="card-title">Last opp en oppgave</h2>
       <p className="muted">
         Et bilde eller en PDF av oppgaven, eller oppgaveteksten. Claude tolker oppgaven til en modell som du sjekker før du utforsker
         den. Alt som vises, regnes ut av appen.
@@ -146,7 +147,12 @@ export function UploadPanel() {
               {partial && <span className="muted"> ({partial})</span>}
             </p>
           )}
-          {interpretation.status === "error" && <p className="warning">{interpretation.error}</p>}
+          {interpretation.status === "error" && (
+            <div className="alert" role="alert">
+              <WarningIcon />
+              <span>{interpretation.error}</span>
+            </div>
+          )}
           {interpretation.description && (
             <div className="description">
               <h3>Claudes beskrivelse</h3>

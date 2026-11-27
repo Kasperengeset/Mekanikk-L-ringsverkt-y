@@ -96,6 +96,8 @@ export interface Note {
 interface PanelBase {
   top: number;
   height: number;
+  /** Høyden til tittelen og merknadene øverst i panelet (innholdet begynner under). */
+  headerHeight: number;
   title: string;
   notes: Note[];
 }
@@ -561,7 +563,7 @@ function forcePanel(ctx: Context, q: Quantity, top: number, truss: boolean): For
   if (max <= 1e-9 * ref) {
     items.push({ text: `${q} = 0 i alle elementer.`, tone: "muted" });
     const { notes, height } = flowNotes(items, top, ctx.width);
-    return { ...base, notes, height: height + 6, zero: true, amplitude: 0 };
+    return { ...base, notes, height: height + 6, headerHeight: height + 6, zero: true, amplitude: 0 };
   }
 
   const amp = fitAmplitude(ctx, q, truss);
@@ -576,6 +578,7 @@ function forcePanel(ctx: Context, q: Quantity, top: number, truss: boolean): For
     ...base,
     ...content,
     notes,
+    headerHeight,
     zero: false,
     amplitude: amp,
     height: headerHeight + 2 * LAYOUT.pad + (content.bbox.y1 - content.bbox.y0),
@@ -696,6 +699,7 @@ function deformedPanel(ctx: Context, setting: number | "auto", top: number): Def
     title: TITLES.deformed,
     top,
     height,
+    headerHeight,
     notes,
     sketch: content.sketch,
     shapes: content.shapes,

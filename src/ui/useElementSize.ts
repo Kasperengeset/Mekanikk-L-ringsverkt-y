@@ -1,17 +1,19 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
-/** Størrelsen til et element, oppdatert ved endring (ResizeObserver). */
+/**
+ * Størrelsen til et element, oppdatert ved endring (ResizeObserver). Returnerer en callback-ref,
+ * så målingen også virker for et element som vises senere (f.eks. først når en modell er lastet).
+ */
 export function useElementSize<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
+  const [element, setElement] = useState<T | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => setSize({ width: el.clientWidth, height: el.clientHeight });
+    if (!element) return;
+    const update = () => setSize({ width: element.clientWidth, height: element.clientHeight });
     update();
     const ro = new ResizeObserver(update);
-    ro.observe(el);
+    ro.observe(element);
     return () => ro.disconnect();
-  }, []);
-  return [ref, size] as const;
+  }, [element]);
+  return [setElement, size] as const;
 }

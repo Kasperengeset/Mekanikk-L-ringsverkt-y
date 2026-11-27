@@ -1,6 +1,6 @@
 /**
- * N-, V- og M-diagram og deformert form under konstruksjonen. Leser innstillingene i
- * `store.diagrams` (hvilke diagram som vises, forstørrelse) og tegner med DiagramsSvg.
+ * N-, V- og M-diagram og deformert form under konstruksjonen, ett kort per diagram. Leser innstillingene i
+ * `store.diagrams` (hvilke diagram som vises, forstørrelse) og tegner med DiagramCards.
  * `viewport` er konstruksjonens viewport; diagrammene får samme skala og x-akse, og panelet
  * bestemmer selv sin høyde.
  *
@@ -11,7 +11,7 @@ import { useEffect, useMemo } from "react";
 import { hiddenValues } from "../../core/pedagogy.js";
 import { useStore } from "../state/store.js";
 import type { CanvasProps } from "../types.js";
-import { DiagramsSvg } from "./DiagramsSvg.js";
+import { DiagramCards } from "./DiagramCards.js";
 import "./diagrams.css";
 
 export function DiagramsView({ model, result, viewport }: CanvasProps) {
@@ -32,5 +32,5 @@ export function DiagramsView({ model, result, viewport }: CanvasProps) {
     if (marker && typeof marker.scrollIntoView === "function") marker.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [highlight, panelShown]);
 
-  return <DiagramsSvg model={model} result={result} viewport={viewport} settings={settings} onSettingsChange={setDiagrams} hidden={hidden} highlight={highlight} />;
+  return <DiagramCards model={model} result={result} viewport={viewport} settings={settings} onSettingsChange={setDiagrams} hidden={hidden} highlight={highlight} />;
 }

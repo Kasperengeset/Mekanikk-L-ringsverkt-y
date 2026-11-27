@@ -52,7 +52,11 @@ pnpm dev                    # frontend (plassholder til uke 3)
 - **Vercel:** klart til publisering (`vercel.json`, `pnpm check:api` i CI). Tilgangskoder per
   testbruker (`ACCESS_CODES`, personlig lenke med `?kode=`) holder API-et lukket for andre.
   Fremgangsmåte og miljøvariabler står i `docs/deploy.md`.
-- **Neste:** første deploy, 5–10 testbrukere og betalingstest (Port 4).
+- **Design:** visningen følger designet i `docs/design/Mekanikk-intuisjon.html`. Kremhvit side, hvite
+  kort, mørkebrunt og oransje, Inter og Newsreader. Skriftene ligger i `public/fonts/` (OFL), så appen
+  henter ingenting fra Google. Bare lyst tema.
+- **Publisert:** https://mekanikk-l-ringsverkt-y.vercel.app
+- **Neste:** 5–10 testbrukere og betalingstest (Port 4).
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter
 `python3 -m venv .venv && .venv/bin/pip install -r eval/anastruct/requirements.txt`.

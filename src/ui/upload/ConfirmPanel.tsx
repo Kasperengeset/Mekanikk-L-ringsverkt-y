@@ -9,6 +9,7 @@ import type { Model } from "../../core/schema.js";
 import { formatNumber } from "../format.js";
 import { useStore } from "../state/store.js";
 import { useSolveResult } from "../state/useSolveResult.js";
+import { WarningIcon } from "../icons.js";
 import { entryTitle, formatValue, highlightRefs, parseAlternative, uncertainEntries, type UncertainEntry } from "./provenance.js";
 import { resetToUpload, useUploadSession } from "./session.js";
 import "./upload.css";
@@ -82,18 +83,21 @@ export function ConfirmPanel() {
 
   const questions = interpretation.questions;
   return (
-    <div className="confirm">
-      <h2>Stemmer modellen med oppgaven?</h2>
+    <div className="card confirm">
+      <h2 className="card-title">Stemmer modellen med oppgaven?</h2>
       <p className="muted">Sammenlign tegningen med oppgaven. Det som er markert, var Claude usikker på.</p>
 
       {result && result.status !== "ok" && (
-        <p className="warning">
-          {result.status === "mechanism"
-            ? `Modellen er en mekanisme: ${result.message}`
-            : result.status === "invalid"
-              ? result.issues.map((i) => i.message).join(" ")
-              : "Likevektskontrollen feilet for denne modellen."}
-        </p>
+        <div className="alert" role="status">
+          <WarningIcon />
+          <span>
+            {result.status === "mechanism"
+              ? `Modellen er en mekanisme: ${result.message}`
+              : result.status === "invalid"
+                ? result.issues.map((i) => i.message).join(" ")
+                : "Likevektskontrollen feilet for denne modellen."}
+          </span>
+        </div>
       )}
 
       {questions.length > 0 && (

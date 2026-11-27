@@ -1,63 +1,54 @@
-/* Samtalen med veilederen (spor D). Fargene kommer fra variablene i styles.css. */
+/* Samtalen med veilederen (spor D), etter designet i docs/design. */
 .agent-panel {
-  display: grid;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-  min-width: 0;
-}
-.agent-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 14px;
 }
-.agent-head h3 {
+.agent-panel .card-head {
   margin: 0;
 }
 .agent-new {
-  font-size: 13px;
-  padding: 2px 8px;
+  font-size: 14px;
+  padding: 0 14px;
 }
 .agent-log {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  max-height: min(55vh, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: min(60vh, 560px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 2px;
+}
+.agent-log:empty {
+  display: none;
 }
 .agent-intro {
   margin: 0;
   font-size: 14px;
 }
 .agent-msg {
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .agent-student {
-  justify-self: end;
-  max-width: 90%;
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  align-self: flex-end;
+  max-width: 85%;
+  padding: 12px 16px;
+  background: var(--surface-warm);
+  border-radius: 16px 16px 4px 16px;
   white-space: pre-wrap;
 }
 .agent-tutor {
-  justify-self: stretch;
-  background: var(--bg);
-  border: 1px solid var(--line);
+  align-self: stretch;
+  padding: 2px 2px;
 }
 .agent-tutor p {
   margin: 0;
   white-space: pre-wrap;
 }
 .agent-tutor p + p {
-  margin-top: 6px;
+  margin-top: 8px;
 }
 /* Markør mens teksten strømmer. */
 .agent-tutor.streaming p:last-of-type::after {
@@ -79,80 +70,73 @@
 .agent-cut {
   display: block;
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .agent-action {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
-  padding-left: 10px;
+  padding: 2px 0 2px 10px;
   border-left: 2px solid var(--accent);
 }
 .agent-action.error {
   border-left-color: var(--warning);
   color: var(--warning);
 }
-.agent-notice {
+.agent-notice.info {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted);
 }
-.agent-notice.error {
+.agent-notice .btn-link {
   color: var(--warning);
 }
 .agent-status {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted);
   font-style: italic;
 }
 .agent-suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 .agent-chip {
-  font-size: 13px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
-  color: var(--accent);
-}
-.agent-chip:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  min-height: 40px;
 }
 .agent-composer {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px;
-  align-items: end;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
 }
 .agent-composer textarea {
-  font: inherit;
-  font-size: 14px;
+  flex: 1;
   resize: vertical;
-  min-height: 40px;
-  max-height: 160px;
-  padding: 6px 8px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--fg);
+  min-height: 48px;
+  max-height: 180px;
+  padding: 12px 14px;
+  line-height: 1.4;
 }
-.agent-composer textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+.agent-send,
+.agent-stop {
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  flex: none;
 }
-.agent-send {
+.agent-send:disabled {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--bg);
+  color: #ffffff;
+  opacity: 0.45;
 }
 .agent-stop {
-  border-color: var(--warning);
   color: var(--warning);
+  border-color: var(--warning);
 }
 .agent-cost {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
 }

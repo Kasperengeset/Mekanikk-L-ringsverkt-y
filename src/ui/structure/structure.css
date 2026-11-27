@@ -1,12 +1,18 @@
 /*
  * Konstruksjonsvisningen. StructureSvg setter fargene som attributter (det er det pnpm snapshot ser);
- * her overstyres de med temaets variabler, så lys og mørk modus virker i appen. Alt tegnes med currentColor.
+ * her overstyres de med temaets variabler. Alt tegnes med currentColor.
+ * Som i designet: fordelte laster og momenter i mørkebrunt, punktlaster i oransje.
  */
 .structure {
   display: block;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  font-family: var(--font-sans);
+}
+.structure text {
+  font-family: var(--font-sans);
+  font-weight: 500;
 }
 .structure .st-visual {
   pointer-events: none;
@@ -20,8 +26,18 @@
 .structure .st-node {
   color: var(--muted);
 }
+.structure .st-node text {
+  font-weight: 600;
+}
 .structure .st-load {
   color: var(--load);
+}
+.structure .st-load-point {
+  color: var(--load-point);
+}
+.structure .st-load-point:not(.is-uncertain):not(.is-selected) text {
+  fill: var(--load-point-label);
+  font-weight: 600;
 }
 .structure .st-mechanism {
   color: var(--warning);

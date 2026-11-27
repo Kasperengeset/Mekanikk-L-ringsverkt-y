@@ -112,6 +112,17 @@ function NoteView({ note, pal }: { note: Note; pal: Palette }) {
   );
 }
 
+/** Symbolet foran en merknad (strekk, trykk, vendepunkt) som et lite frittstående SVG-bilde. */
+export function NoteGlyphSvg({ glyph, pal }: { glyph: NonNullable<Note["glyph"]>; pal: Palette }) {
+  return (
+    <svg width={30} height={14} viewBox="0 -7 30 14" aria-hidden="true" className="dg-note-glyph">
+      {glyph === "tension" && <NSymbol x={15} y={0} angle={0} sign={1} color={pal.N} pal={pal} className="dg-symbol-N" />}
+      {glyph === "compression" && <NSymbol x={15} y={0} angle={0} sign={-1} color={pal.N} pal={pal} className="dg-symbol-N" />}
+      {glyph === "inflection" && <InflectionDot p={{ x: 15, y: 0 }} pal={pal} />}
+    </svg>
+  );
+}
+
 function SketchView({ sketch, pal, dashed }: { sketch: Sketch; pal: Palette; dashed?: boolean }) {
   return (
     <g className="dg-sketch" opacity={dashed ? 0.6 : 0.4}>
@@ -142,29 +153,38 @@ function SupportView({ glyph, pal }: { glyph: SupportGlyph; pal: Palette }) {
   );
 }
 
-/** Tallene i et panel. Et skjult tall er et lite «?» på samme sted, så studenten ser hvor tallet står. */
+/** Tallene i et panel. Et skjult tall er et rundt merke med «?» på samme sted, så studenten ser hvor tallet står. */
 function Labels({ labels, pal }: { labels: PlacedLabel[]; pal: Palette }) {
   return (
     <g className="dg-labels">
-      {labels.map((l, k) => (
+      {labels.map((l, k) =>
+        l.masked ? (
+          <g key={k} className="dg-hidden-value">
+            <title>Tallet vises når du har prøvd selv</title>
+            <circle cx={r1(l.x)} cy={r1(l.y)} r={10} fill={pal.background} stroke={pal.line} strokeWidth={1.2} className="dg-hidden-chip" />
+            <text x={r1(l.x)} y={r1(l.y + 4.2)} textAnchor="middle" fontSize={12} fontWeight={600} fill={pal.muted} className="dg-hidden-text">
+              {l.text}
+            </text>
+          </g>
+        ) : (
         <text
           key={k}
           x={r1(l.x)}
           y={r1(l.y + 4.2)}
           textAnchor="middle"
           fontSize={12}
-          fontWeight={l.emphasis || l.masked ? 700 : 400}
-          fill={l.masked ? pal.muted : pal.fg}
+          fontWeight={l.emphasis ? 700 : 500}
+          fill={pal.fg}
           stroke={pal.background}
           strokeWidth={3}
           strokeLinejoin="round"
           paintOrder="stroke"
-          className={l.masked ? "dg-label dg-hidden-value" : "dg-label"}
+          className="dg-label"
         >
-          {l.masked && <title>Tallet vises når du har prøvd selv</title>}
           {l.text}
         </text>
-      ))}
+        ),
+      )}
     </g>
   );
 }
@@ -235,22 +255,22 @@ function SymbolView({ symbol, pal }: { symbol: ActionSymbol; pal: Palette }) {
   return symbol.kind === "N" ? <NSymbol {...props} /> : <VSymbol {...props} />;
 }
 
-function ForcePanelView({ panel, first, width, pal }: { panel: ForcePanel; first: boolean; width: number; pal: Palette }) {
+export function ForcePanelView({ panel, first, width, pal, header = true }: { panel: ForcePanel; first: boolean; width: number; pal: Palette; header?: boolean }) {
   const q = panel.kind;
   const color = pal[q];
   return (
     <g className={`dg-panel dg-panel-${q}`}>
-      <Header panel={panel} first={first} width={width} pal={pal} />
+      {header && <Header panel={panel} first={first} width={width} pal={pal} />}
       {!panel.zero && (
         <>
           <SketchView sketch={panel.sketch} pal={pal} />
           {panel.diagrams.map((d) => (
             <g key={d.member}>
-              <path d={pathOf(d.outline, true)} fill={color} fillOpacity={0.12} stroke="none" className={`dg-fill-${q}`} />
+              <path d={pathOf(d.outline, true)} fill={color} fillOpacity={0.12} stroke="none" className={`dg-fill-${q} dg-area`} />
               {d.hatch.length > 0 && (
-                <path d={d.hatch.map(([a, b]) => `M${r1(a.x)} ${r1(a.y)}L${r1(b.x)} ${r1(b.y)}`).join("")} stroke={color} strokeOpacity={0.45} strokeWidth={0.8} fill="none" className={`dg-stroke-${q}`} />
+                <path d={d.hatch.map(([a, b]) => `M${r1(a.x)} ${r1(a.y)}L${r1(b.x)} ${r1(b.y)}`).join("")} stroke={color} strokeOpacity={0.45} strokeWidth={0.8} fill="none" className={`dg-stroke-${q} dg-hatch`} />
               )}
-              <path d={pathOf(d.outline)} fill="none" stroke={color} strokeWidth={1.7} strokeLinejoin="round" className={`dg-stroke-${q}`} />
+              <path d={pathOf(d.outline)} fill="none" stroke={color} strokeWidth={1.7} strokeLinejoin="round" className={`dg-stroke-${q} dg-outline`} />
             </g>
           ))}
           {panel.symbols.map((s, k) => (
@@ -267,11 +287,25 @@ function ForcePanelView({ panel, first, width, pal }: { panel: ForcePanel; first
   );
 }
 
-function DeformedPanelView({ panel, first, width, pal, clipId }: { panel: DeformedPanel; first: boolean; width: number; pal: Palette; clipId: string }) {
+export function DeformedPanelView({
+  panel,
+  first,
+  width,
+  pal,
+  clipId,
+  header = true,
+}: {
+  panel: DeformedPanel;
+  first: boolean;
+  width: number;
+  pal: Palette;
+  clipId: string;
+  header?: boolean;
+}) {
   const c: Box = panel.clip;
   return (
     <g className="dg-panel dg-panel-deformed">
-      <Header panel={panel} first={first} width={width} pal={pal} />
+      {header && <Header panel={panel} first={first} width={width} pal={pal} />}
       <defs>
         <clipPath id={clipId}>
           <rect x={c.x0} y={c.y0} width={c.x1 - c.x0} height={c.y1 - c.y0} />

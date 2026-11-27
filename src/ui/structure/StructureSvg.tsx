@@ -460,7 +460,7 @@ export function StructureSvg(props: StructureSvgProps) {
         {dists.map((g) => {
           const mark = markOf(`load:${g.load.id}`);
           return (
-            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load", palette.load, mark, palette)}>
+            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load st-load-dist", palette.load, mark, palette)}>
               <line x1={r2(g.tailA.x)} y1={r2(g.tailA.y)} x2={r2(g.tailB.x)} y2={r2(g.tailB.y)} stroke="currentColor" strokeWidth={1.6} />
               {g.arrows.map((a, k) => (
                 <Arrow key={k} tail={a.tail} tip={a.tip} head={SMALL_HEAD} width={1.3} />
@@ -476,7 +476,7 @@ export function StructureSvg(props: StructureSvgProps) {
           const first = group[0]!;
           const mark = group.length === 1 ? markOf(`load:${first.load.id}`) : undefined;
           return (
-            <g key={first.load.id} {...look("st-load st-load-label", palette.load, mark, palette)}>
+            <g key={first.load.id} {...look("st-load st-load-label st-load-dist", palette.load, mark, palette)}>
               {distLabels(group, model, obstacles).map((l, k) => (
                 <Label key={k} at={l} lines={l.lines} palette={palette} up={l.up} bounds={viewport} />
               ))}
@@ -560,7 +560,7 @@ export function StructureSvg(props: StructureSvgProps) {
           const path = momentPath(g.center, g.load.M >= 0);
           const label = momentLabels.get(g.load.id)!;
           return (
-            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load", palette.load, markOf(`load:${g.load.id}`), palette)}>
+            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load st-load-moment", palette.load, markOf(`load:${g.load.id}`), palette)}>
               <path d={path.d} fill="none" stroke="currentColor" strokeWidth={2} />
               <ArrowHead tip={path.tip} dir={path.tangent} />
               <Label at={label.at} lines={label.lines} palette={palette} bounds={viewport} />
@@ -571,8 +571,8 @@ export function StructureSvg(props: StructureSvgProps) {
           const mark = markOf(`load:${g.load.id}`);
           const label = pointLabels.get(g.load.id)!;
           return (
-            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load", palette.load, mark, palette)}>
-              <Arrow tail={g.tail} tip={g.tip} width={2.2} />
+            <g key={g.load.id} data-entity={`load:${g.load.id}`} {...look("st-load st-load-point", palette.load, mark, palette)}>
+              <Arrow tail={g.tail} tip={g.tip} width={2.6} />
               <Label at={label.at} lines={label.lines} palette={palette} bounds={viewport} />
               {interactive && mark === "selected" && (
                 <circle cx={r2(g.tail.x)} cy={r2(g.tail.y)} r={4.5} fill={palette.bg} className="st-bg" stroke="currentColor" strokeWidth={1.6} />

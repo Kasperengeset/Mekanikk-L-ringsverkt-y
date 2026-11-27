@@ -14,6 +14,7 @@ import { anythingHidden, askedTargets, checkAttempt, hiddenValues, type AskedTar
 import type { Model } from "../../core/schema.js";
 import type { SolveResult } from "../../core/solver/index.js";
 import { symbolicUnits } from "../format.js";
+import { InfoIcon } from "../icons.js";
 import { useStore } from "../state/store.js";
 import { Controls } from "./Controls.js";
 import { CONVENTION_TEXT, expectedText, HIDDEN_EXPLANATION, parseNumberInput, summaryText, unitLabel, VERDICT_TEXT } from "./logic.js";
@@ -40,12 +41,19 @@ export function PedagogyPanel({ model, result }: { model: Model; result: SolveRe
   const numeric = targets.some((t) => t.components.length > 0);
 
   return (
-    <section className="pedagogy-panel">
+    <>
       <PredictionCard />
       {hasAsked && (
-        <>
-          <h3>Prøv selv</h3>
-          {anythingHidden(hidden) && <p className="pd-hidden-note">{HIDDEN_EXPLANATION}</p>}
+        <section className="card pedagogy-panel" aria-labelledby="try-title">
+          <h2 id="try-title" className="card-title">
+            Prøv selv
+          </h2>
+          {anythingHidden(hidden) && (
+            <div className="callout pd-hidden-note">
+              <InfoIcon />
+              <span>{HIDDEN_EXPLANATION}</span>
+            </div>
+          )}
           {result.status !== "ok" ? (
             <p className="muted">Svarene kan ikke sjekkes før konstruksjonen har en løsning.</p>
           ) : (
@@ -57,10 +65,10 @@ export function PedagogyPanel({ model, result }: { model: Model; result: SolveRe
               ))}
             </>
           )}
-        </>
+        </section>
       )}
       <Controls model={model} />
-    </section>
+    </>
   );
 }
 
@@ -97,7 +105,7 @@ function DiagramsTarget({ target, attempt }: { target: AskedTarget; attempt: Att
       ) : (
         <>
           <p className="muted">Tegn diagrammene selv først. Formen ser du allerede; tallene vises når du har tegnet.</p>
-          <button type="button" className="pd-primary" onClick={() => recordAttempt(target.index, { values: null, at: Date.now() })}>
+          <button type="button" className="primary pd-primary pd-wide" onClick={() => recordAttempt(target.index, { values: null, at: Date.now() })}>
             Jeg har tegnet diagrammene selv – vis tallene
           </button>
         </>
@@ -160,7 +168,7 @@ function NumericTarget({ target, model, attempt, draft, onDraft }: TargetProps) 
       })}
       {error && <p className="pd-error">{error}</p>}
       <div className="pd-actions">
-        <button type="submit" className="pd-primary">
+        <button type="submit" className="primary pd-primary">
           Sjekk svaret
         </button>
         {check && attempt?.values && (

@@ -27,7 +27,7 @@ function layout(m: Model, extra: { hidden?: ReturnType<typeof hiddenValues>; hig
 const forcePanel = (panels: Panel[], kind: "N" | "V" | "M") => panels.find((p): p is ForcePanel => p.kind === kind)!;
 const deformedPanel = (panels: Panel[]) => panels.find((p): p is DeformedPanel => p.kind === "deformed")!;
 /** Stiene som tegner formen (fyll, skravur og kurve), i rekkefølge. */
-const shapePaths = (svg: string) => [...svg.matchAll(/<path d="([^"]+)"[^>]*class="dg-(?:fill|stroke)-[NVM]"/g)].map((m) => m[1]);
+const shapePaths = (svg: string) => [...svg.matchAll(/<path d="([^"]+)"[^>]*class="dg-(?:fill|stroke)-[NVM](?: [^"]*)?"/g)].map((m) => m[1]);
 /** Markupen til ett panel (fra panelets gruppe til neste panel). */
 const panelMarkup = (svg: string, kind: string) => svg.split(/(?=<g class="dg-panel )/).find((s) => s.startsWith(`<g class="dg-panel dg-panel-${kind}"`)) ?? "";
 

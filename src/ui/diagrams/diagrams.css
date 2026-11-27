@@ -1,8 +1,5 @@
 /* Diagrammene (spor B). Fargene i DiagramsSvg er faste standardfarger (for pnpm snapshot);
-   her overstyres de med fargevariablene fra styles.css, så lys og mørk modus følger appen. */
-.diagrams {
-  border-top: 1px solid var(--line);
-}
+   her overstyres de med fargevariablene fra styles.css via klassenavnene. */
 .diagrams .dg-fill-N {
   fill: var(--diagram-N);
 }
@@ -11,6 +8,9 @@
 }
 .diagrams .dg-fill-M {
   fill: var(--diagram-M);
+}
+.diagrams .dg-area {
+  fill-opacity: 0.16;
 }
 .diagrams .dg-stroke-N,
 .diagrams .dg-symbol-N rect,
@@ -24,6 +24,12 @@
 }
 .diagrams .dg-stroke-M {
   stroke: var(--diagram-M);
+}
+.diagrams .dg-outline {
+  stroke-width: 2.4px;
+}
+.diagrams .dg-hatch {
+  stroke-opacity: 0.3;
 }
 .diagrams .dg-symbol-N .dg-head {
   fill: var(--diagram-N);
@@ -43,6 +49,7 @@
 }
 .diagrams .dg-label {
   stroke: var(--bg);
+  fill: var(--fg);
 }
 .diagrams .dg-muted {
   fill: var(--muted);
@@ -54,42 +61,19 @@
   stroke: var(--line);
 }
 
-/* Verktøylinjen */
-.dg-chip {
-  cursor: pointer;
-}
-.dg-chip rect {
-  fill: var(--bg);
-  stroke: var(--line);
-}
-.dg-chip text {
-  fill: var(--fg);
-  user-select: none;
-}
-.dg-chip.active rect {
-  fill: var(--accent);
-  stroke: var(--accent);
-}
-.dg-chip.active text {
-  fill: var(--bg);
-}
-.dg-chip.disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-.dg-chip:focus {
-  outline: none;
-}
-.dg-chip:focus-visible rect {
-  stroke: var(--accent);
-  stroke-width: 2;
-}
-
-/* Skjulte tall og utheving (uke 4) */
+/* Skjulte tall: runde merker med «?» */
 .diagrams .dg-hidden-value {
-  fill: var(--muted);
   cursor: help;
 }
+.diagrams .dg-hidden-chip {
+  fill: var(--bg);
+  stroke: #cfc3b1;
+}
+.diagrams .dg-hidden-text {
+  fill: var(--muted);
+}
+
+/* Utheving fra agenten */
 .diagrams .dg-highlight-stroke {
   stroke: var(--uncertain);
 }
@@ -113,4 +97,68 @@
   .diagrams .dg-highlight-ring {
     animation: none;
   }
+}
+
+/* Verktøylinjen over diagrammene */
+.dg-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+}
+.dg-toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dg-toolbar-label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Kortene */
+.dg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dg-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.dg-swatch-N {
+  background: var(--diagram-N);
+}
+.dg-swatch-V {
+  background: var(--diagram-V);
+}
+.dg-swatch-M {
+  background: var(--diagram-M);
+}
+.dg-swatch-deformed {
+  background: var(--deformed);
+}
+.dg-notes {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.dg-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dg-note.warning {
+  color: var(--warning);
+  font-weight: 600;
+}
+.dg-figure {
+  margin-top: 8px;
+  overflow: visible;
 }
