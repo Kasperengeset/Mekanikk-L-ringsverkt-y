@@ -49,8 +49,9 @@ pnpm dev                    # frontend (plassholder til uke 3)
 - **Uke 4:** veilederen (`/api/agent`) med verktøyene get_state, set_param, add_control, highlight og
   ask_prediction; «Prøv selv» der tallene for det oppgaven spør om vises først etter et eget forsøk;
   glidebrytere og spådomskort. Prøvd ende til ende med ekte nøkkel.
-- **Vercel:** klart til publisering (`vercel.json`, `pnpm check:api` i CI). Fremgangsmåte og
-  miljøvariabler står i `docs/deploy.md`.
+- **Vercel:** klart til publisering (`vercel.json`, `pnpm check:api` i CI). Tilgangskoder per
+  testbruker (`ACCESS_CODES`, personlig lenke med `?kode=`) holder API-et lukket for andre.
+  Fremgangsmåte og miljøvariabler står i `docs/deploy.md`.
 - **Neste:** første deploy, 5–10 testbrukere og betalingstest (Port 4).
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter

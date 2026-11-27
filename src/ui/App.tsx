@@ -3,6 +3,7 @@
  *   A: structure/StructureView   B: diagrams/DiagramsView   C: upload/UploadPanel og upload/ConfirmPanel
  */
 import { useEffect } from "react";
+import { AccessGate } from "./access/AccessGate.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
 import { fitViewport } from "./geometry.js";
@@ -47,6 +48,7 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <h1>Mekanikk-intuisjon</h1>
+        <AccessGate />
       </header>
       <main className="workspace">
         <section className="canvas" ref={canvasRef}>

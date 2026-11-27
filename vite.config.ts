@@ -98,7 +98,7 @@ function devApi(): Plugin {
     configureServer(server) {
       if (process.env.VITEST) return;
       // En verdi som allerede er satt i skallet, går foran .env (som i eval-skriptet).
-      const env = loadEnv(server.config.mode, server.config.envDir, ["ANTHROPIC_", "INTERPRET_", "AGENT_"]);
+      const env = loadEnv(server.config.mode, server.config.envDir, ["ANTHROPIC_", "INTERPRET_", "AGENT_", "ACCESS_"]);
       for (const [key, value] of Object.entries(env)) if (value && !process.env[key]) process.env[key] = value;
       server.middlewares.use("/api/interpret", (req, res) => void serveApi(server, "/api/interpret.ts", req, res));
       server.middlewares.use("/api/agent", (req, res) => void serveApi(server, "/api/agent.ts", req, res));

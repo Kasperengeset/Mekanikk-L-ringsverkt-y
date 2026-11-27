@@ -5,6 +5,7 @@
  * Samtalen nullstilles når en ny oppgave lastes inn (se isNewProblem nederst).
  */
 import { create } from "zustand";
+import { requireAccess } from "../api/access.js";
 import { useStore } from "../state/store.js";
 import { createAgentTransport, type AgentTransport } from "./client.js";
 import { MAX_ROUNDS, runAgentLoop, type LoopOutcome } from "./loop.js";
@@ -43,6 +44,8 @@ interface AgentState {
 
   /** Sender en melding fra studenten og kjører løkken til veilederen er ferdig. Ignoreres mens veilederen arbeider. */
   send(text: string): Promise<LoopOutcome | undefined>;
+  /** Kjører løkken på nytt når samtalen slutter med en melding som ikke fikk svar (f.eks. etter at tilgangskoden er skrevet inn). */
+  retry(): Promise<LoopOutcome | undefined>;
   /** Stopper strømmen og eventuelle ventende spådommer. */
   abort(): void;
   /** Tømmer samtalen (avbryter det som pågår). */
@@ -85,25 +88,14 @@ let controller: AbortController | null = null;
 /** Øker ved reset, så en løkke fra en gammel samtale ikke skriver inn i den nye. */
 let generation = 0;
 
-export const useAgentStore = create<AgentState>()((set, get) => ({
-  history: [],
-  entries: [],
-  activity: null,
-  usage: ZERO_USAGE,
-  costUsd: 0,
-  transport: createAgentTransport(),
-  maxRounds: MAX_ROUNDS,
-
-  async send(text) {
-    const trimmed = text.trim();
-    if (!trimmed || get().activity) return undefined;
+export const useAgentStore = create<AgentState>()((set, get) => {
+  /** Kjører løkken fra en samtale som slutter med en melding fra studenten. */
+  async function run(history: AgentMessage[]): Promise<LoopOutcome> {
     const gen = generation;
     const live = () => gen === generation;
     const ctrl = new AbortController();
     controller = ctrl;
-
-    const history = appendStudentText(get().history, trimmed);
-    set({ history, entries: [...get().entries, { id: nextId++, kind: "student", text: trimmed }], activity: "thinking" });
+    set({ activity: "thinking" });
 
     /** Veilederens tekst i runden som pågår, eller null før første tekst. */
     let tutorId: number | null = null;
@@ -181,27 +173,52 @@ export const useAgentStore = create<AgentState>()((set, get) => ({
             ]),
       ],
     }));
+    if (outcome.status === "error" && outcome.code === "access") requireAccess(outcome.message, () => void get().retry());
     return outcome;
-  },
+  }
 
-  abort() {
-    controller?.abort();
-  },
+  return {
+    history: [],
+    entries: [],
+    activity: null,
+    usage: ZERO_USAGE,
+    costUsd: 0,
+    transport: createAgentTransport(),
+    maxRounds: MAX_ROUNDS,
 
-  reset() {
-    generation++;
-    controller?.abort();
-    controller = null;
-    set({ history: [], entries: [], activity: null, usage: ZERO_USAGE, costUsd: 0 });
-  },
+    async send(text) {
+      const trimmed = text.trim();
+      if (!trimmed || get().activity) return undefined;
+      const history = appendStudentText(get().history, trimmed);
+      set({ history, entries: [...get().entries, { id: nextId++, kind: "student", text: trimmed }] });
+      return run(history);
+    },
 
-  newConversation() {
-    get().reset();
-    const app = useStore.getState();
-    app.setHighlights([]);
-    app.setDiagramHighlight(null);
-  },
-}));
+    async retry() {
+      const history = get().history;
+      if (get().activity || history.at(-1)?.role !== "user") return undefined;
+      return run(history);
+    },
+
+    abort() {
+      controller?.abort();
+    },
+
+    reset() {
+      generation++;
+      controller?.abort();
+      controller = null;
+      set({ history: [], entries: [], activity: null, usage: ZERO_USAGE, costUsd: 0 });
+    },
+
+    newConversation() {
+      get().reset();
+      const app = useStore.getState();
+      app.setHighlights([]);
+      app.setDiagramHighlight(null);
+    },
+  };
+});
 
 type AppState = ReturnType<typeof useStore.getState>;
 

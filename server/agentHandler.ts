@@ -50,6 +50,8 @@ export function agentConfigFromEnv(env: Record<string, string | undefined> = pro
 export interface AgentHandlerDeps {
   /** Kalles per forespørsel etter at konfigurasjonen er sjekket. */
   createClient(): Anthropic;
+  /** Tilgangskontroll før forespørselen leses; en melding her gir 401 med koden access (se server/access.ts). */
+  authorize?(req: Request): string | undefined;
   config?: Partial<AgentConfig>;
   /** Sjekkes før strømmen starter; en melding her gir 500 med koden config (f.eks. manglende API-nøkkel). */
   checkConfig?(): string | undefined;
@@ -128,6 +130,8 @@ export function createAgentHandler(deps: AgentHandlerDeps): (req: Request) => Pr
 
   return async function handle(req: Request): Promise<Response> {
     if (req.method !== "POST") return jsonError(405, "bad_request", "Bruk POST.");
+    const denied = deps.authorize?.(req);
+    if (denied) return jsonError(401, "access", denied);
 
     const tooLarge = () => jsonError(413, "too_large", "Samtalen er blitt for lang. Start en ny samtale.");
     if (Number(req.headers.get("content-length") ?? 0) > MAX_REQUEST_BYTES) return tooLarge();
