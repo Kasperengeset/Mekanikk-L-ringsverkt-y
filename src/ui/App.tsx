@@ -6,6 +6,9 @@
  * inne i konstruksjonskortet, og høyden følger formen på konstruksjonen.
  */
 import { useEffect } from "react";
+import { ForceSystemView } from "./forces/ForceSystemView.js";
+import { LiveBar } from "./live/LiveBar.js";
+import { useLiveFollow } from "./live/live.js";
 import { CutCard } from "./cut3d/CutCard.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
@@ -27,7 +30,10 @@ export function App() {
   const loadModel = useStore((s) => s.loadModel);
   const hasCut = useStore((s) => s.cut !== null);
   const result = useSolveResult();
+  const forces = useStore((s) => s.forces);
   const [figureRef, size] = useElementSize<HTMLDivElement>();
+  const [forcesRef, forcesSize] = useElementSize<HTMLElement>();
+  useLiveFollow();
 
   useEffect(() => {
     // Fra Claude: modellen i lenken (#m=…). Ellers et eksempel (?eksempel=…).
@@ -56,7 +62,18 @@ export function App() {
       </SiteHeader>
       <div className="workspace">
         <main className="canvas">
-          {model && result ? (
+          <LiveBar />
+          {!model && forces ? (
+            <section className="card figure-card" aria-label="Kraftsystemet" ref={forcesRef}>
+              <div className="card-head">
+                <h2 className="card-title">Kraftsystem fra Claude</h2>
+                <button type="button" className="primary" onClick={() => useStore.getState().showForces(null)}>
+                  Ny oppgave
+                </button>
+              </div>
+              <ForceSystemView result={forces.result} forceUnit={forces.units.force} lengthUnit={forces.units.length} width={forcesSize.width - 48} />
+            </section>
+          ) : model && result ? (
             <>
               <section className="card figure-card" aria-label="Konstruksjonen">
                 <div ref={figureRef}>{viewport && <StructureView model={model} result={result} viewport={viewport} />}</div>

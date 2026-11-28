@@ -98,6 +98,37 @@ export async function oauthDecide(authorizationId: string, approve: boolean): Pr
   return { url: data.redirect_url };
 }
 
+// ---------------------------------------------------------------- direktekobling fra Claude
+
+/**
+ * Følger studentens siste resultat fra Claude (tabellen live_views): først det som ligger der, så hver ny
+ * rad i sanntid. Gir en funksjon som stopper.
+ */
+export function followLiveViews(userId: string, onPayload: (payload: unknown, createdAt: string, initial: boolean) => void): () => void {
+  const sb = supabase();
+  if (!sb) return () => {};
+  let stopped = false;
+  void sb
+    .from("live_views")
+    .select("payload,created_at")
+    .maybeSingle()
+    .then(({ data }) => {
+      const row = data as { payload?: unknown; created_at?: string } | null;
+      if (!stopped && row?.payload && row.created_at) onPayload(row.payload, row.created_at, true);
+    });
+  const channel = sb
+    .channel(`live-${userId}`)
+    .on("postgres_changes", { event: "*", schema: "public", table: "live_views", filter: `user_id=eq.${userId}` }, (msg) => {
+      const row = msg.new as { payload?: unknown; created_at?: string } | undefined;
+      if (!stopped && row?.payload && row.created_at) onPayload(row.payload, row.created_at, false);
+    })
+    .subscribe();
+  return () => {
+    stopped = true;
+    void sb.removeChannel(channel);
+  };
+}
+
 // ---------------------------------------------------------------- konto
 
 export interface AccountStatus {

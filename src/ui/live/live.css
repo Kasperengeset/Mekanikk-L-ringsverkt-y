@@ -1,0 +1,26 @@
+.live-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 14px;
+  color: var(--fg-soft);
+}
+.live-bar .btn-link {
+  margin-left: auto;
+  color: var(--muted);
+}
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.live-bar.on .live-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-bg);
+}

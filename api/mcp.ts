@@ -7,18 +7,21 @@
  */
 import { mechanics } from "../server/modules/mechanics/tools.js";
 import { createEntitlements } from "../server/platform/entitlements.js";
+import { createLiveSync } from "../server/platform/live.js";
 import { createMcpHandler } from "../server/platform/mcp.js";
 import { createTokenVerifier } from "../server/platform/oauth.js";
 import { supabaseFromEnv } from "../server/platform/supabase.js";
 
 const supabase = supabaseFromEnv(process.env);
 const entitlements = createEntitlements(process.env);
+const live = createLiveSync(process.env);
 
 const handle = createMcpHandler({
   modules: [mechanics],
   env: process.env,
   ...(supabase ? { verifyToken: createTokenVerifier(supabase.url) } : {}),
   ...(entitlements ? { entitlements } : {}),
+  ...(live ? { live } : {}),
 });
 
 export const POST = handle;

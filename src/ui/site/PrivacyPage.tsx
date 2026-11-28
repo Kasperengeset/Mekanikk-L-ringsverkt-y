@@ -45,9 +45,10 @@ export function PrivacyPage() {
 
           <h2>Når du bruker oss i Claude</h2>
           <p>
-            Claude leser oppgaven din hos Anthropic, under din egen Claude-konto og Anthropics vilkår. Til oss sender Claude bare konstruksjonen (mål,
-            opplagre, laster) når den bruker verktøyene våre. Vi regner ut svaret og lagrer verken konstruksjonen eller samtalen. Lenken «Åpne i
-            moment.no» har konstruksjonen i selve adressen, så den lagres heller ikke hos oss.
+            Claude leser oppgaven din hos Anthropic, under din egen Claude-konto og Anthropics vilkår. Til oss sender Claude bare konstruksjonen eller
+            kreftene (mål, opplagre, laster) når den bruker verktøyene våre. Vi lagrer ikke samtalen. For at appen her skal kunne vise det du
+            regner på, lagrer vi <strong>det siste resultatet</strong> på brukeren din: én rad som overskrives ved neste oppgave, slettes etter ett døgn
+            og bare kan leses av deg. Lenken «Åpne i appen» har konstruksjonen i selve adressen.
           </p>
 
           <h2>Drift</h2>
