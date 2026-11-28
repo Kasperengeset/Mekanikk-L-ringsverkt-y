@@ -3,8 +3,9 @@
  * (ingen bundling), og resultatet lastes som ESM i ren Node. Fanger relative importer uten .js og
  * JSON-importer uten `with { type: "json" }`, som ellers først feiler etter en deploy.
  *
- * Kjøres med ren `node` (ikke tsx, som ville skjult nettopp disse feilene). Supabase-variablene fjernes, så
- * MCP-serveren kjører åpen (som lokalt) og ingenting går mot nettverket.
+ * Kjøres med ren `node` (ikke tsx, som ville skjult nettopp disse feilene). ANTHROPIC_API_KEY og
+ * Supabase-variablene fjernes, så tolkningen og veilederen stopper ved konfigurasjonssjekken, MCP-serveren
+ * kjører åpen (som lokalt), og ingenting går mot nettverket.
  */
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
@@ -16,9 +17,21 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const work = mkdtempSync(join(tmpdir(), "check-api-"));
 const out = join(work, "out");
 for (const key of Object.keys(process.env)) if (key.includes("SUPABASE")) delete process.env[key];
+delete process.env.ANTHROPIC_API_KEY;
+delete process.env.ACCESS_CODES;
+
+/** Tolkningen og veilederen: en gyldig forespørsel stopper ved konfigurasjonssjekken (ingen nøkkel), før Claude. */
+const stopsAtConfig = (name, body) => ({
+  request: () => new Request(`http://localhost/api/${name}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }),
+  method: "POST",
+  ok: (res, json) => res.status === 500 && json?.error?.code === "config",
+  describe: (json) => `svarer (${json.error.message})`,
+});
 
 /** Én forespørsel per funksjon og hva svaret skal være. */
 const checks = {
+  agent: stopsAtConfig("agent", { messages: [{ role: "user", content: "Hei" }] }),
+  interpret: stopsAtConfig("interpret", { text: "Fritt opplagt bjelke, L = 4 m, jevnt fordelt last q = 5 kN/m." }),
   mcp: {
     request: () =>
       new Request("http://localhost/mcp", {

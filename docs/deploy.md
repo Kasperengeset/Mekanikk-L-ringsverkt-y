@@ -3,8 +3,9 @@
 Appen består av to deler:
 
 - **Statiske filer** fra `pnpm build` (mappen `dist/`): forsiden, verktøyet, innlogging, konto og samtykke.
-- **To serverløse funksjoner:** `api/mcp.ts` (MCP-serveren på `/mcp`) og `api/oauth-protected-resource.ts`
-  (OAuth-metadata på `/.well-known/…`). Node-runtime med standard `Request`/`Response`. Se [mcp.md](mcp.md).
+- **Serverløse funksjoner:** `api/interpret.ts` (tolkning) og `api/agent.ts` (veilederen) for webappen, som
+  strømmer svaret som Server-Sent Events, og `api/mcp.ts` (MCP-serveren på `/mcp`) med
+  `api/oauth-protected-resource.ts` (OAuth-metadata), for studenter som bruker oss fra Claude. Se [mcp.md](mcp.md).
 
 Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger ikke settes i dashbordet.
 
@@ -14,10 +15,16 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
    `Kasperengeset/Mekanikk-L-ringsverkt-y`.
 2. Legg inn miljøvariablene under (**Settings → Environment Variables**), både for Production og Preview.
 3. Trykk **Deploy**. Hver push lager deretter en preview-deploy, og `main` går til produksjon.
-4. Prøv: åpne `<url>/app?eksempel=bjelke`, og legg til `<url>/mcp` som connector i Claude.
+4. Prøv: åpne `<url>/app?eksempel=bjelke` (gratis), last opp en oppgave (ca. 0,05 USD per tolkning), spør
+   veilederen, og legg til `<url>/mcp` som connector i Claude.
 
 | Variabel | Verdi | Merknad |
 | --- | --- | --- |
+| `ANTHROPIC_API_KEY` | nøkkelen | Påkrevd for tolkning og veileder i webappen. MCP-serveren trenger den ikke. |
+| `ACCESS_CODES` | `ola-7f3k, kari-9x2m` | Valgfri. Tilgangskoder for testbrukere (slipper forbi innlogging og kvote). |
+| `INTERPRET_MODEL`, `INTERPRET_EFFORT`, `INTERPRET_CONSISTENCY` | `claude-opus-5-5`, `high`, `low_confidence` | Valgfri. |
+| `AGENT_MODEL`, `AGENT_EFFORT` | `claude-opus-5-5`, `medium` | Valgfri. |
+| `QUOTA_INTERPRET_PER_WEEK`, `QUOTA_AGENT_PER_WEEK` | `10`, `60` | Valgfri. Gratis tolkninger og spørsmål til veilederen per uke. |
 | `ENABLE_EXPERIMENTAL_COREPACK` | `1` | Vercel bruker da pnpm 11.8.0 fra `packageManager` i `package.json`, samme som lokalt og i CI. |
 | `VITE_SUPABASE_URL` | `https://<prosjekt>.supabase.co` | Innlogging (se [auth.md](auth.md)) og MCP-tokens. Uten den er MCP-serveren åpen. |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Offentlig nøkkel; havner i nettleseren. |
@@ -26,17 +33,19 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
 | `PUBLIC_URL` | `https://moment.no` | Valgfri. Fast offentlig adresse i lenker og OAuth-metadata. |
 | `VITE_CONTACT_EMAIL` | adressen | Valgfri. Står på personvernsiden for sletting av bruker. |
 
-`ANTHROPIC_API_KEY` og `ACCESS_CODES` brukes ikke lenger av appen (Claude kjører hos studenten, se
-[mcp.md](mcp.md)) og kan slettes i Vercel.
-
 ## Kostnad
 
-Appen kaller ikke Claude selv lenger; Claude-bruken betales av studentens eget abonnement. Det som koster
-hos oss, er Vercel og Supabase, begge på gratisplan så langt.
+- Webappen kaller Claude med din nøkkel: ca. 0,05 USD per tolkning og opptil ca. 0,08 USD per veiledersvar.
+  Ukekvoten per bruker holder taket. Lag en egen nøkkel i Anthropic Console med månedlig forbruksgrense.
+- Via MCP (Claude hos studenten) betaler studentens eget abonnement for Claude; hos oss koster det bare
+  Vercel og Supabase.
 
 ## Grenser
 
-- **Varighet:** `maxDuration` er 30 s. Verktøyene svarer på millisekunder; taket er bare en sikring.
+- **Størrelse på forespørselen:** Vercel avviser forespørsler over 4,5 MB. Klienten holder bildene under
+  ca. 4 MB samlet (base64), se `imageByteBudget` i `src/ui/upload/logic.ts`.
+- **Varighet:** `maxDuration` er 300 s (tolkning med self-consistency kan ta tid). MCP-verktøyene svarer på
+  millisekunder.
 - **Kursmaterialet** (`testset/ov*`, øvinger og løsningsforslag) er utelatt fra både git og
   `vercel deploy` (`.gitignore` og `.vercelignore`), og kommer aldri med i en deploy.
 

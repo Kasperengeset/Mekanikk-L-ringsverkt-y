@@ -2,8 +2,12 @@
 import { useEffect, useState } from "react";
 import { accountStatus, useAuth, type AccountStatus } from "../auth/auth.js";
 import { LoginForm } from "../auth/LoginForm.js";
-import { connectorUrl } from "../start/StartPanel.js";
 import { SiteFooter, SiteHeader } from "./SiteHeader.js";
+
+/** Adressen studentene legger til som connector i Claude. */
+export function connectorUrl(): string {
+  return typeof window === "undefined" ? "https://moment.no/mcp" : `${window.location.origin}/mcp`;
+}
 
 const FREE_TASKS = Number((import.meta.env as Record<string, string | undefined>).VITE_QUOTA_TASKS_PER_WEEK) || 5;
 
