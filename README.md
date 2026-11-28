@@ -1,18 +1,18 @@
 # Mekanikk-intuisjonsverktøy
 
-Interaktivt læringsverktøy for 2D-statikk. Studenten laster opp en oppgave. En LLM lager en
-strukturert modell av den, og alt som vises, regnes deterministisk fra modellen.
-Spesifikasjonen ligger i `docs/spesifikasjon.pdf`.
+Interaktivt læringsverktøy for 2D-statikk, brukt fra studentens egen Claude som MCP-connector
+(`/mcp`, se `docs/mcp.md`). Claude tolker oppgaven; alle tall regnes deterministisk av løseren her,
+og webappen viser konstruksjonen med diagrammer og snitt i 3D. Opprinnelig spesifikasjon: `docs/spesifikasjon.pdf`.
 
 ## Kom i gang
 
 ```
 pnpm install
-cp .env.example .env        # fyll inn ANTHROPIC_API_KEY
+cp .env.example .env        # Supabase-variablene er valgfrie lokalt
 pnpm test                   # enhetstester
 pnpm testset:check          # sjekker fasitmodellene i testset/
-pnpm eval:interpret --examples --consistency never   # tolkning av eksemplene (koster litt)
-pnpm dev                    # frontend (plassholder til uke 3)
+pnpm dev                    # webappen og MCP-serveren på http://localhost:5199/mcp
+pnpm eval:interpret --examples --consistency never   # måling av tolkningen (koster litt, trenger ANTHROPIC_API_KEY)
 ```
 
 ## Struktur
@@ -25,14 +25,17 @@ pnpm dev                    # frontend (plassholder til uke 3)
 | `src/core/compare.ts` | Sammenligner to modeller entitet for entitet (eval og self-consistency). |
 | `src/core/consistency.ts` | Velger tolkningen flest er enige i, og markerer uenighet. |
 | `src/core/solver/` | Løseren: direkte stivhetsmetode, ledd, skrå opplagre, eksakte snittkrefter, mekanismesjekk og likevektskontroll. |
+| `src/core/forces.ts` | Kraftsystemer: dekomponering, resultant, moment og likevekt. |
+| `src/core/cut.ts`, `stress.ts` | Snitt og frie legemer; spenninger σ og τ i tverrsnittet. |
+| `server/platform/` | Generisk MCP-lag: Streamable HTTP, OAuth-ressursserver (Supabase), abonnement og kvote. |
+| `server/modules/mechanics/` | Mekanikk-verktøyene (`force_system`, `solve_structure`). |
+| `api/` | Vercel-funksjonene: `mcp.ts` og OAuth-metadataene. |
 | `src/pdf/render.ts` | PDF-sider til bilder, felles for nettleser og eval. |
 | `eval/anastruct/` | Uavhengig referanse for løseren (Python, anaStruct). |
-| `src/core/llm/` | Prompter og verktøydefinisjoner. |
-| `server/llm/` | Adapterlaget mot LLM-leverandøren (`claude.ts`) og pristabell. |
-| `server/interpret.ts` | Tolkningsløpet med valgfri self-consistency. |
-| `eval/` | Eval-skriptet for tolkningen og innlesing av testsettet. |
+| `src/core/llm/`, `server/llm/`, `server/interpret.ts` | Tolkning med Claude, brukt bare av målingen i `eval/` (appen kaller ikke Claude). |
+| `eval/` | Måling av tolkningen og innlesing av testsettet. |
 | `testset/` | Oppgaver med fasitmodeller. Se `testset/README.md`. |
-| `src/ui/` | Frontend (uke 3). |
+| `src/ui/` | Webappen: forside, verktøyet (`/app`), innlogging, konto, OAuth-samtykke. |
 
 ## Status
 
@@ -56,7 +59,10 @@ pnpm dev                    # frontend (plassholder til uke 3)
   kort, mørkebrunt og oransje, Inter og Newsreader. Skriftene ligger i `public/fonts/` (OFL), så appen
   henter ingenting fra Google. Bare lyst tema.
 - **Publisert:** https://mekanikk-l-ringsverkt-y.vercel.app
-- **Neste:** 5–10 testbrukere og betalingstest (Port 4).
+- **Omlegging til MCP (milepæl 1):** LLM-kallene i backenden er fjernet. `/mcp` er en MCP-server med
+  OAuth mot Supabase, `force_system` og `solve_structure`, ukekvote og abonnement. Webappen er visning
+  uten AI. Se `docs/mcp.md`.
+- **Neste:** visning i chatten (MCP Apps), koblede visninger, stegmotor, Mohrs sirkel (milepæl 2–5).
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter
 `python3 -m venv .venv && .venv/bin/pip install -r eval/anastruct/requirements.txt`.

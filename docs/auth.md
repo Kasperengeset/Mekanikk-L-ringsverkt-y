@@ -1,26 +1,24 @@
 # Innlogging og kvote (Supabase)
 
 Studentene logger inn med en lenke på e-post (uten passord) eller med Google. Første innlogging oppretter
-brukeren. Eksemplene virker uten bruker; egne oppgaver og veilederen krever innlogging og trekker fra en
-gratis ukekvote. Testbrukere med tilgangskode (`ACCESS_CODES`) slipper forbi uten kvote.
+brukeren. Den samme innloggingen brukes når Claude kobles til MCP-serveren (OAuth, se [mcp.md](mcp.md)).
+Eksemplene i webappen virker uten bruker.
 
 Uten `VITE_SUPABASE_URL` og `VITE_SUPABASE_PUBLISHABLE_KEY` er innloggingen av og alt virker som før.
 
 ## Slik henger det sammen
 
-- Nettleseren (`src/ui/auth/auth.ts`) logger inn med Supabase Auth og sender tokenet i `Authorization`.
-- Serveren (`server/gate.ts`) sjekker tokenet mot Supabase og trekker kvoten med funksjonen
-  `consume_quota` (`supabase/migrations/0001_usage.sql`). Bare den hemmelige nøkkelen kan kalle den.
-- Én tolkning teller 1. Et spørsmål fra studenten til veilederen teller 1. Verktøyrundene veilederen
-  tar på egen hånd teller mot et høyere tak (7 × spørsmålskvoten), så en løpsk samtale stopper.
+- Nettleseren (`src/ui/auth/auth.ts`) logger inn med Supabase Auth.
+- Claude får et OAuth-token fra Supabase (OAuth 2.1 Server) etter at studenten har godkjent på
+  `/oauth/samtykke`. MCP-serveren validerer tokenet og teller oppgaver (`server/platform/`).
 - Uken går fra mandag til søndag, norsk tid.
-- Feiler kontakten med Supabase, stoppes forespørselen (503) i stedet for å bruke Claude uten kvote.
+- Feiler kontakten med Supabase, nektes verktøykallet i stedet for å slippe forbi kvoten.
 
 ## Oppsett (én gang)
 
 1. **Prosjekt.** Opprett et prosjekt på supabase.com. Velg en region i EU (f.eks. Stockholm eller
    Frankfurt); personvernsiden sier at dataene ligger i EU.
-2. **Tabellen og funksjonen.** Åpne SQL Editor og kjør hele `supabase/migrations/0001_usage.sql`.
+2. **Tabellene og funksjonene.** Åpne SQL Editor og kjør migrasjonene i `supabase/migrations/` i rekkefølge.
 3. **Nøklene.** Under Project Settings → API keys: kopier *Project URL*, en *publishable key* og en
    *secret key*.
 4. **Adressene.** Under Authentication → URL Configuration:
@@ -40,12 +38,11 @@ Uten `VITE_SUPABASE_URL` og `VITE_SUPABASE_PUBLISHABLE_KEY` er innloggingen av o
 ## Sjekk at det virker
 
 - Forsiden viser «Logg inn» øverst til høyre.
-- `/app`: opplastingen ber om innlogging; eksemplene virker uten.
-- Logg inn med e-post; lenken åpner `/app` innlogget, og e-postadressen står øverst.
-- Tolk en oppgave; i Supabase (Table Editor → usage) står det en rad med `interpret` og `used = 1`.
-- Uten innlogging svarer API-et 401 med koden `login`:
-  `curl -s -X POST https://…/api/interpret -H 'content-type: application/json' -d '{}'`
+- Logg inn med e-post; lenken åpner `/app` innlogget, og e-postadressen står øverst (lenke til `/konto`).
+- Uten token svarer `/mcp` 401 med `WWW-Authenticate: Bearer resource_metadata=…`:
+  `curl -si -X POST https://…/mcp -H 'content-type: application/json' -d '{}'`
 
 ## Slette en bruker
 
-Authentication → Users → slett brukeren. Raden i `usage` slettes automatisk (`on delete cascade`).
+Authentication → Users → slett brukeren. Radene i `usage`, `task_usage` og `subscriptions` slettes
+automatisk (`on delete cascade`).

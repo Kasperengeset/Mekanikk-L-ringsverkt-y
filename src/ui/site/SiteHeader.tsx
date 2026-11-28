@@ -25,9 +25,9 @@ export function SiteHeader({ children }: { children?: ReactNode }) {
           )}
           {status === "signedIn" ? (
             <span className="site-account">
-              <span className="site-email" title={email}>
+              <a className="site-email" href="/konto" onClick={linkClick("/konto")} title={email}>
                 {email}
-              </span>
+              </a>
               <button type="button" className="btn-link" onClick={() => void signOut().then(() => path === "/logg-inn" && navigate("/"))}>
                 Logg ut
               </button>

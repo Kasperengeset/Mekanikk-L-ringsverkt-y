@@ -10,12 +10,13 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { ForceSystemInput } from "../src/core/forces.js";
 import { Model } from "../src/core/schema.js";
 import type { ImageMediaType, InterpretInput } from "../server/llm/adapter.js";
 import { renderPdfInNode } from "../server/pdf.js";
 
 export const Meta = z.strictObject({
-  category: z.enum(["beam", "frame", "truss"]),
+  category: z.enum(["beam", "frame", "truss", "force_system"]),
   source: z.string().describe("Hvor oppgaven er hentet fra, f.eks. 'TKT4116 eksamen V2024 oppg. 2'."),
   example: z.boolean().default(false).describe("true for eksempler som ikke teller i testsettet."),
   pages: z.array(z.number().int().positive()).optional().describe("Sidene i PDF-en som sendes til tolkningen, 1-basert. Standard: alle."),
@@ -43,8 +44,30 @@ const MEDIA_TYPES: Record<string, ImageMediaType> = {
   gif: "image/gif",
 };
 
+/** Svar fra oppgaven (svarantydning/løsningsforslag) som løseren skal treffe, i oppgavens enheter. */
+export const ForceExpected = z.strictObject({
+  forces: z.record(z.string(), z.strictObject({ Fx: z.number().optional(), Fz: z.number().optional() })).optional(),
+  Rx: z.number().optional(),
+  Rz: z.number().optional(),
+  R: z.number().optional(),
+  M: z.number().optional(),
+  /** Relativ toleranse (svarantydningen er avrundet). */
+  tolerance: z.number().positive().default(0.005),
+});
+export type ForceExpected = z.infer<typeof ForceExpected>;
+
+/** Kraftsystem-oppgave (category force_system): truth.json er input til force_system, expected.json svarene. */
+export interface ForceCase {
+  id: string;
+  dir: string;
+  meta: Meta;
+  truth: ForceSystemInput;
+  expected: ForceExpected;
+}
+
 export interface TestsetLoad {
   cases: TestCase[];
+  forceCases: ForceCase[];
   /** Mapper med oppgave og meta.json, men uten truth.json ennå. */
   pending: { id: string; meta: Meta }[];
   errors: { id: string; message: string }[];
@@ -54,9 +77,10 @@ export interface TestsetLoad {
 export async function loadTestset(root = "testset", options: { inputs?: boolean } = {}): Promise<TestsetLoad> {
   const withInputs = options.inputs ?? true;
   const cases: TestCase[] = [];
+  const forceCases: ForceCase[] = [];
   const pending: TestsetLoad["pending"] = [];
   const errors: { id: string; message: string }[] = [];
-  if (!existsSync(root)) return { cases, pending, errors };
+  if (!existsSync(root)) return { cases, forceCases, pending, errors };
   for (const id of readdirSync(root).sort()) {
     const dir = join(root, id);
     if (!statSync(dir).isDirectory()) continue;
@@ -65,6 +89,10 @@ export async function loadTestset(root = "testset", options: { inputs?: boolean 
       const meta = Meta.parse(read("meta.json"));
       if (!existsSync(join(dir, "truth.json"))) {
         pending.push({ id, meta });
+        continue;
+      }
+      if (meta.category === "force_system") {
+        forceCases.push({ id, dir, meta, truth: ForceSystemInput.parse(read("truth.json")), expected: ForceExpected.parse(read("expected.json")) });
         continue;
       }
       const truth = Model.parse(read("truth.json"));
@@ -87,5 +115,5 @@ export async function loadTestset(root = "testset", options: { inputs?: boolean 
       errors.push({ id, message });
     }
   }
-  return { cases, pending, errors };
+  return { cases, forceCases, pending, errors };
 }

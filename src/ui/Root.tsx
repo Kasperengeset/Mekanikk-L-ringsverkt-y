@@ -1,8 +1,11 @@
 /**
- * Sidene: forsiden, verktøyet (lastes ved behov, så forsiden er rask), innlogging og personvern.
+ * Sidene: forsiden, verktøyet (lastes ved behov, så forsiden er rask), innlogging, konto, personvern og
+ * samtykket når Claude kobles til (OAuth).
  */
 import { lazy, Suspense } from "react";
 import { useLocation, linkClick } from "./router.js";
+import { AccountPage } from "./site/AccountPage.js";
+import { ConsentPage } from "./site/ConsentPage.js";
 import { Landing } from "./site/Landing.js";
 import { LoginPage } from "./site/LoginPage.js";
 import { PrivacyPage } from "./site/PrivacyPage.js";
@@ -26,6 +29,10 @@ export function Root() {
       return <LoginPage />;
     case "/personvern":
       return <PrivacyPage />;
+    case "/oauth/samtykke":
+      return <ConsentPage />;
+    case "/konto":
+      return <AccountPage />;
     default:
       return <NotFound />;
   }

@@ -6,7 +6,6 @@
  * inne i konstruksjonskortet, og høyden følger formen på konstruksjonen.
  */
 import { useEffect } from "react";
-import { AccessGate } from "./access/AccessGate.js";
 import { CutCard } from "./cut3d/CutCard.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
@@ -16,8 +15,8 @@ import { SiteHeader } from "./site/SiteHeader.js";
 import { useStore } from "./state/store.js";
 import { useSolveResult } from "./state/useSolveResult.js";
 import { StructureView } from "./structure/StructureView.js";
-import { ConfirmPanel } from "./upload/ConfirmPanel.js";
-import { UploadPanel } from "./upload/UploadPanel.js";
+import { modelFromHash } from "./share.js";
+import { StartPanel } from "./start/StartPanel.js";
 import { useElementSize } from "./useElementSize.js";
 import type { Model } from "../core/schema.js";
 
@@ -45,7 +44,9 @@ export function App() {
   const [figureRef, size] = useElementSize<HTMLDivElement>();
 
   useEffect(() => {
-    const fixture = fixtureFromUrl(window.location.search);
+    // Fra Claude: modellen i lenken (#m=…). Ellers et eksempel (?eksempel=…).
+    const shared = modelFromHash(window.location.hash);
+    const fixture = shared ?? fixtureFromUrl(window.location.search);
     if (fixture) loadModel(fixture);
   }, [loadModel]);
 
@@ -64,9 +65,7 @@ export function App() {
 
   return (
     <div className="app">
-      <SiteHeader>
-        <AccessGate />
-      </SiteHeader>
+      <SiteHeader />
       <div className="workspace">
         <main className="canvas">
           {model && result ? (
@@ -79,10 +78,10 @@ export function App() {
               {phase === "explore" && viewport && <DiagramsView model={model} result={result} viewport={viewport} />}
             </>
           ) : (
-            <UploadPanel />
+            <StartPanel />
           )}
         </main>
-        {model && result && <aside className="panel">{phase === "confirm" ? <ConfirmPanel /> : <SidePanel model={model} result={result} />}</aside>}
+        {model && result && <aside className="panel"><SidePanel model={model} result={result} /></aside>}
       </div>
     </div>
   );
