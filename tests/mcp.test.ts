@@ -11,7 +11,7 @@ import { createEntitlements, type Entitlements } from "../server/platform/entitl
 import { createMcpHandler } from "../server/platform/mcp.js";
 import { createTokenVerifier, protectedResourceMetadata } from "../server/platform/oauth.js";
 import { FIXTURES } from "../src/ui/fixtures.js";
-import { modelFromHash } from "../src/ui/share.js";
+import { forcesFromHash, modelFromHash } from "../src/ui/share.js";
 
 const SUPABASE_URL = "https://proj.supabase.co";
 const ISSUER = `${SUPABASE_URL}/auth/v1`;
@@ -95,6 +95,13 @@ describe("MCP-serveren (åpen, lokal utvikling)", () => {
     expect(t).toContain("F1z = 344,1 N");
     expect(t).toContain("R = √(Rx² + Rz²) = 454,9 N");
     expect(t).toMatch(/Ikke regn dem på nytt/);
+    // Lenken står først, og åpner kraftsystemet i appen.
+    const first = t.split("\n")[0]!;
+    expect(first).toContain("ta med denne lenken");
+    const url = (r.structuredContent as { open_url: string }).open_url;
+    expect(first).toContain(url);
+    expect(url.startsWith("https://moment.no/app#f=")).toBe(true);
+    expect(forcesFromHash(new URL(url).hash)).toMatchObject({ view: "forces", resultant: { R: expect.closeTo(454.9, 1) } });
   });
 
   it("force_system: manglende retning gir missing_fields, ikke en antakelse", async () => {

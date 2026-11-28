@@ -12,7 +12,7 @@ import { Model } from "../../../src/core/schema.js";
 import { solve } from "../../../src/core/solver/index.js";
 import { forceFactor, lengthFactor } from "../../../src/core/units.js";
 import { formatNumber } from "../../../src/ui/format.js";
-import { modelLink } from "../../../src/ui/share.js";
+import { forcesLink, modelLink } from "../../../src/ui/share.js";
 import type { SubjectModule, ToolContext, ToolDefinition } from "../../platform/mcp.js";
 
 /** Visningen i chatten for begge verktøyene (src/ui/embed, bygd til dist/mcp-ui/visning.html). */
@@ -53,7 +53,10 @@ export const forceSystemTool: ToolDefinition<typeof ForceSystemInput> = {
       return text(`Mangler opplysninger, spør studenten før du regner videre:\n${lines.join("\n")}`, { status: "missing", missing_fields: r.missing });
     }
     if (r.residual > RESIDUAL_LIMIT) return text(`Kontrollen feilet (residual ${r.residual}). Resultatet vises ikke.`, { status: "check_failed", residual: r.residual }, true);
+    const structured = { view: "forces", units: input.units, ...r };
+    const url = forcesLink(ctx.origin, structured);
     const lines = [
+      `Interaktiv figur av kreftene (ta med denne lenken i svaret til studenten): ${url}`,
       "Løst med Mekanikk-intuisjon (deterministisk, kontrollert). Akser: x mot høyre, z oppover; vinkler mot klokka fra +x.",
       "Komponenter:",
       ...r.forces.map((f) => `- ${f.id}: ${f.id}x = ${fmt(f.Fx)} ${u}, ${f.id}z = ${fmt(f.Fz)} ${u} (|${f.id}| = ${fmt(f.magnitude)} ${u}, ${fmt(f.angle_deg)}°)`),
@@ -62,12 +65,11 @@ export const forceSystemTool: ToolDefinition<typeof ForceSystemInput> = {
         ? [`Moment om (${fmt(r.moment.about.x)}, ${fmt(r.moment.about.z)}) ${input.units.length}: M = ${fmt(r.moment.M)} ${u}${input.units.length} (positivt mot klokka).`]
         : []),
       r.equilibrium ? "Systemet er i likevekt (R = 0)." : "Systemet er ikke i likevekt (R ≠ 0).",
-      `Figuren med kreftene og resultanten vises automatisk i ${ctx.origin}/app når studenten har den åpen og er innlogget.`,
+      `Har studenten ${ctx.origin}/app åpen og er innlogget, vises figuren der automatisk.`,
       EXPLAIN,
     ];
-    const structured = { view: "forces", units: input.units, ...r };
     await ctx.publish(structured);
-    return text(lines.join("\n"), structured);
+    return text(lines.join("\n"), { ...structured, open_url: url });
   },
 };
 
@@ -135,6 +137,7 @@ function structureText(s: StructureSummary, model: Model): string {
   const val = (v: number) => fmt(zero(v, scale) ? 0 : v);
   const det = s.determinacy.classification === "determinate" ? "statisk bestemt" : `statisk ubestemt (n = ${s.determinacy.n_s})`;
   const lines = [
+    `Interaktiv figur med diagrammer og snitt i 3D (ta med denne lenken i svaret til studenten): ${s.open_url}`,
     `Løst med Mekanikk-intuisjon (deterministisk; likevekt kontrollert, relativ residual ${s.equilibrium_residual.toExponential(1)}). Konstruksjonen er ${det}.`,
     `Opplagerkrefter (H positiv mot høyre, V positiv oppover, M positivt mot klokka):`,
     ...s.reactions.map((r) => `- ${r.node}: H = ${val(r.H)} ${F}, V = ${val(r.V)} ${F}${supports.get(r.node) === "fixed" ? `, M = ${val(r.M)} ${F}${L}` : ""}`),
@@ -148,7 +151,7 @@ function structureText(s: StructureSummary, model: Model): string {
       return m.kind === "truss" ? `- ${m.id} (stav, ${fmt(m.length)} ${L}): N = ${val(m.N.max)} ${F}` : `- ${m.id} (${fmt(m.length)} ${L}): ${part("N", F)}; ${part("V", F)}; ${part("M", `${F}${L}`)}`;
     }),
     "Fortegn: N > 0 er strekk. dM/dx = V. M > 0 gir strekk på høyre side sett fra i mot j (underkant for en bjelke tegnet fra venstre mot høyre).",
-    `Interaktiv visning med diagrammer og snitt: ${s.open_url} (har studenten ${new URL(s.open_url).origin}/app åpen og er innlogget, vises konstruksjonen der automatisk).`,
+    `Har studenten ${new URL(s.open_url).origin}/app åpen og er innlogget, vises konstruksjonen der automatisk.`,
     EXPLAIN,
   ];
   return lines.join("\n");
@@ -200,7 +203,7 @@ export const mechanics: SubjectModule = {
     "Mekanikk-intuisjon gir verifiserte beregninger for statikk på nivå med TKT4116 Mekanikk 1 ved NTNU.",
     "Når studenten spør om en statikkoppgave, skal tallene alltid komme fra verktøyene, også når regningen er enkel: force_system for kraftsystemer (dekomponering, resultant, moment), solve_structure for bjelker, rammer og fagverk. Kall verktøyet før du regner noe selv.",
     "Tolk oppgaven (figur eller tekst) til verktøyets skjema; spør studenten når figuren er uklar.",
-    "Forklar ut fra verktøyets resultater og bruk kursets begreper (fritt legeme, likevektslikninger, snittmetoden). Gi lenken til den interaktive visningen når den finnes.",
+    "Forklar ut fra verktøyets resultater og bruk kursets begreper (fritt legeme, likevektslikninger, snittmetoden). Ta alltid med lenken til den interaktive figuren fra verktøysvaret i svaret ditt.",
   ].join(" "),
   tools: [forceSystemTool as unknown as ToolDefinition, solveStructureTool as unknown as ToolDefinition],
   resources: [

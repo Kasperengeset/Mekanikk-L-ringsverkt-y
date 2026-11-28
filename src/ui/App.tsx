@@ -18,7 +18,8 @@ import { SiteHeader } from "./site/SiteHeader.js";
 import { useStore } from "./state/store.js";
 import { useSolveResult } from "./state/useSolveResult.js";
 import { StructureView } from "./structure/StructureView.js";
-import { modelFromHash } from "./share.js";
+import { forcesFromHash, modelFromHash } from "./share.js";
+import { applyLivePayload } from "./live/live.js";
 import { AccessGate } from "./access/AccessGate.js";
 import { ConfirmPanel } from "./upload/ConfirmPanel.js";
 import { UploadPanel } from "./upload/UploadPanel.js";
@@ -38,8 +39,10 @@ export function App() {
   useEffect(() => {
     // Fra Claude: modellen i lenken (#m=…). Ellers et eksempel (?eksempel=…).
     const shared = modelFromHash(window.location.hash);
+    const forces = forcesFromHash(window.location.hash);
     const fixture = shared ?? fixtureFromUrl(window.location.search);
     if (fixture) loadModel(fixture);
+    else if (forces) applyLivePayload({ view: "forces", ...forces });
   }, [loadModel]);
 
   useEffect(() => {
