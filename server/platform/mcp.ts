@@ -11,17 +11,20 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { z } from "zod";
 import type { Entitlements } from "./entitlements.js";
+import type { LiveSync } from "./live.js";
 import { bearerToken, publicOrigin, resourceMetadataUrl, type AuthUser, type TokenVerifier } from "./oauth.js";
 
 export interface ToolContext {
   user?: AuthUser;
-  /** Offentlig adresse til appen, f.eks. for lenken «Åpne i moment.no». */
+  /** Offentlig adresse til appen, f.eks. for lenken «Åpne i appen». */
   origin: string;
   /**
    * Teller oppgaven mot ukekvoten (én gang per oppgave). Gir en melding når kallet ikke er tillatt,
    * som verktøyet returnerer i stedet for resultatet.
    */
   consumeTask(taskKey: string): Promise<string | undefined>;
+  /** Sender resultatet til webappen (/app) hos den innloggede studenten (direktekoblingen). */
+  publish(payload: Record<string, unknown>): Promise<void>;
 }
 
 export interface ToolDefinition<S extends z.ZodObject = z.ZodObject> {
@@ -102,6 +105,7 @@ export interface McpHandlerDeps {
   /** Uten verifier (lokal utvikling uten Supabase) er serveren åpen og uten kvote. */
   verifyToken?: TokenVerifier;
   entitlements?: Entitlements;
+  live?: LiveSync;
   env?: Record<string, string | undefined>;
   /** Henter visningene (standard: fra nettstedet). Testene gir sin egen. */
   loadAsset?: AssetLoader;
@@ -158,6 +162,9 @@ export function createMcpHandler(deps: McpHandlerDeps): (req: Request) => Promis
         const r = await deps.entitlements.consumeTask(user.id, taskKey);
         if ("error" in r) return r.error;
         return r.allowed ? undefined : quotaMessage(r.used, r.limit, origin);
+      },
+      publish: async (payload) => {
+        if (user && deps.live) await deps.live.publish(user.id, payload);
       },
     };
 

@@ -8,6 +8,7 @@
 import { create } from "zustand";
 import { setParams, type EditResult } from "../../core/edit.js";
 import type { Cut, Vec2 } from "../../core/cut.js";
+import type { ForceSystemResult } from "../../core/forces.js";
 import type { Attempt } from "../../core/pedagogy.js";
 import type { Model } from "../../core/schema.js";
 
@@ -33,6 +34,12 @@ export interface DiagramSettings {
 /** Snittet studenten har lagt (klikk eller dra på et element), med punktet det står i (modellkoordinater). */
 export interface CutState extends Cut {
   point: Vec2;
+}
+
+/** Et kraftsystem fra Claude (force_system), vist i stedet for en konstruksjon. */
+export interface ForcesView {
+  units: { force: string; length: string };
+  result: Pick<ForceSystemResult, "forces" | "resultant" | "moment" | "equilibrium">;
 }
 
 /** Hva 3D-visningen av snittet viser: resultantene N, V og M, eller spenningene i tverrsnittet. */
@@ -110,6 +117,8 @@ interface AppState {
   /** Snittet som vises i 3D, eller null. Ikke en del av angre-historikken. */
   cut: CutState | null;
   cutMode: CutMode;
+  /** Kraftsystem fra Claude (direktekoblingen). Vises når det ikke er noen modell. */
+  forces: ForcesView | null;
 
   setPhase(phase: Phase): void;
   /** Ny modell uten historikk (f.eks. etter tolkning eller fra URL). */
@@ -139,6 +148,7 @@ interface AppState {
   setDiagrams(partial: Partial<DiagramSettings>): void;
   setInterpretation(partial: Partial<InterpretationState>): void;
   setCut(cut: CutState | null): void;
+  showForces(forces: ForcesView | null): void;
   setCutMode(mode: CutMode): void;
 }
 
@@ -163,6 +173,7 @@ export const useStore = create<AppState>()((set, get) => ({
   interpretation: { status: "idle", description: "", questions: [] },
   cut: null,
   cutMode: "forces",
+  forces: null,
 
   setPhase: (phase) => set({ phase }),
   loadModel: (model, phase = "explore") =>
@@ -179,6 +190,7 @@ export const useStore = create<AppState>()((set, get) => ({
       controls: [],
       prediction: null,
       cut: null,
+      forces: null,
     }),
   reset: () =>
     set({
@@ -194,6 +206,7 @@ export const useStore = create<AppState>()((set, get) => ({
       controls: [],
       prediction: null,
       cut: null,
+      forces: null,
       interpretation: { status: "idle", description: "", questions: [] },
     }),
 
@@ -256,5 +269,6 @@ export const useStore = create<AppState>()((set, get) => ({
   setDiagrams: (partial) => set({ diagrams: { ...get().diagrams, ...partial } }),
   setInterpretation: (partial) => set({ interpretation: { ...get().interpretation, ...partial } }),
   setCut: (cut) => set({ cut }),
+  showForces: (forces) => set({ forces, ...(forces ? { model: null, phase: "upload" as Phase, past: [], future: [], cut: null } : {}) }),
   setCutMode: (cutMode) => set({ cutMode }),
 }));

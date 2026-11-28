@@ -26,7 +26,7 @@ describe("visningen i chatten", () => {
     const reactions = screen.getByRole("list", { name: "Opplagerkrefter" });
     expect(reactions.textContent).toContain("V = 13 kN");
     expect(reactions.textContent).toContain("M = 30 kNm");
-    fireEvent.click(screen.getByRole("button", { name: "Åpne i moment.no" }));
+    fireEvent.click(screen.getByRole("button", { name: "Åpne i appen" }));
     expect(String(openLink.mock.calls[0]![0]).startsWith("https://moment.no/app#m=")).toBe(true);
   });
 

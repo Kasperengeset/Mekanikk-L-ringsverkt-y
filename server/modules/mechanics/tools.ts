@@ -62,9 +62,12 @@ export const forceSystemTool: ToolDefinition<typeof ForceSystemInput> = {
         ? [`Moment om (${fmt(r.moment.about.x)}, ${fmt(r.moment.about.z)}) ${input.units.length}: M = ${fmt(r.moment.M)} ${u}${input.units.length} (positivt mot klokka).`]
         : []),
       r.equilibrium ? "Systemet er i likevekt (R = 0)." : "Systemet er ikke i likevekt (R ≠ 0).",
+      `Figuren med kreftene og resultanten vises automatisk i ${ctx.origin}/app når studenten har den åpen og er innlogget.`,
       EXPLAIN,
     ];
-    return text(lines.join("\n"), { view: "forces", units: input.units, ...r });
+    const structured = { view: "forces", units: input.units, ...r };
+    await ctx.publish(structured);
+    return text(lines.join("\n"), structured);
   },
 };
 
@@ -145,7 +148,7 @@ function structureText(s: StructureSummary, model: Model): string {
       return m.kind === "truss" ? `- ${m.id} (stav, ${fmt(m.length)} ${L}): N = ${val(m.N.max)} ${F}` : `- ${m.id} (${fmt(m.length)} ${L}): ${part("N", F)}; ${part("V", F)}; ${part("M", `${F}${L}`)}`;
     }),
     "Fortegn: N > 0 er strekk. dM/dx = V. M > 0 gir strekk på høyre side sett fra i mot j (underkant for en bjelke tegnet fra venstre mot høyre).",
-    `Interaktiv visning med diagrammer og snitt: ${s.open_url}`,
+    `Interaktiv visning med diagrammer og snitt: ${s.open_url} (har studenten ${new URL(s.open_url).origin}/app åpen og er innlogget, vises konstruksjonen der automatisk).`,
     EXPLAIN,
   ];
   return lines.join("\n");
@@ -184,7 +187,9 @@ export const solveStructureTool: ToolDefinition<typeof StructureInput> = {
             : "";
       return text(`${s.message}${detail}${hint}`, { status: s.status, message: s.message, ...("issues" in s ? { issues: s.issues } : {}) });
     }
-    return text(structureText(s, model), { view: "structure", ...s, model } as unknown as Record<string, unknown>);
+    const structured = { view: "structure", ...s, model } as unknown as Record<string, unknown>;
+    await ctx.publish(structured);
+    return text(structureText(s, model), structured);
   },
 };
 

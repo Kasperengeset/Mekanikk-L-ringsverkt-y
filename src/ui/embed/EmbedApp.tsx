@@ -45,7 +45,7 @@ export function EmbedApp({ payload, actions = {}, pending = false }: { payload: 
           )}
           {payload?.view === "structure" && payload.open_url && actions.openLink && (
             <button type="button" className="pill sm" onClick={() => actions.openLink!(payload.open_url!)}>
-              Åpne i moment.no
+              Åpne i appen
             </button>
           )}
         </span>

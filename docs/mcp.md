@@ -28,15 +28,21 @@ gang uansett hvor mange ganger Claude kaller verktøyet for den: nøkkelen er en
 samme tallene maskinlesbart pluss modellen (`view: "forces" | "structure"`). Verktøyene peker på
 ressursen `ui://mekanikk/visning.html` (`_meta.ui.resourceUri`), som Claude viser i chatten. Visningen kjører
 løseren i nettleseren, så dra og snitt oppdaterer diagrammene uten nye kall. Serveren henter HTML-filen fra
-nettstedet (`/mcp-ui/visning.html`) og bufrer den. Lenken «Åpne i moment.no» har modellen komprimert i
+nettstedet (`/mcp-ui/visning.html`) og bufrer den. Lenken «Åpne i appen» har modellen komprimert i
 adressen (`#m=…`), så ingenting lagres hos oss.
+
+**Direktekobling til webappen (`/app`).** Hvert resultat lagres som brukerens siste visning
+(`put_live_view`, `supabase/migrations/0003_live_views.sql`, én rad per bruker, slettes etter ett døgn).
+Har studenten `/app` åpen og er innlogget, følger appen raden i sanntid (Supabase Realtime, RLS) og viser
+konstruksjonen eller kraftsystemet automatisk (`src/ui/live/`). Det virker også når Claude ikke viser
+figuren i chatten.
 
 Se visningen lokalt uten Claude: `pnpm dev`, så `http://localhost:5199/embed.html?demo=forces` eller
 `?demo=gerber` (et hvilket som helst eksempel).
 
 ## Oppsett i Supabase (én gang)
 
-1. SQL Editor: kjør `supabase/migrations/0002_entitlements.sql`.
+1. SQL Editor: kjør `supabase/migrations/0002_entitlements.sql` og `0003_live_views.sql`.
 2. Authentication → OAuth Server: slå på OAuth-serveren.
    - **Authorization Path:** `/oauth/samtykke`. Full adresse blir Site URL + stien, så Site URL må være
      produksjonsadressen.

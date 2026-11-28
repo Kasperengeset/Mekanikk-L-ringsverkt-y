@@ -1,5 +1,5 @@
 /**
- * Modellen i lenken: «Åpne i moment.no» fra Claude sender hele modellen komprimert i adressens hash
+ * Modellen i lenken: «Åpne i appen» fra Claude sender hele modellen komprimert i adressens hash
  * (#m=…), så ingenting lagres på serveren. Brukes av MCP-verktøyene og av webappen.
  */
 import LZString from "lz-string";

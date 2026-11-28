@@ -30,7 +30,7 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Offentlig nøkkel; havner i nettleseren. |
 | `SUPABASE_SECRET_KEY` | `sb_secret_…` | Hemmelig; bare på serveren. Teller kvoten. Påkrevd når innloggingen er på. |
 | `QUOTA_TASKS_PER_WEEK` / `VITE_QUOTA_TASKS_PER_WEEK` | `5` | Valgfri. Gratis oppgaver per uke i MCP-serveren / tallet som vises på /konto. |
-| `PUBLIC_URL` | `https://moment.no` | Valgfri. Fast offentlig adresse i lenker og OAuth-metadata. |
+| `PUBLIC_URL` | `https://<domene>` | Valgfri. Fast offentlig adresse i lenker og OAuth-metadata. |
 | `VITE_CONTACT_EMAIL` | adressen | Valgfri. Står på personvernsiden for sletting av bruker. |
 
 ## Kostnad
