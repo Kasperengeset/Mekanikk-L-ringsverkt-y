@@ -11,6 +11,8 @@ export function useElementSize<T extends HTMLElement>() {
     if (!element) return;
     const update = () => setSize({ width: element.clientWidth, height: element.clientHeight });
     update();
+    // Uten ResizeObserver (eldre nettlesere, jsdom) måles elementet bare én gang.
+    if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(update);
     ro.observe(element);
     return () => ro.disconnect();

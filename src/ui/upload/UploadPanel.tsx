@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
 import { MAX_IMAGES } from "../api/protocol.js";
 import { FIXTURES } from "../fixtures.js";
+import { LoginPrompt, useNeedsLogin } from "../auth/LoginPrompt.js";
 import { useStore } from "../state/store.js";
 import { WarningIcon } from "../icons.js";
 import { summarizePartial } from "./logic.js";
@@ -35,6 +36,7 @@ export function UploadPanel() {
   const statusRef = useRef<HTMLElement>(null);
   const [dragging, setDragging] = useState(false);
   const count = imageCount(attachments);
+  const needsLogin = useNeedsLogin();
 
   // Fremdriften og beskrivelsen står under skjemaet; vis dem når tolkningen starter.
   useEffect(() => {
@@ -72,6 +74,10 @@ export function UploadPanel() {
         den. Alt som vises, regnes ut av appen.
       </p>
 
+      {needsLogin ? (
+        <LoginPrompt title="Logg inn for å laste opp egne oppgaver" text="Det er gratis, og du får en kvote med tolkninger hver uke. Eksemplene under kan du prøve uten bruker." />
+      ) : (
+        <>
       <fieldset className="upload-form" disabled={busy}>
         <div
           className={`dropzone${dragging ? " dragging" : ""}`}
@@ -138,6 +144,8 @@ export function UploadPanel() {
         </button>
         {busy && <button onClick={cancelInterpretation}>Avbryt</button>}
       </div>
+        </>
+      )}
 
       {(busy || interpretation.status === "error") && (
         <section className="interpretation" aria-live="polite" ref={statusRef}>

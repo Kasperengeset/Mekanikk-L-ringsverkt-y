@@ -23,6 +23,7 @@ import {
 import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse.js";
 import { interpretProblem, type ConsistencyMode, type InterpretOptions, type InterpretOutcome } from "./interpret.js";
 import { InterpretError, type InterpretProvider, type InterpretStreamEvent } from "./llm/adapter.js";
+import type { Gate } from "./gate.js";
 
 export interface ProviderOptions {
   /** Strømhendelser fra tolkningen. Bare den første tolkningen strømmes (ikke ekstra kjøringer for self-consistency). */
@@ -35,6 +36,8 @@ export interface InterpretHandlerDeps {
   createProvider(options: ProviderOptions): InterpretProvider;
   /** Tilgangskontroll før forespørselen leses; en melding her gir 401 med koden access (se server/access.ts). */
   authorize?(req: Request): string | undefined;
+  /** Innlogging, tilgangskoder og kvote (server/gate.ts). Går foran authorize. */
+  gate?: Gate;
   /** Sjekkes før strømmen starter; en melding her gir 500 med koden config (f.eks. manglende API-nøkkel). */
   checkConfig?(): string | undefined;
   interpretOptions?: InterpretOptions;
@@ -118,6 +121,8 @@ export function createInterpretHandler(deps: InterpretHandlerDeps): (req: Reques
     if (req.method !== "POST") return jsonError(405, "bad_request", "Bruk POST.");
     const denied = deps.authorize?.(req);
     if (denied) return jsonError(401, "access", denied);
+    const admitted = deps.gate ? await deps.gate.admit(req) : {};
+    if ("denial" in admitted) return jsonError(admitted.denial.status, admitted.denial.code, admitted.denial.message);
 
     const length = Number(req.headers.get("content-length") ?? 0);
     if (length > MAX_REQUEST_BYTES) return jsonError(413, "too_large", tooLargeMessage());
@@ -136,6 +141,8 @@ export function createInterpretHandler(deps: InterpretHandlerDeps): (req: Reques
 
     const configProblem = deps.checkConfig?.();
     if (configProblem) return jsonError(500, "config", configProblem);
+    const overQuota = await deps.gate?.consume(admitted.user, "interpret");
+    if (overQuota) return jsonError(overQuota.status, overQuota.code, overQuota.message);
 
     const input = { images: parsed.data.images, ...(parsed.data.text?.trim() ? { text: parsed.data.text.trim() } : {}) };
     const abort = new AbortController();
