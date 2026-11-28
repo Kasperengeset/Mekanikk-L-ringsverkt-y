@@ -25,6 +25,7 @@
     "pdfjs-dist": "^6.5.438",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "three": "0.187.0",
     "zod": "^4.6.7",
     "zustand": "^5.1.0"
   },
@@ -37,6 +38,7 @@
     "@types/node": "^22.20.7",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "0.187.0",
     "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^10.15.0",
     "globals": "^17.14.0",

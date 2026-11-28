@@ -42,6 +42,12 @@
 .structure .st-mechanism {
   color: var(--warning);
 }
+.structure .st-cut {
+  color: var(--accent-strong);
+}
+.structure .st-cut-gap {
+  stroke: var(--bg);
+}
 .structure .st-bg {
   fill: var(--bg);
 }

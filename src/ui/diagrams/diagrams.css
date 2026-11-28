@@ -73,6 +73,15 @@
   fill: var(--muted);
 }
 
+/* Snittet som vises i 3D */
+.diagrams .dg-cut-stroke {
+  stroke: var(--accent-strong);
+}
+.diagrams .dg-cut-dot {
+  fill: var(--accent-strong);
+  stroke: var(--bg);
+}
+
 /* Utheving fra agenten */
 .diagrams .dg-highlight-stroke {
   stroke: var(--uncertain);

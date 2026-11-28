@@ -7,6 +7,7 @@
  * `highlight` tegner en markør (prikk og ring) på kurven i riktig panel.
  */
 import { useId, type KeyboardEvent, type ReactNode } from "react";
+import type { Cut } from "../../core/cut.js";
 import type { HiddenValues } from "../../core/pedagogy.js";
 import type { Point } from "../geometry.js";
 import type { DiagramPoint, DiagramSettings } from "../state/store.js";
@@ -17,6 +18,7 @@ import {
   LAYOUT,
   layoutDiagrams,
   type ActionSymbol,
+  type CutMarker,
   type DeformedPanel,
   type DiagramLayout,
   type DiagramMarker,
@@ -37,6 +39,8 @@ export interface DiagramsSvgProps extends CanvasProps {
   hidden?: HiddenValues;
   /** Punkt i et diagram som skal utheves. */
   highlight?: DiagramPoint | null;
+  /** Snittet som vises i 3D. */
+  cut?: Cut | null;
 }
 
 const FONT = "system-ui, -apple-system, Helvetica, Arial, sans-serif";
@@ -44,10 +48,10 @@ const FONT = "system-ui, -apple-system, Helvetica, Arial, sans-serif";
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const pathOf = (pts: Point[], close = false) => pts.map((p, k) => `${k ? "L" : "M"}${r1(p.x)} ${r1(p.y)}`).join("") + (close ? "Z" : "");
 
-export function DiagramsSvg({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange, hidden, highlight }: DiagramsSvgProps) {
+export function DiagramsSvg({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange, hidden, highlight, cut }: DiagramsSvgProps) {
   const pal: Palette = { ...DEFAULT_PALETTE, ...palette };
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const layout = layoutDiagrams(model, result, viewport, settings, { top: onSettingsChange ? LAYOUT.toolbar : 0, hidden, highlight });
+  const layout = layoutDiagrams(model, result, viewport, settings, { top: onSettingsChange ? LAYOUT.toolbar : 0, hidden, highlight, cut });
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -189,6 +193,17 @@ function Labels({ labels, pal }: { labels: PlacedLabel[]; pal: Palette }) {
   );
 }
 
+/** Snittet: stiplet strek gjennom aksen og kurven, og en prikk på kurven. */
+function CutMarkerView({ marker, pal }: { marker: CutMarker; pal: Palette }) {
+  const { from, to, point: p } = marker;
+  return (
+    <g className="dg-cut">
+      <line x1={r1(from.x)} y1={r1(from.y)} x2={r1(to.x)} y2={r1(to.y)} stroke={pal.accent} strokeWidth={1.6} strokeDasharray="4 3" className="dg-cut-stroke" />
+      <circle cx={r1(p.x)} cy={r1(p.y)} r={3.5} fill={pal.accent} stroke={pal.background} strokeWidth={1.5} className="dg-cut-dot" />
+    </g>
+  );
+}
+
 /** Uthevet punkt: strek fra aksen, ring og prikk på kurven. */
 function MarkerView({ marker, pal }: { marker: DiagramMarker; pal: Palette }) {
   const { point: p, base: b } = marker;
@@ -279,6 +294,7 @@ export function ForcePanelView({ panel, first, width, pal, header = true }: { pa
           {panel.inflections.map((p, k) => (
             <InflectionDot key={k} p={p} pal={pal} />
           ))}
+          {panel.cut && <CutMarkerView marker={panel.cut} pal={pal} />}
           {panel.highlight && <MarkerView marker={panel.highlight} pal={pal} />}
           <Labels labels={panel.labels} pal={pal} />
         </>

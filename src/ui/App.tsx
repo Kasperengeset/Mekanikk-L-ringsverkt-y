@@ -7,6 +7,7 @@
  */
 import { useEffect } from "react";
 import { AccessGate } from "./access/AccessGate.js";
+import { CutCard } from "./cut3d/CutCard.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
 import { fitViewport, modelBounds } from "./geometry.js";
@@ -39,6 +40,7 @@ export function App() {
   const model = useStore((s) => s.model);
   const phase = useStore((s) => s.phase);
   const loadModel = useStore((s) => s.loadModel);
+  const hasCut = useStore((s) => s.cut !== null);
   const result = useSolveResult();
   const [figureRef, size] = useElementSize<HTMLDivElement>();
 
@@ -79,7 +81,9 @@ export function App() {
             <>
               <section className="card figure-card" aria-label="Konstruksjonen">
                 <div ref={figureRef}>{viewport && <StructureView model={model} result={result} viewport={viewport} />}</div>
+                {phase === "explore" && !hasCut && <p className="figure-hint muted">Klikk på et element for å snitte det og se kreftene inni i 3D.</p>}
               </section>
+              {phase === "explore" && <CutCard model={model} result={result} />}
               {phase === "explore" && viewport && <DiagramsView model={model} result={result} viewport={viewport} />}
             </>
           ) : (

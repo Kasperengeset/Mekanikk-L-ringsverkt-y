@@ -7,6 +7,7 @@
  */
 import { create } from "zustand";
 import { setParams, type EditResult } from "../../core/edit.js";
+import type { Cut, Vec2 } from "../../core/cut.js";
 import type { Attempt } from "../../core/pedagogy.js";
 import type { Model } from "../../core/schema.js";
 
@@ -28,6 +29,14 @@ export interface DiagramSettings {
   /** Forstørrelse av forskyvningene; "auto" gir største utbøyning ≈ 10 % av konstruksjonen. */
   deformationScale: number | "auto";
 }
+
+/** Snittet studenten har lagt (klikk eller dra på et element), med punktet det står i (modellkoordinater). */
+export interface CutState extends Cut {
+  point: Vec2;
+}
+
+/** Hva 3D-visningen av snittet viser: resultantene N, V og M, eller spenningene i tverrsnittet. */
+export type CutMode = "forces" | "stress";
 
 export interface InterpretationState {
   status: "idle" | "uploading" | "interpreting" | "done" | "error";
@@ -98,6 +107,9 @@ interface AppState {
   predictionAnswers: Record<string, PredictionAnswer>;
   diagrams: DiagramSettings;
   interpretation: InterpretationState;
+  /** Snittet som vises i 3D, eller null. Ikke en del av angre-historikken. */
+  cut: CutState | null;
+  cutMode: CutMode;
 
   setPhase(phase: Phase): void;
   /** Ny modell uten historikk (f.eks. etter tolkning eller fra URL). */
@@ -126,6 +138,8 @@ interface AppState {
   answerPrediction(id: string, answer: PredictionAnswer): void;
   setDiagrams(partial: Partial<DiagramSettings>): void;
   setInterpretation(partial: Partial<InterpretationState>): void;
+  setCut(cut: CutState | null): void;
+  setCutMode(mode: CutMode): void;
 }
 
 const HISTORY_LIMIT = 100;
@@ -147,6 +161,8 @@ export const useStore = create<AppState>()((set, get) => ({
   predictionAnswers: {},
   diagrams: { N: true, V: true, M: true, deformed: true, deformationScale: "auto" },
   interpretation: { status: "idle", description: "", questions: [] },
+  cut: null,
+  cutMode: "forces",
 
   setPhase: (phase) => set({ phase }),
   loadModel: (model, phase = "explore") =>
@@ -162,6 +178,7 @@ export const useStore = create<AppState>()((set, get) => ({
       attempts: {},
       controls: [],
       prediction: null,
+      cut: null,
     }),
   reset: () =>
     set({
@@ -176,6 +193,7 @@ export const useStore = create<AppState>()((set, get) => ({
       attempts: {},
       controls: [],
       prediction: null,
+      cut: null,
       interpretation: { status: "idle", description: "", questions: [] },
     }),
 
@@ -237,4 +255,6 @@ export const useStore = create<AppState>()((set, get) => ({
   },
   setDiagrams: (partial) => set({ diagrams: { ...get().diagrams, ...partial } }),
   setInterpretation: (partial) => set({ interpretation: { ...get().interpretation, ...partial } }),
+  setCut: (cut) => set({ cut }),
+  setCutMode: (cutMode) => set({ cutMode }),
 }));

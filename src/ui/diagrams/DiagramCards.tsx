@@ -14,10 +14,10 @@ import { DEFAULT_SETTINGS, layoutDiagrams, type Panel } from "./layout.js";
 import { DEFAULT_PALETTE, type Palette } from "./palette.js";
 import { toolbarChips, type Chip } from "./toolbar.js";
 
-export function DiagramCards({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange, hidden, highlight }: DiagramsSvgProps) {
+export function DiagramCards({ model, result, viewport, settings = DEFAULT_SETTINGS, palette, onSettingsChange, hidden, highlight, cut }: DiagramsSvgProps) {
   const pal: Palette = { ...DEFAULT_PALETTE, ...palette };
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-  const layout = layoutDiagrams(model, result, viewport, settings, { top: 0, hidden, highlight });
+  const layout = layoutDiagrams(model, result, viewport, settings, { top: 0, hidden, highlight, cut });
   return (
     <>
       {onSettingsChange && <DiagramsToolbar chips={toolbarChips(settings, layout.deformationScale ?? 0, onSettingsChange)} />}

@@ -1,0 +1,323 @@
+/* Kortet «Snitt i 3D»: 3D-figuren, tallene i snittet og spenningene i tverrsnittet. */
+.c3-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.c3-head {
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+.c3-where {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.c3-remove {
+  margin-top: 6px;
+  color: var(--muted);
+}
+.c3-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.c3-toolbar .c3-reset {
+  margin-left: auto;
+}
+
+/* 3D-flaten med etikettene oppå */
+.c3-stage {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdf9 0%, var(--surface-muted) 100%);
+  overflow: hidden;
+}
+.c3-canvas {
+  position: relative;
+  height: 400px;
+  touch-action: none;
+  cursor: grab;
+}
+.c3-canvas:active {
+  cursor: grabbing;
+}
+.c3-canvas canvas {
+  display: block;
+}
+.c3-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: default;
+}
+@media (max-width: 720px) {
+  .c3-canvas {
+    height: 320px;
+  }
+}
+.c3-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.c3-label {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 82%);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.c3-label.c3-node {
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+.c3-label.c3-symbol {
+  padding: 0 4px;
+  background: rgb(255 255 255 / 70%);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 500;
+}
+.c3-label sub {
+  font-size: 0.72em;
+  font-style: normal;
+}
+.c3-label.is-masked .c3-value {
+  color: var(--muted);
+}
+.c3-tone-load {
+  color: var(--load);
+}
+.c3-tone-loadPoint {
+  color: var(--load-point-label);
+}
+.c3-tone-reaction {
+  color: var(--reaction);
+}
+.c3-tone-N {
+  color: var(--diagram-N);
+}
+.c3-tone-V,
+.c3-tone-tau {
+  color: var(--diagram-V);
+}
+.c3-tone-M {
+  color: var(--accent-strong);
+}
+.c3-tone-tension {
+  color: var(--tension);
+}
+.c3-tone-compression {
+  color: var(--compression);
+}
+.c3-tone-muted {
+  color: var(--muted);
+}
+.c3-fallback {
+  margin: 0;
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 14px;
+}
+.c3-hint {
+  margin: -4px 0 0;
+  font-size: 13px;
+}
+
+/* Tallene i snittet */
+.c3-readout {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+.c3-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  font-size: 14px;
+}
+.c3-row-name {
+  flex: 1;
+}
+.c3-row-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+.c3-row-value .muted {
+  font-weight: 400;
+}
+.c3-lock {
+  display: flex;
+  color: var(--faint);
+}
+.c3-swatch {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 3px;
+}
+.c3-swatch-N {
+  background: var(--diagram-N);
+}
+.c3-swatch-V {
+  background: var(--diagram-V);
+}
+.c3-swatch-M {
+  background: var(--diagram-M);
+}
+
+/* Fargeforklaring */
+.c3-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.c3-key::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+  background: currentColor;
+}
+.c3-key {
+  color: var(--muted);
+}
+.c3-key-loadPoint::before {
+  background: var(--load-point);
+}
+.c3-key-reaction::before {
+  background: var(--reaction);
+}
+.c3-key-N::before {
+  background: var(--diagram-N);
+}
+.c3-key-V::before,
+.c3-key-tau::before {
+  background: var(--diagram-V);
+}
+.c3-key-M::before {
+  background: var(--diagram-M);
+}
+.c3-key-tension::before {
+  background: var(--tension);
+}
+.c3-key-compression::before {
+  background: var(--compression);
+}
+
+/* Spenningene i 2D */
+.c3-stress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.c3-stress-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.c3-stress figure {
+  margin: 0;
+  padding: 10px 8px 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.c3-stress figcaption {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-soft);
+}
+.c3-stress-svg {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+}
+.c3-stress-empty {
+  margin: 24px 0;
+  font-size: 13px;
+}
+.c3-stress-note {
+  margin: 0;
+  font-size: 13px;
+}
+.c3-section {
+  fill: var(--surface-warm);
+  stroke: var(--fg-soft);
+  stroke-width: 1.2;
+}
+.c3-section-hole {
+  fill: var(--bg);
+  stroke: var(--fg-soft);
+  stroke-width: 1.2;
+}
+.c3-axis {
+  stroke: var(--fg-soft);
+  stroke-width: 1.2;
+}
+.c3-axis-centroid {
+  stroke: var(--faint);
+  stroke-width: 1;
+  stroke-dasharray: 5 3;
+}
+.c3-axis-neutral {
+  stroke: var(--accent-strong);
+  stroke-width: 1.2;
+  stroke-dasharray: 8 3 2 3;
+}
+.c3-axis-text {
+  font-size: 10px;
+  fill: var(--faint);
+}
+.c3-curve {
+  fill: none;
+  stroke: var(--fg-soft);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.c3-curve-tau {
+  stroke: var(--diagram-V);
+}
+.c3-fill-tension {
+  fill: var(--tension);
+  fill-opacity: 0.22;
+}
+.c3-fill-compression {
+  fill: var(--compression);
+  fill-opacity: 0.22;
+}
+.c3-fill-tau {
+  fill: var(--diagram-V);
+  fill-opacity: 0.2;
+}
+.c3-value-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--fg);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3;
+}
