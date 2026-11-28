@@ -15,6 +15,8 @@ connector, logger inn med brukeren sin hos oss, og Claude kaller verktøyene vå
 | `server/platform/entitlements.ts` | Abonnement og ukekvote via `consume_task` (`supabase/migrations/0002_entitlements.sql`). |
 | `server/modules/mechanics/tools.ts` | Mekanikk-verktøyene: `force_system`, `solve_structure`. |
 | `src/ui/site/ConsentPage.tsx` | `/oauth/samtykke`: studenten godkjenner at Claude får tilgang. |
+| `src/ui/embed/` | Visningen i chatten (MCP Apps): kraftsystemet, eller konstruksjonen med diagrammer og snitt i 3D. |
+| `vite.embed.config.ts` | Bygger visningen til én HTML-fil, `dist/mcp-ui/visning.html` (alt inlinet). |
 
 En ny fagmodul er en `SubjectModule` (`id`, `instructions`, `tools`) som legges i listen i `api/mcp.ts`.
 
@@ -22,9 +24,15 @@ En ny fagmodul er en `SubjectModule` (`id`, `instructions`, `tools`) som legges 
 gang uansett hvor mange ganger Claude kaller verktøyet for den: nøkkelen er en hash av geometrien
 (konstruksjon) eller kreftenes navn (kraftsystem). Aktivt abonnement (`subscriptions`) gir fri bruk.
 
-**Hva Claude ser.** Claude leser tekstinnholdet i svaret. `structuredContent` har de samme tallene
-maskinlesbart pluss modellen, til visningen i chatten (milepæl 2). Lenken «Åpne i moment.no» har modellen
-komprimert i adressen (`#m=…`), så ingenting lagres hos oss.
+**Hva Claude ser, og hva visningen viser.** Claude leser tekstinnholdet i svaret. `structuredContent` har de
+samme tallene maskinlesbart pluss modellen (`view: "forces" | "structure"`). Verktøyene peker på
+ressursen `ui://mekanikk/visning.html` (`_meta.ui.resourceUri`), som Claude viser i chatten. Visningen kjører
+løseren i nettleseren, så dra og snitt oppdaterer diagrammene uten nye kall. Serveren henter HTML-filen fra
+nettstedet (`/mcp-ui/visning.html`) og bufrer den. Lenken «Åpne i moment.no» har modellen komprimert i
+adressen (`#m=…`), så ingenting lagres hos oss.
+
+Se visningen lokalt uten Claude: `pnpm dev`, så `http://localhost:5199/embed.html?demo=forces` eller
+`?demo=gerber` (et hvilket som helst eksempel).
 
 ## Oppsett i Supabase (én gang)
 

@@ -15,6 +15,9 @@ import { formatNumber } from "../../../src/ui/format.js";
 import { modelLink } from "../../../src/ui/share.js";
 import type { SubjectModule, ToolContext, ToolDefinition } from "../../platform/mcp.js";
 
+/** Visningen i chatten for begge verktøyene (src/ui/embed, bygd til dist/mcp-ui/visning.html). */
+export const VIEW_URI = "ui://mekanikk/visning.html";
+
 /** Relativ likevektsresidual som godtas (kravet er 1e-6; løseren selv krever 1e-9). */
 export const RESIDUAL_LIMIT = 1e-6;
 
@@ -33,12 +36,13 @@ export const forceSystemTool: ToolDefinition<typeof ForceSystemInput> = {
   name: "force_system",
   title: "Kraftsystem: komponenter, resultant og moment",
   description: [
-    "Dekomponerer krefter i x- og z-komponenter og regner resultanten R (og eventuelt moment om et punkt) for et plant kraftsystem, f.eks. «finn komponentene og resultanten av F1, F2 og F3».",
-    "Bruk for oppgaver om dekomponering, resultant og likevekt av krefter i ett punkt eller på et stivt legeme, ikke for bjelker og rammer (bruk solve_structure).",
+    "Bruk dette verktøyet hver gang en mekanikkoppgave handler om krefter som skal dekomponeres eller summeres: komponenter (Fx, Fz), resultant R, retning, moment om et punkt eller likevekt i et punkt, f.eks. «finn x- og z-komponentene og resultanten av F1, F2 og F3».",
+    "Bruk det også når regningen virker enkel: tallene herfra er kontrollert, mens hoderegning ikke er det. Regn ikke komponenter eller resultanter selv; bygg forklaringen på svaret herfra. Ikke for bjelker, rammer og fagverk (bruk solve_structure).",
     "Akser som i kurset: x mot høyre, z oppover. Gi hver kraft slik oppgaven gir den: størrelse + vinkel fra +x, størrelse + retningsvektor (helning som 3:4, eller fra ett punkt til et annet), eller komponenter.",
     "Står ikke retningen eller størrelsen i oppgaven, still studenten et spørsmål i stedet for å anta; verktøyet svarer med missing_fields.",
   ].join(" "),
   inputSchema: ForceSystemInput,
+  ui: VIEW_URI,
   async run(input, ctx) {
     const denied = await ctx.consumeTask(`forces:${hash({ u: input.units, ids: input.forces.map((f) => f.id).sort() })}`);
     if (denied) return text(denied, { status: "denied", message: denied }, true);
@@ -60,7 +64,7 @@ export const forceSystemTool: ToolDefinition<typeof ForceSystemInput> = {
       r.equilibrium ? "Systemet er i likevekt (R = 0)." : "Systemet er ikke i likevekt (R ≠ 0).",
       EXPLAIN,
     ];
-    return text(lines.join("\n"), { units: input.units, ...r });
+    return text(lines.join("\n"), { view: "forces", units: input.units, ...r });
   },
 };
 
@@ -151,13 +155,14 @@ export const solveStructureTool: ToolDefinition<typeof StructureInput> = {
   name: "solve_structure",
   title: "Løs bjelke, ramme eller fagverk",
   description: [
-    "Løser en plan bjelke, ramme eller et fagverk med en verifisert løser (direkte stivhetsmetode, eksakte snittkrefter, likevektskontroll): opplagerkrefter, N, V og M langs elementene, statisk bestemthet.",
-    "Bruk den for alle tall om reaksjoner og snittkrefter i slike oppgaver, også når du kunne regnet selv.",
+    "Bruk dette verktøyet hver gang en mekanikkoppgave har en bjelke, ramme eller et fagverk med opplagre og laster: opplagerkrefter, stavkrefter, snittkrefter N, V og M, diagrammer eller statisk bestemthet.",
+    "Det løser konstruksjonen med en verifisert løser (direkte stivhetsmetode, eksakte snittkrefter, likevektskontroll). Regn ikke reaksjoner eller snittkrefter selv, heller ikke enkle; bygg forklaringen på svaret herfra.",
     "Fyll ut modellen ut fra oppgaven: koordinater og laster i oppgavens egne enheter (units), y oppover (kursets z), vinkler mot klokka fra +x.",
     "Spør studenten hvis noe er uklart i figuren (opplagertype, mål, retning på last) i stedet for å anta.",
-    "Svaret har en lenke til en interaktiv visning; gi den til studenten.",
+    "Svaret vises som en interaktiv figur i chatten (konstruksjon, N/V/M-diagrammer, snitt i 3D) og har en lenke til fullskjermvisning.",
   ].join(" "),
   inputSchema: StructureInput,
+  ui: VIEW_URI,
   async run(input, ctx: ToolContext) {
     const parsed = Model.safeParse({ ...input, schemaVersion: 1, provenance: [] });
     if (!parsed.success) {
@@ -179,7 +184,7 @@ export const solveStructureTool: ToolDefinition<typeof StructureInput> = {
             : "";
       return text(`${s.message}${detail}${hint}`, { status: s.status, message: s.message, ...("issues" in s ? { issues: s.issues } : {}) });
     }
-    return text(structureText(s, model), { ...s, model } as unknown as Record<string, unknown>);
+    return text(structureText(s, model), { view: "structure", ...s, model } as unknown as Record<string, unknown>);
   },
 };
 
@@ -188,9 +193,17 @@ export const mechanics: SubjectModule = {
   title: "Mekanikk (statikk)",
   instructions: [
     "Mekanikk-intuisjon gir verifiserte beregninger for statikk på nivå med TKT4116 Mekanikk 1 ved NTNU.",
-    "Bruk verktøyene for alle tall: force_system for kraftsystemer (dekomponering, resultant, moment), solve_structure for bjelker, rammer og fagverk.",
+    "Når studenten spør om en statikkoppgave, skal tallene alltid komme fra verktøyene, også når regningen er enkel: force_system for kraftsystemer (dekomponering, resultant, moment), solve_structure for bjelker, rammer og fagverk. Kall verktøyet før du regner noe selv.",
     "Tolk oppgaven (figur eller tekst) til verktøyets skjema; spør studenten når figuren er uklar.",
     "Forklar ut fra verktøyets resultater og bruk kursets begreper (fritt legeme, likevektslikninger, snittmetoden). Gi lenken til den interaktive visningen når den finnes.",
   ].join(" "),
   tools: [forceSystemTool as unknown as ToolDefinition, solveStructureTool as unknown as ToolDefinition],
+  resources: [
+    {
+      uri: VIEW_URI,
+      name: "Mekanikk-intuisjon: visning",
+      description: "Interaktiv figur av kraftsystemet eller konstruksjonen, med diagrammer og snitt i 3D.",
+      path: "/mcp-ui/visning.html",
+    },
+  ],
 };

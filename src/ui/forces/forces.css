@@ -1,0 +1,90 @@
+/* Kraftsystemet: krefter i oransje (som punktlaster), resultanten mørk, komponentene stiplet. */
+.fs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fs-figure {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+.fs-axes line {
+  stroke: var(--line-hover);
+  stroke-width: 1;
+  stroke-dasharray: 6 4;
+}
+.fs-axes text {
+  fill: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+}
+.fs-force {
+  color: var(--load-point);
+}
+.fs-resultant {
+  color: var(--primary);
+}
+.fs-comp {
+  color: var(--diagram-N);
+}
+.fs-proj {
+  stroke: var(--line-hover);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.fs-point {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1.6;
+}
+.fs-label {
+  font-size: 13px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3;
+}
+.fs-force-label {
+  fill: var(--load-point-label);
+}
+.fs-resultant-label {
+  fill: var(--primary);
+}
+.fs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.fs-table th,
+.fs-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+.fs-table th:first-child {
+  text-align: left;
+}
+.fs-table thead th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 13px;
+}
+.fs-table tfoot th,
+.fs-table tfoot td {
+  font-weight: 600;
+  border-bottom: none;
+  border-top: 2px solid var(--line-strong);
+}
+.fs-note {
+  margin: 0;
+  font-size: 14px;
+}

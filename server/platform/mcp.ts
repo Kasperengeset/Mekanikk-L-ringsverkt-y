@@ -5,6 +5,7 @@
  * Handleren tar seg av CORS, innlogging (OAuth-token → bruker) og kvote. Fagmodulene vet ingenting om
  * HTTP eller Supabase; de får en ToolContext med brukeren og en funksjon for å telle oppgaven.
  */
+import { RESOURCE_MIME_TYPE, registerAppResource } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -28,6 +29,8 @@ export interface ToolDefinition<S extends z.ZodObject = z.ZodObject> {
   title: string;
   description: string;
   inputSchema: S;
+  /** Visningen i chatten (MCP Apps) som tegner svaret, som ui://-adresse til en av modulens ressurser. */
+  ui?: string;
   run(input: z.infer<S>, ctx: ToolContext): Promise<CallToolResult> | CallToolResult;
 }
 
@@ -38,19 +41,57 @@ export interface SubjectModule {
   /** Tekst til Claude om hvordan verktøyene i modulen skal brukes. */
   instructions: string;
   tools: ToolDefinition[];
+  /** Visninger (MCP Apps): én HTML-fil per ressurs, hentet fra appens egne statiske filer (`path`). */
+  resources?: UiResource[];
 }
+
+export interface UiResource {
+  uri: string;
+  name: string;
+  description: string;
+  /** Stien til den bygde HTML-filen på nettstedet, f.eks. /mcp-ui/visning.html. */
+  path: string;
+}
+
+/** Henter en bygd visning. Standard: fra appens egen adresse, bufret i minnet så lenge funksjonen lever. */
+export type AssetLoader = (url: string) => Promise<string>;
+
+const assetCache = new Map<string, Promise<string>>();
+export const fetchAsset: AssetLoader = (url) => {
+  let hit = assetCache.get(url);
+  if (!hit) {
+    hit = fetch(url).then(async (res) => {
+      if (!res.ok) throw new Error(`Fant ikke visningen (${res.status}).`);
+      return res.text();
+    });
+    hit.catch(() => assetCache.delete(url));
+    assetCache.set(url, hit);
+  }
+  return hit;
+};
 
 export const SERVER_INFO = { name: "mekanikk-intuisjon", version: "0.2.0" };
 
-export function buildServer(modules: SubjectModule[], ctx: ToolContext): McpServer {
+export function buildServer(modules: SubjectModule[], ctx: ToolContext, loadAsset: AssetLoader = fetchAsset): McpServer {
   const server = new McpServer(SERVER_INFO, { instructions: modules.map((m) => m.instructions).join("\n\n") });
   for (const m of modules) {
     for (const tool of m.tools) {
       server.registerTool(
         tool.name,
-        { title: tool.title, description: tool.description, inputSchema: tool.inputSchema, annotations: { readOnlyHint: true, openWorldHint: false } },
+        {
+          title: tool.title,
+          description: tool.description,
+          inputSchema: tool.inputSchema,
+          annotations: { readOnlyHint: true, openWorldHint: false },
+          ...(tool.ui ? { _meta: { ui: { resourceUri: tool.ui }, "ui/resourceUri": tool.ui } } : {}),
+        },
         async (input: unknown) => tool.run(input as never, ctx),
       );
+    }
+    for (const r of m.resources ?? []) {
+      registerAppResource(server, r.name, r.uri, { description: r.description } as Parameters<typeof registerAppResource>[3], async () => ({
+        contents: [{ uri: r.uri, mimeType: RESOURCE_MIME_TYPE, text: await loadAsset(`${ctx.origin}${r.path}`), _meta: { ui: { prefersBorder: false } } }],
+      }));
     }
   }
   return server;
@@ -62,6 +103,8 @@ export interface McpHandlerDeps {
   verifyToken?: TokenVerifier;
   entitlements?: Entitlements;
   env?: Record<string, string | undefined>;
+  /** Henter visningene (standard: fra nettstedet). Testene gir sin egen. */
+  loadAsset?: AssetLoader;
   log?(message: string, err?: unknown): void;
 }
 
@@ -118,7 +161,16 @@ export function createMcpHandler(deps: McpHandlerDeps): (req: Request) => Promis
       },
     };
 
-    const server = buildServer(deps.modules, ctx);
+    // Logg hvilke metoder og verktøy som kalles (ikke innholdet), så bruken kan følges i Vercel.
+    const body = (await req
+      .clone()
+      .json()
+      .catch(() => undefined)) as { method?: string; params?: { name?: string } } | { method?: string; params?: { name?: string } }[] | undefined;
+    for (const m of Array.isArray(body) ? body : body ? [body] : []) {
+      if (m.method) console.info(`mcp: ${m.method}${m.method === "tools/call" && m.params?.name ? ` ${m.params.name}` : ""}${user ? " (innlogget)" : ""}`);
+    }
+
+    const server = buildServer(deps.modules, ctx, deps.loadAsset);
     const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
     try {
       await server.connect(transport);

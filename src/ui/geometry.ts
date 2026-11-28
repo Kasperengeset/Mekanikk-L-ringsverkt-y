@@ -76,3 +76,18 @@ export function fitViewport(model: Model, width: number, height: number, options
 export function originXOf(v: Viewport): number {
   return v.toScreen({ x: v.bounds.minX, y: v.bounds.minY }).x;
 }
+
+/**
+ * Luften fitViewport legger rundt konstruksjonen. Lastpilene har fast lengde i piksler, så luften kan ikke
+ * krympe på smale skjermer uten at teksten på en last havner oppå pilen.
+ */
+export const FIT_PADDING = 70;
+
+/** Høyden som gir konstruksjonen full bredde, innenfor rimelige grenser (bjelker blir lave, rammer høyere). */
+export function structureHeight(model: Model, width: number): number {
+  const b = modelBounds(model);
+  const spanX = Math.max(b.maxX - b.minX, 1e-9);
+  const spanY = b.maxY - b.minY;
+  const height = (width - 2 * FIT_PADDING) * (spanY / spanX) + 2 * FIT_PADDING;
+  return Math.round(Math.min(Math.max(height, 210), 560));
+}
