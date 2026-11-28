@@ -58,7 +58,19 @@ describe("MCP-serveren (åpen, lokal utvikling)", () => {
       expect(t.description).toMatch(/studenten/);
       expect(t.annotations?.readOnlyHint).toBe(true);
     }
-    expect(client.getInstructions()).toMatch(/Bruk verktøyene for alle tall/);
+    expect(client.getInstructions()).toMatch(/tallene alltid komme fra verktøyene/);
+  });
+
+  it("verktøyene peker på visningen i chatten, og ressursen gir HTML-filen fra nettstedet", async () => {
+    const loadAsset = vi.fn(async (url: string) => `<!doctype html><p>${url}</p>`);
+    const client = await connect(createMcpHandler({ modules: [mechanics], loadAsset, log: () => {} }));
+    const { tools } = await client.listTools();
+    for (const t of tools) expect(t._meta).toMatchObject({ ui: { resourceUri: "ui://mekanikk/visning.html" }, "ui/resourceUri": "ui://mekanikk/visning.html" });
+    const { resources } = await client.listResources();
+    expect(resources).toEqual([expect.objectContaining({ uri: "ui://mekanikk/visning.html", mimeType: "text/html;profile=mcp-app" })]);
+    const read = await client.readResource({ uri: "ui://mekanikk/visning.html" });
+    expect(read.contents[0]).toMatchObject({ mimeType: "text/html;profile=mcp-app", text: "<!doctype html><p>https://moment.no/mcp-ui/visning.html</p>" });
+    expect(loadAsset).toHaveBeenCalledWith("https://moment.no/mcp-ui/visning.html");
   });
 
   it("force_system: tre krefter som i Øving 1 (egen utgave av tallene)", async () => {
@@ -74,7 +86,8 @@ describe("MCP-serveren (åpen, lokal utvikling)", () => {
         ],
       },
     });
-    const s = r.structuredContent as { resultant: { Rx: number; Rz: number; R: number } };
+    const s = r.structuredContent as { view: string; resultant: { Rx: number; Rz: number; R: number } };
+    expect(s.view).toBe("forces");
     expect(s.resultant.R).toBeCloseTo(455.0, 0);
     expect(s.resultant.Rx).toBeCloseTo(449.3, 1);
     expect(s.resultant.Rz).toBeCloseTo(-71.4, 1);
@@ -96,6 +109,7 @@ describe("MCP-serveren (åpen, lokal utvikling)", () => {
     const r = await client.callTool({ name: "solve_structure", arguments: asInput(FIXTURES.utkrager!.model) });
     const s = r.structuredContent as { status: string; reactions: { node: string; V: number; M: number }[]; open_url: string; equilibrium_residual: number };
     expect(s.status).toBe("ok");
+    expect((r.structuredContent as { view: string }).view).toBe("structure");
     expect(s.reactions[0]).toMatchObject({ node: "A", V: expect.closeTo(17, 9), M: expect.closeTo(44, 9) });
     expect(s.equilibrium_residual).toBeLessThan(1e-6);
     expect(s.open_url.startsWith("https://moment.no/app#m=")).toBe(true);

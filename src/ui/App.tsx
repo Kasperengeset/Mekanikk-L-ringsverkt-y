@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { CutCard } from "./cut3d/CutCard.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
-import { fitViewport, modelBounds } from "./geometry.js";
+import { FIT_PADDING, fitViewport, structureHeight } from "./geometry.js";
 import { SidePanel } from "./panel/SidePanel.js";
 import { SiteHeader } from "./site/SiteHeader.js";
 import { useStore } from "./state/store.js";
@@ -18,22 +18,6 @@ import { StructureView } from "./structure/StructureView.js";
 import { modelFromHash } from "./share.js";
 import { StartPanel } from "./start/StartPanel.js";
 import { useElementSize } from "./useElementSize.js";
-import type { Model } from "../core/schema.js";
-
-/**
- * Luften fitViewport legger rundt konstruksjonen. Lastpilene har fast lengde i piksler, så luften kan ikke
- * krympe på smale skjermer uten at teksten på en last havner oppå pilen.
- */
-const FIT_PADDING = 70;
-
-/** Høyden som gir konstruksjonen full bredde, innenfor rimelige grenser (bjelker blir lave, rammer høyere). */
-export function structureHeight(model: Model, width: number): number {
-  const b = modelBounds(model);
-  const spanX = Math.max(b.maxX - b.minX, 1e-9);
-  const spanY = b.maxY - b.minY;
-  const height = (width - 2 * FIT_PADDING) * (spanY / spanX) + 2 * FIT_PADDING;
-  return Math.round(Math.min(Math.max(height, 210), 560));
-}
 
 export function App() {
   const model = useStore((s) => s.model);

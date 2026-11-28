@@ -1,0 +1,75 @@
+/* Visningen i Claude-chatten: kompakt, én kolonne, samme kort og farger som webappen. */
+html,
+body {
+  background: transparent;
+}
+.embed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px 8px;
+  background: var(--page);
+  border-radius: 16px;
+}
+.embed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 0;
+}
+.embed-brand {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+.embed-brand span {
+  color: var(--accent);
+}
+.embed-actions {
+  display: flex;
+  gap: 6px;
+}
+.embed .card {
+  padding: 14px 12px;
+}
+.embed .figure-card {
+  padding: 12px 10px;
+}
+.embed .fs {
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.embed-structure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.embed-reactions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.embed-reactions li {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.embed-empty {
+  margin: 0;
+  padding: 24px 12px;
+  text-align: center;
+}
+.embed .c3-canvas {
+  height: 320px;
+}

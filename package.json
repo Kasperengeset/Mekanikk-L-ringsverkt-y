@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && vite build -c vite.embed.config.ts && node scripts/rename-embed.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
@@ -20,6 +20,7 @@
     "snapshot": "tsx scripts/snapshot.tsx"
   },
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "2.0.4",
     "@modelcontextprotocol/sdk": "1.32.1",
     "@supabase/supabase-js": "2.119.0",
     "jose": "6.2.16",
@@ -50,6 +51,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.74.0",
     "vite": "^8.3.8",
+    "vite-plugin-singlefile": "2.3.4",
     "vitest": "^5.1.2"
   },
   "packageManager": "pnpm@11.8.0"
