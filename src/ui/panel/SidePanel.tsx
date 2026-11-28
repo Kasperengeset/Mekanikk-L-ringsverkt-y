@@ -1,4 +1,4 @@
-/** Sidepanelet i utforskingsfasen: angre og gjør om, opplagerkreftene, «Prøv selv» og veilederen. */
+/** Sidepanelet i utforskingsfasen: angre og gjør om, veilederen øverst, så opplagerkreftene og «Prøv selv». */
 import { hiddenValues } from "../../core/pedagogy.js";
 import type { Model } from "../../core/schema.js";
 import type { SolveResult } from "../../core/solver/index.js";
@@ -33,6 +33,7 @@ export function SidePanel({ model, result }: { model: Model; result: SolveResult
           Ny oppgave
         </button>
       </div>
+      <AgentPanel model={model} result={result} />
       <section className="card" aria-labelledby="reactions-title">
         <h2 id="reactions-title" className="card-title">
           Opplagerkrefter
@@ -86,7 +87,6 @@ export function SidePanel({ model, result }: { model: Model; result: SolveResult
         )}
       </section>
       <PedagogyPanel model={model} result={result} />
-      <AgentPanel model={model} result={result} />
     </>
   );
 }

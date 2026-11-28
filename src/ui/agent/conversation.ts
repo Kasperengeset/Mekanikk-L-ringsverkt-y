@@ -6,6 +6,7 @@
  */
 import { create } from "zustand";
 import { requireAccess } from "../api/access.js";
+import { requireLogin } from "../auth/auth.js";
 import { useStore } from "../state/store.js";
 import { createAgentTransport, type AgentTransport } from "./client.js";
 import { MAX_ROUNDS, runAgentLoop, type LoopOutcome } from "./loop.js";
@@ -174,6 +175,7 @@ export const useAgentStore = create<AgentState>()((set, get) => {
       ],
     }));
     if (outcome.status === "error" && outcome.code === "access") requireAccess(outcome.message, () => void get().retry());
+    if (outcome.status === "error" && outcome.code === "login") requireLogin(outcome.message);
     return outcome;
   }
 

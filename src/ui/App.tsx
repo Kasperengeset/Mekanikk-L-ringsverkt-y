@@ -11,8 +11,8 @@ import { CutCard } from "./cut3d/CutCard.js";
 import { DiagramsView } from "./diagrams/DiagramsView.js";
 import { fixtureFromUrl } from "./fixtures.js";
 import { fitViewport, modelBounds } from "./geometry.js";
-import { BrandMark } from "./icons.js";
 import { SidePanel } from "./panel/SidePanel.js";
+import { SiteHeader } from "./site/SiteHeader.js";
 import { useStore } from "./state/store.js";
 import { useSolveResult } from "./state/useSolveResult.js";
 import { StructureView } from "./structure/StructureView.js";
@@ -64,17 +64,9 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="app-header-inner">
-          <div className="brand">
-            <BrandMark />
-            <h1 className="brand-name">
-              Mekanikk-<span>intuisjon</span>
-            </h1>
-          </div>
-          <AccessGate />
-        </div>
-      </header>
+      <SiteHeader>
+        <AccessGate />
+      </SiteHeader>
       <div className="workspace">
         <main className="canvas">
           {model && result ? (

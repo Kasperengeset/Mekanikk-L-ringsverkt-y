@@ -23,6 +23,7 @@ import {
 } from "../src/ui/agent/protocol.js";
 import { SSE_CONTENT_TYPE } from "../src/ui/api/protocol.js";
 import { encodeSseEvent, SSE_HEARTBEAT } from "../src/ui/api/sse.js";
+import type { Gate } from "./gate.js";
 import { costUsd } from "./llm/pricing.js";
 
 export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
@@ -52,6 +53,8 @@ export interface AgentHandlerDeps {
   createClient(): Anthropic;
   /** Tilgangskontroll før forespørselen leses; en melding her gir 401 med koden access (se server/access.ts). */
   authorize?(req: Request): string | undefined;
+  /** Innlogging, tilgangskoder og kvote (server/gate.ts). Går foran authorize. */
+  gate?: Gate;
   config?: Partial<AgentConfig>;
   /** Sjekkes før strømmen starter; en melding her gir 500 med koden config (f.eks. manglende API-nøkkel). */
   checkConfig?(): string | undefined;
@@ -75,6 +78,13 @@ const TOOLS: Anthropic.Beta.BetaTool[] = AGENT_TOOLS.map((t) => ({
 
 /** Antall ganger et svar hentes på nytt når strømmen ikke kunne leses (ugyldig verktøy-JSON, brutt forbindelse). */
 const STREAM_RETRIES = 2;
+
+/** true når siste melding er tekst fra studenten, ikke svar på verktøykall. */
+export function isStudentTurn(messages: AgentMessage[]): boolean {
+  const last = messages[messages.length - 1];
+  if (!last || last.role !== "user") return false;
+  return typeof last.content === "string" || last.content.every((b) => b.type !== "tool_result");
+}
 
 function jsonError(status: number, code: AgentErrorCode, message: string): Response {
   return Response.json({ error: { code, message } satisfies AgentErrorBody }, { status });
@@ -132,6 +142,8 @@ export function createAgentHandler(deps: AgentHandlerDeps): (req: Request) => Pr
     if (req.method !== "POST") return jsonError(405, "bad_request", "Bruk POST.");
     const denied = deps.authorize?.(req);
     if (denied) return jsonError(401, "access", denied);
+    const admitted = deps.gate ? await deps.gate.admit(req) : {};
+    if ("denial" in admitted) return jsonError(admitted.denial.status, admitted.denial.code, admitted.denial.message);
 
     const tooLarge = () => jsonError(413, "too_large", "Samtalen er blitt for lang. Start en ny samtale.");
     if (Number(req.headers.get("content-length") ?? 0) > MAX_REQUEST_BYTES) return tooLarge();
@@ -153,6 +165,13 @@ export function createAgentHandler(deps: AgentHandlerDeps): (req: Request) => Pr
 
     // Meldingene sendes videre nøyaktig slik klienten sendte dem (skjemaet fjerner ingenting fra svarblokkene).
     const messages = (body as { messages: AgentMessage[] }).messages;
+    if (deps.gate) {
+      // Et spørsmål fra studenten teller mot ukekvoten; alle kall (også verktøyrundene) mot et høyere tak.
+      for (const kind of isStudentTurn(messages) ? (["agent", "agent_call"] as const) : (["agent_call"] as const)) {
+        const overQuota = await deps.gate.consume(admitted.user, kind);
+        if (overQuota) return jsonError(overQuota.status, overQuota.code, overQuota.message);
+      }
+    }
     const abort = new AbortController();
     req.signal?.addEventListener("abort", () => abort.abort(), { once: true });
     const encoder = new TextEncoder();

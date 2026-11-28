@@ -64,6 +64,9 @@ export type InterpretRequest = z.infer<typeof InterpretRequest>;
 export type ErrorCode =
   | "bad_request"
   | "access"
+  | "login"
+  | "quota"
+  | "unavailable"
   | "too_large"
   | "config"
   | "auth"

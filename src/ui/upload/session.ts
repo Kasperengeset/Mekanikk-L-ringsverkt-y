@@ -7,6 +7,7 @@
  */
 import { create } from "zustand";
 import { requireAccess } from "../api/access.js";
+import { requireLogin } from "../auth/auth.js";
 import { InterpretApiError, interpretRemote } from "../api/interpret.js";
 import { MAX_IMAGES, type InterpretResponse, type Progress } from "../api/protocol.js";
 import { useStore } from "../state/store.js";
@@ -225,6 +226,7 @@ export async function startInterpretation(): Promise<void> {
     set({ busy: false, progress: null });
     app().setInterpretation({ status: "error", error: message, partial: undefined });
     if (err instanceof InterpretApiError && err.code === "access") requireAccess(message, () => void startInterpretation());
+    if (err instanceof InterpretApiError && err.code === "login") requireLogin(message);
   } finally {
     if (controller === own) controller = null;
   }

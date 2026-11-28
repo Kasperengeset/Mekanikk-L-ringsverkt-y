@@ -10,6 +10,7 @@ import { useStore } from "../state/store.js";
 import { useAgentStore, type ChatEntry } from "./conversation.js";
 import { MAX_STUDENT_TEXT } from "./protocol.js";
 import "./agent.css";
+import { LoginPrompt, useNeedsLogin } from "../auth/LoginPrompt.js";
 
 export const SUGGESTIONS = ["Forklar M-diagrammet", "Gi meg et hint", "Hva skjer hvis jeg flytter lasten?"];
 
@@ -75,6 +76,7 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
   const busy = activity !== null;
+  const needsLogin = useNeedsLogin();
 
   useEffect(() => {
     const log = logRef.current;
@@ -105,6 +107,14 @@ export function AgentPanel(props: { model: Model; result: SolveResult }) {
         : activity === "acting"
           ? "Veilederen arbeider i verktøyet …"
           : null;
+
+  if (needsLogin)
+    return (
+      <section className="card agent-panel" aria-label="Veileder">
+        <h2 className="card-title">Veileder</h2>
+        <LoginPrompt title="Logg inn for å spørre veilederen" text="Veilederen forklarer det du ser uten å gi deg svaret. Den krever bruker, siden hvert svar koster litt å lage." />
+      </section>
+    );
 
   return (
     <section className="card agent-panel" aria-label="Veileder">

@@ -30,6 +30,12 @@ Innstillingene for bygging og funksjoner står i `vercel.json`, så de trenger i
 | `INTERPRET_CONSISTENCY` | `low_confidence` | Valgfri: `never`, `low_confidence` eller `always`. Ved `low_confidence` kan kostnaden bli tre ganger så høy for usikre oppgaver. |
 | `AGENT_MODEL` | `claude-opus-5-5` | Valgfri. |
 | `AGENT_EFFORT` | `medium` | Valgfri. |
+| `VITE_SUPABASE_URL` | `https://<prosjekt>.supabase.co` | Innlogging (se [auth.md](auth.md)). Uten den er innloggingen av. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Offentlig nøkkel; havner i nettleseren. |
+| `SUPABASE_SECRET_KEY` | `sb_secret_…` | Hemmelig; bare på serveren. Trekker kvoten. Påkrevd når innloggingen er på. |
+| `QUOTA_INTERPRET_PER_WEEK` | `10` | Valgfri. Gratis tolkninger per bruker per uke. |
+| `QUOTA_AGENT_PER_WEEK` | `60` | Valgfri. Gratis spørsmål til veilederen per uke. |
+| `VITE_CONTACT_EMAIL` | adressen | Valgfri. Står på personvernsiden for sletting av bruker. |
 
 ## Tilgangskoder og personlige lenker
 
