@@ -57,6 +57,8 @@ export interface StructureSvgProps extends CanvasProps {
   scales?: LoadScales;
   /** Tegn håndtak og et usynlig treff-lag for pekeren. */
   interactive?: boolean;
+  /** Snittet som vises i 3D: punktet og elementets retning (modellkoordinater). Tegnes som et kutt i elementet. */
+  cut?: { point: Point; dir: Point } | null;
   className?: string;
   svgRef?: Ref<SVGSVGElement>;
   onPointerDown?: PointerEventHandler<SVGSVGElement>;
@@ -528,6 +530,7 @@ export function StructureSvg(props: StructureSvgProps) {
           }
           return out;
         })}
+        {props.cut && <CutMark cut={props.cut} viewport={viewport} palette={palette} />}
         {trussJoints.map((n) => {
           const p = screen.get(n.id)!;
           return <circle key={n.id} cx={r2(p.x)} cy={r2(p.y)} r={3.6} fill={palette.bg} className="st-bg" stroke="currentColor" strokeWidth={1.6} />;
@@ -591,6 +594,25 @@ export function StructureSvg(props: StructureSvgProps) {
       {interactive && <HitLayer model={model} ends={ends} dists={dists} points={points} moments={moments} supportDirs={supportDirs} screen={screen} />}
       {props.children}
     </svg>
+  );
+}
+
+/** Snittet: et lite brudd i elementet og en stiplet strek på tvers. */
+function CutMark({ cut, viewport, palette }: { cut: { point: Point; dir: Point }; viewport: Viewport; palette: Palette }) {
+  const p = viewport.toScreen(cut.point);
+  const d = unit(screenDir(cut.dir));
+  const n = perpCCW(d);
+  const gap = (a: number) => [add(p, mul(n, a)), sub(p, mul(n, a))] as const;
+  const [g1, g2] = gap(BEAM_WIDTH / 2 + 2);
+  const [c1, c2] = gap(17);
+  return (
+    <g className="st-cut" color={palette.accent} aria-label="Snitt">
+      <line x1={r2(g1.x)} y1={r2(g1.y)} x2={r2(g2.x)} y2={r2(g2.y)} stroke={palette.bg} strokeWidth={4} className="st-cut-gap" />
+      <line x1={r2(c1.x)} y1={r2(c1.y)} x2={r2(c2.x)} y2={r2(c2.y)} stroke="currentColor" strokeWidth={1.8} strokeDasharray="4 3" />
+      {[c1, c2].map((c, k) => (
+        <circle key={k} cx={r2(c.x)} cy={r2(c.y)} r={2.4} fill="currentColor" />
+      ))}
+    </g>
   );
 }
 

@@ -2,6 +2,8 @@
  * Konstruksjonsvisningen i appen: StructureSvg koblet til storen, med klikk og dra.
  *
  *  - Klikk velger en entitet; klikk på et opplager bytter type (fast innspent → fastlager → rullelager).
+ *  - Klikk på et element i utforskingen legger et snitt der (vises i 3D); dras pekeren, følger snittet
+ *    langs bjelken. Snittet er visning, ikke en endring av modellen, så det havner ikke i angre-historikken.
  *  - Dra en punktlast eller et moment langs bjelken, halen på en punktlast for størrelse og retning,
  *    en node for geometrien, en fordelt last (hele, eller endene) langs elementet.
  *  - Pointer events med setPointerCapture: beginGesture ved pointerdown, updateGesture per pointermove,
@@ -10,13 +12,16 @@
  * Med ?debug=1 vises tiden per oppdatering (endring + løsning + tegning, til React har skrevet DOM-en).
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import type { Chain } from "../../core/edit-ops.js";
+import { resolveCut } from "../../core/cut.js";
 import { cycleSupportType } from "../../core/edit.js";
 import type { Point, Viewport } from "../geometry.js";
 import { useStore } from "../state/store.js";
 import type { CanvasProps } from "../types.js";
-import { dragTo, startDrag, type DragPart, type DragSession } from "./drag.js";
+import { cutChain, cutOnChain } from "./cutDrag.js";
+import { dragTo, lengthStep, startDrag, type DragPart, type DragSession } from "./drag.js";
 import { highlightProps, parseEntityKey } from "./highlight.js";
-import { length, loadScales, sub, type LoadScales } from "./layout.js";
+import { length, loadScales, memberPoint, nodePoint, sub, unit, type LoadScales } from "./layout.js";
 import { StructureSvg } from "./StructureSvg.js";
 import "./structure.css";
 
@@ -25,8 +30,15 @@ const CLICK_TOLERANCE = 4;
 
 const DEBUG = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debug") === "1";
 
+/** Et snitt som flyttes langs en bjelke. */
+interface CutSession {
+  kind: "cut";
+  chain: Chain;
+  step: number;
+}
+
 interface ActiveDrag {
-  session: DragSession;
+  session: DragSession | CutSession;
   pointerId: number;
   start: Point;
   moved: boolean;
@@ -51,6 +63,16 @@ export function StructureView({ model, result, viewport }: CanvasProps) {
   const selection = useStore((s) => s.selection);
   const highlights = useStore((s) => s.highlights);
   const marks = useMemo(() => highlightProps({ phase, selection, highlights }, model), [phase, selection, highlights, model]);
+  const storedCut = useStore((s) => s.cut);
+  const cutMark = useMemo(() => {
+    if (phase !== "explore" || !storedCut) return null;
+    const cut = resolveCut(model, storedCut);
+    const m = cut && model.members.find((x) => x.id === cut.member);
+    const a = m && nodePoint(model, m.i);
+    const b = m && nodePoint(model, m.j);
+    const point = m && memberPoint(model, m, cut.at);
+    return a && b && point ? { point, dir: unit(sub(b, a)) } : null;
+  }, [phase, storedCut, model]);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const active = useRef<ActiveDrag | null>(null);
@@ -77,6 +99,7 @@ export function StructureView({ model, result, viewport }: CanvasProps) {
     const svg = svgRef.current;
     if (pointerId !== undefined && svg?.hasPointerCapture?.(pointerId)) svg.releasePointerCapture(pointerId);
     const store = useStore.getState();
+    if (a.session.kind === "cut") return;
     if (a.session.kind === "support") {
       if (commit && !a.moved && store.model) {
         const r = cycleSupportType(store.model, a.session.node);
@@ -116,6 +139,20 @@ export function StructureView({ model, result, viewport }: CanvasProps) {
     const store = useStore.getState();
     store.select(ref);
     if (!ref || !store.model) return;
+    if (ref.kind === "member" && store.phase === "explore") {
+      const chain = cutChain(store.model, ref.id);
+      if (!chain) return;
+      const step = lengthStep(store.model);
+      const p = local(e);
+      const cut = cutOnChain(chain, vp.toWorld(p), step);
+      if (!cut) return;
+      e.preventDefault();
+      svgRef.current?.setPointerCapture?.(e.pointerId);
+      active.current = { session: { kind: "cut", chain, step }, pointerId: e.pointerId, start: p, moved: false, viewport: vp };
+      store.select(null);
+      store.setCut(cut);
+      return;
+    }
     const part = (target?.getAttribute("data-part") ?? "body") as DragPart;
     const p = local(e);
     const session = startDrag(store.model, ref, part, vp.toWorld(p), vp, scales);
@@ -134,6 +171,12 @@ export function StructureView({ model, result, viewport }: CanvasProps) {
     const p = local(e);
     if (!a.moved && length(sub(p, a.start)) < CLICK_TOLERANCE) return;
     a.moved = true;
+    if (a.session.kind === "cut") {
+      const cut = cutOnChain(a.session.chain, a.viewport.toWorld(p), a.session.step);
+      const current = useStore.getState().cut;
+      if (cut && (cut.member !== current?.member || cut.at !== current?.at)) useStore.getState().setCut(cut);
+      return;
+    }
     const next = dragTo(a.session, a.viewport.toWorld(p), p);
     if (!next || next.key === a.lastKey) return;
     timing.current.start = performance.now();
@@ -158,6 +201,7 @@ export function StructureView({ model, result, viewport }: CanvasProps) {
       scales={scales}
       {...marks}
       interactive
+      cut={cutMark}
       className={frozen ? "is-dragging" : undefined}
       svgRef={svgRef}
       onPointerDown={onPointerDown}

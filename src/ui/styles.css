@@ -63,6 +63,9 @@
   --diagram-V: #5c7a3e;
   --diagram-M: #e2682b;
   --deformed: #e2682b;
+  /* 3D-snittet: opplagerkrefter (egen farge, så de skilles fra lastene) og bjelkene */
+  --reaction: #7b4f8e;
+  --member-3d: #efe7da;
   /* Skrift */
   --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: Newsreader, Georgia, "Times New Roman", serif;
@@ -217,6 +220,11 @@ a {
 /* Konstruksjonen og diagrammene har samme sidemarg, så x-aksene står rett under hverandre. */
 .figure-card {
   padding: 20px 24px;
+}
+.figure-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  text-align: center;
 }
 @media (max-width: 720px) {
   .card {

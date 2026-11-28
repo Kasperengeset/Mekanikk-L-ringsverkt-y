@@ -8,6 +8,7 @@
  * Skjulte tall (options.hidden, fra hiddenValues i src/core/pedagogy.ts): formen tegnes som før,
  * men tallene byttes med «?» på de samme karakteristiske punktene, så studenten ser hvor tallene står.
  */
+import type { Cut } from "../../core/cut.js";
 import { isDiagramValueHidden, type HiddenValues } from "../../core/pedagogy.js";
 import type { Model, SupportType } from "../../core/schema.js";
 import { displacedPoint, evalPoly, type MemberResult, type SolveResult } from "../../core/solver/index.js";
@@ -108,6 +109,12 @@ export interface DiagramMarker {
   base: Point;
 }
 
+/** Snittet i et diagram: punktet på kurven, punktet på aksen, og en stiplet strek gjennom begge. */
+export interface CutMarker extends DiagramMarker {
+  from: Point;
+  to: Point;
+}
+
 export interface ForcePanel extends PanelBase {
   kind: Quantity;
   /** true: størrelsen er null overalt, og panelet har bare overskrift. */
@@ -123,6 +130,8 @@ export interface ForcePanel extends PanelBase {
   inflections: Point[];
   /** Punktet som er uthevet (options.highlight), når det hører til dette panelet. */
   highlight?: DiagramMarker;
+  /** Snittet studenten har lagt (options.cut). */
+  cut?: CutMarker;
 }
 
 export interface DeformedPanel extends PanelBase {
@@ -166,6 +175,8 @@ export interface LayoutOptions {
   hidden?: HiddenValues;
   /** Punkt i et diagram som skal utheves (agentens highlight). */
   highlight?: DiagramPoint | null;
+  /** Snittet som vises i 3D; markeres i N-, V- og M-diagrammet. */
+  cut?: Cut | null;
 }
 
 /** Tekst i stedet for et skjult tall. */
@@ -189,6 +200,7 @@ interface Context {
   maxDimSI: number;
   hidden?: HiddenValues;
   highlight?: DiagramPoint | null;
+  cut?: Cut | null;
 }
 
 const DEG = 180 / Math.PI;
@@ -216,6 +228,7 @@ export function layoutDiagrams(model: Model, result: SolveResult, viewport: View
     maxDimSI: Math.max(spanX, spanY) * vp.lengthFactor,
     hidden: options.hidden,
     highlight: options.highlight,
+    cut: options.cut,
   };
 
   const panels: Panel[] = [];
@@ -408,6 +421,7 @@ interface Content {
   symbols: ActionSymbol[];
   inflections: Point[];
   highlight?: DiagramMarker;
+  cut?: CutMarker;
   bbox: Box;
 }
 
@@ -435,6 +449,7 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
   const requests: LabelRequest[] = [];
   const kind = q === "M" ? "moment" : "force";
   let highlight: DiagramMarker | undefined;
+  let cut: CutMarker | undefined;
 
   for (const chain of memberChains(model, ctx.result.members)) {
     const first = chain[0]!;
@@ -465,6 +480,22 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
       const v = piece ? evalPoly(piece[q], xLocal) : 0;
       const x = offsets[hk]! + xLocal;
       highlight = { point: at(x, v), base: axis(x) };
+    }
+
+    // Snittet: verdien like før et sprang (som i 3D-visningen), med en stiplet strek gjennom aksen og kurven.
+    const ck = ctx.cut ? chain.findIndex((m) => m.id === ctx.cut!.member) : -1;
+    if (ctx.cut && ck >= 0) {
+      const m = chain[ck]!;
+      const xLocal = Math.min(1, Math.max(0, ctx.cut.at)) * m.length;
+      const piece = m.pieces.find((p) => xLocal <= p.x1 + 1e-12 * m.length) ?? m.pieces[m.pieces.length - 1];
+      const v = piece ? evalPoly(piece[q], xLocal) : 0;
+      const x = offsets[ck]! + xLocal;
+      const base = axis(x);
+      const point = at(x, v);
+      const span = Math.hypot(point.x - base.x, point.y - base.y);
+      const dir = span > 1 ? { x: (point.x - base.x) / span, y: (point.y - base.y) / span } : normal;
+      const reach = 12;
+      cut = { point, base, from: { x: base.x - dir.x * reach, y: base.y - dir.y * reach }, to: { x: point.x + dir.x * reach, y: point.y + dir.y * reach } };
     }
 
     const samples = samplePieces(pieces, q, step);
@@ -550,7 +581,7 @@ function forceContent(ctx: Context, q: Quantity, map: Mapper, amp: number): Cont
       pointsBox(inflections, 4),
     ].filter((b): b is Box => b !== undefined),
   )!;
-  return { sketch: sk, diagrams, labels, symbols, inflections, highlight, bbox };
+  return { sketch: sk, diagrams, labels, symbols, inflections, highlight, cut, bbox };
 }
 
 function forcePanel(ctx: Context, q: Quantity, top: number, truss: boolean): ForcePanel {
