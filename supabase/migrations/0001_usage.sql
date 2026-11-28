@@ -13,6 +13,9 @@ create table if not exists public.usage (
 );
 
 alter table public.usage enable row level security;
+-- Bare lesing for innloggede (begrenset av RLS under); all skriving går gjennom consume_quota.
+revoke all on table public.usage from anon, authenticated;
+grant select on table public.usage to authenticated;
 
 drop policy if exists "les egen bruk" on public.usage;
 create policy "les egen bruk" on public.usage for select to authenticated using ((select auth.uid()) = user_id);
