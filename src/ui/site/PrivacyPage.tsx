@@ -27,14 +27,21 @@ export function PrivacyPage() {
               <strong>E-postadressen din</strong>, og navnet ditt hvis du logger inn med Google. Det brukes bare til innloggingen.
             </li>
             <li>
-              <strong>Hvor mange oppgaver du har brukt denne uken</strong>, så vi kan holde den gratis kvoten. Vi lagrer en kode (hash) per oppgave, ikke
-              selve oppgaven.
+              <strong>Hvor mye du har brukt denne uken</strong> (antall tolkninger, spørsmål til veilederen og oppgaver i Claude), så vi kan holde den
+              gratis kvoten. For oppgaver i Claude lagrer vi en kode (hash) per oppgave, ikke selve oppgaven.
             </li>
             <li>
               <strong>Abonnementet ditt</strong>, når det kommer.
             </li>
           </ul>
           <p>Brukerne og kvoten lagres hos Supabase, i et datasenter i EU.</p>
+
+          <h2>Oppgaver og spørsmål i appen</h2>
+          <p>
+            Når du tolker en oppgave her, sendes bildet eller teksten til Claude, en språkmodell fra Anthropic, som lager modellen av oppgaven. Når du
+            spør veilederen, sendes samtalen og modellen på skjermen. Vi lagrer verken oppgavene eller samtalene. Anthropic behandler dem etter sine
+            vilkår for API-kunder.
+          </p>
 
           <h2>Når du bruker oss i Claude</h2>
           <p>

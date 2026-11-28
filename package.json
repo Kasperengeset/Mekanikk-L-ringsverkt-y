@@ -20,11 +20,13 @@
     "snapshot": "tsx scripts/snapshot.tsx"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
     "@modelcontextprotocol/ext-apps": "2.0.4",
     "@modelcontextprotocol/sdk": "1.32.1",
     "@supabase/supabase-js": "2.119.0",
     "jose": "6.2.16",
     "lz-string": "^1.5.0",
+    "pdfjs-dist": "^6.5.438",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "three": "0.187.0",
@@ -32,7 +34,6 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^1.14.0",
     "@eslint/js": "^10.0.1",
     "@napi-rs/canvas": "^1.2.1",
     "@resvg/resvg-js": "^2.6.2",
@@ -46,7 +47,6 @@
     "eslint": "^10.15.0",
     "globals": "^17.14.0",
     "jsdom": "^29.1.1",
-    "pdfjs-dist": "^6.5.438",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.74.0",

@@ -3,6 +3,7 @@
  * brukeren. Er VITE_SUPABASE_URL og VITE_SUPABASE_PUBLISHABLE_KEY ikke satt, er innloggingen av
  * (status "disabled"), og appen virker som før (lokal utvikling, tilgangskoder).
  *
+ * Tokenet sendes til API-et i Authorization (authHeaders), der server/gate.ts sjekker det og trekker kvote.
  * Innloggingen brukes også når Claude kobler til MCP-serveren (OAuth): studenten godkjenner på /oauth/samtykke.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -49,6 +50,19 @@ export function startAuth(): void {
     useAuth.setState(session ? { status: "signedIn", user: { id: session.user.id, ...(session.user.email ? { email: session.user.email } : {}) }, notice: null } : { status: "signedOut", user: null });
   void sb.auth.getSession().then(({ data }) => apply(data.session));
   sb.auth.onAuthStateChange((_event, session) => apply(session));
+}
+
+/** Authorization-hodet for API-kall (tolkning og veileder), når studenten er logget inn. */
+export async function authHeaders(): Promise<Record<string, string>> {
+  const sb = supabase();
+  if (!sb) return {};
+  const { data } = await sb.auth.getSession();
+  return data.session ? { authorization: `Bearer ${data.session.access_token}` } : {};
+}
+
+/** Serveren sier at innloggingen mangler eller er utgått. */
+export function requireLogin(message: string): void {
+  useAuth.setState({ notice: message, ...(useAuth.getState().status === "signedIn" ? {} : { status: authEnabled ? "signedOut" : "disabled" }) });
 }
 
 // ---------------------------------------------------------------- OAuth-samtykke (Claude som connector)

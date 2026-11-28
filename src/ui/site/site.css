@@ -244,6 +244,24 @@ a.brand {
   border-radius: 24px;
   background: var(--surface-warm);
 }
+.claude-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 32px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--bg);
+}
+.claude-band .section-title {
+  margin-bottom: 6px;
+}
+.claude-band p {
+  margin: 0;
+  max-width: 42em;
+}
 .cta-band .section-title {
   margin-bottom: 6px;
 }

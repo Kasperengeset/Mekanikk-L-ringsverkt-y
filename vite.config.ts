@@ -1,7 +1,44 @@
+import { readdirSync, readFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createRequire } from "node:module";
+import { dirname, extname, join } from "node:path";
 import { loadEnv, type Plugin, type ViteDevServer } from "vite";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+
+/** Hvor nettleseren finner pdf.js sine dekodere og fonter (se PDF_ASSETS i src/ui/upload/pdf.ts). */
+const PDFJS_PUBLIC = "pdfjs";
+const PDFJS_DIRS = ["wasm", "standard_fonts"];
+const CONTENT_TYPES: Record<string, string> = {
+  ".wasm": "application/wasm",
+  ".js": "text/javascript",
+  ".ttf": "font/ttf",
+  ".pfb": "application/octet-stream",
+};
+
+/**
+ * Serverer pdfjs-dist/wasm og pdfjs-dist/standard_fonts under /pdfjs/ i `pnpm dev`, og kopierer dem til
+ * dist/pdfjs/ ved bygging. Uten dem forsvinner JBIG2-figurer i skannede PDF-er uten feilmelding.
+ */
+function pdfjsAssets(): Plugin {
+  const root = dirname(createRequire(import.meta.url).resolve("pdfjs-dist/package.json"));
+  const files = PDFJS_DIRS.flatMap((dir) => readdirSync(join(root, dir)).map((name) => `${dir}/${name}`));
+  const allowed = new Set(files);
+  return {
+    name: "pdfjs-assets",
+    configureServer(server) {
+      server.middlewares.use(`${server.config.base}${PDFJS_PUBLIC}`, (req, res, next) => {
+        const path = decodeURIComponent((req.url ?? "").split("?")[0]!.replace(/^\//, ""));
+        if (!allowed.has(path)) return next();
+        res.setHeader("content-type", CONTENT_TYPES[extname(path)] ?? "text/plain; charset=utf-8");
+        res.end(readFileSync(join(root, path)));
+      });
+    },
+    generateBundle() {
+      for (const f of files) this.emitFile({ type: "asset", fileName: `${PDFJS_PUBLIC}/${f}`, source: readFileSync(join(root, f)) });
+    },
+  };
+}
 
 async function readBody(req: IncomingMessage): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -9,11 +46,17 @@ async function readBody(req: IncomingMessage): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-/** Node-forespørsel → Web Request → funksjonen i api/<navn>.ts (eksporten for metoden) → svaret tilbake. */
+type Handler = (req: Request) => Response | Promise<Response>;
+
+/** Node-forespørsel → Web Request → eksporten for metoden i api/<navn>.ts → strømmet svar tilbake. */
 async function serveApi(server: ViteDevServer, module: string, req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const abort = new AbortController();
+  res.on("close", () => {
+    if (!res.writableFinished) abort.abort();
+  });
   try {
     // Lastes for hver forespørsel, så endringer i api/ og server/ virker uten omstart.
-    const mod = (await server.ssrLoadModule(module)) as Record<string, ((req: Request) => Response | Promise<Response>) | undefined>;
+    const mod = (await server.ssrLoadModule(module)) as Record<string, Handler | undefined>;
     const fn = mod[req.method ?? "GET"];
     if (!fn) {
       res.statusCode = 405;
@@ -28,12 +71,22 @@ async function serveApi(server: ViteDevServer, module: string, req: IncomingMess
     const request = new Request(new URL((req as { originalUrl?: string }).originalUrl ?? req.url ?? "/", `http://${req.headers.host ?? "localhost"}`), {
       method: req.method,
       headers,
+      signal: abort.signal,
       ...(hasBody ? { body: new Uint8Array(await readBody(req)) } : {}),
     });
     const response = await fn(request);
     res.statusCode = response.status;
     response.headers.forEach((value, key) => res.setHeader(key, value));
-    res.end(Buffer.from(await response.arrayBuffer()));
+    res.flushHeaders();
+    if (!response.body) return void res.end();
+    const reader = response.body.getReader();
+    abort.signal.addEventListener("abort", () => void reader.cancel().catch(() => {}), { once: true });
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(value);
+    }
+    res.end();
   } catch (err) {
     server.config.logger.error(`${module}: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`);
     if (!res.headersSent) {
@@ -44,27 +97,32 @@ async function serveApi(server: ViteDevServer, module: string, req: IncomingMess
   }
 }
 
-/** Monterer /mcp og OAuth-metadataene i `pnpm dev`, som rewrites i vercel.json gjør i produksjon. Leser .env med loadEnv. */
+/**
+ * Monterer funksjonene i api/ i `pnpm dev`, som Vercel gjør i produksjon: /api/interpret og /api/agent
+ * (webappen), /mcp og OAuth-metadataene (MCP-serveren, se rewrites i vercel.json). Leser .env med loadEnv.
+ */
 function devApi(): Plugin {
   return {
     name: "dev-api",
     apply: "serve",
     configureServer(server) {
       if (process.env.VITEST) return;
-      // En verdi som allerede er satt i skallet, går foran .env.
-      const env = loadEnv(server.config.mode, server.config.envDir, ["SUPABASE_", "VITE_SUPABASE_", "QUOTA_", "PUBLIC_URL"]);
+      // En verdi som allerede er satt i skallet, går foran .env (som i eval-skriptet).
+      const env = loadEnv(server.config.mode, server.config.envDir, ["ANTHROPIC_", "INTERPRET_", "AGENT_", "ACCESS_", "SUPABASE_", "VITE_SUPABASE_", "QUOTA_", "PUBLIC_URL"]);
       for (const [key, value] of Object.entries(env)) if (value && !process.env[key]) process.env[key] = value;
       const mount = (path: string, module: string) => server.middlewares.use(path, (req, res) => void serveApi(server, module, req, res));
+      mount("/api/interpret", "/api/interpret.ts");
+      mount("/api/agent", "/api/agent.ts");
+      mount("/api/mcp", "/api/mcp.ts");
       mount("/.well-known/oauth-protected-resource", "/api/oauth-protected-resource.ts");
       mount("/api/oauth-protected-resource", "/api/oauth-protected-resource.ts");
-      mount("/api/mcp", "/api/mcp.ts");
       server.middlewares.use((req, res, next) => (req.url?.split("?")[0] === "/mcp" ? void serveApi(server, "/api/mcp.ts", req, res) : next()));
     },
   };
 }
 
 export default defineConfig({
-  plugins: [react(), devApi()],
+  plugins: [react(), pdfjsAssets(), devApi()],
   test: {
     include: ["tests/**/*.test.{ts,tsx}"],
   },

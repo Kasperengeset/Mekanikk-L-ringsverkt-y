@@ -1,6 +1,6 @@
 # MCP-serveren
 
-Studentene bruker Mekanikk-intuisjon fra sin egen Claude: de legger til `https://<domene>/mcp` som egen
+Et tillegg til webappen (som har egen tolkning og veileder): studenter kan også bruke Mekanikk-intuisjon fra sin egen Claude: de legger til `https://<domene>/mcp` som egen
 connector, logger inn med brukeren sin hos oss, og Claude kaller verktøyene våre. Claude tolker oppgaven
 (betalt av studentens abonnement); alle tall kommer fra løseren i `src/core`.
 

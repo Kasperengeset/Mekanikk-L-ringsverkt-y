@@ -16,7 +16,9 @@ import { useStore } from "./state/store.js";
 import { useSolveResult } from "./state/useSolveResult.js";
 import { StructureView } from "./structure/StructureView.js";
 import { modelFromHash } from "./share.js";
-import { StartPanel } from "./start/StartPanel.js";
+import { AccessGate } from "./access/AccessGate.js";
+import { ConfirmPanel } from "./upload/ConfirmPanel.js";
+import { UploadPanel } from "./upload/UploadPanel.js";
 import { useElementSize } from "./useElementSize.js";
 
 export function App() {
@@ -49,7 +51,9 @@ export function App() {
 
   return (
     <div className="app">
-      <SiteHeader />
+      <SiteHeader>
+        <AccessGate />
+      </SiteHeader>
       <div className="workspace">
         <main className="canvas">
           {model && result ? (
@@ -62,10 +66,10 @@ export function App() {
               {phase === "explore" && viewport && <DiagramsView model={model} result={result} viewport={viewport} />}
             </>
           ) : (
-            <StartPanel />
+            <UploadPanel />
           )}
         </main>
-        {model && result && <aside className="panel"><SidePanel model={model} result={result} /></aside>}
+        {model && result && <aside className="panel">{phase === "confirm" ? <ConfirmPanel /> : <SidePanel model={model} result={result} />}</aside>}
       </div>
     </div>
   );

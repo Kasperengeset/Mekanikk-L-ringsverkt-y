@@ -1,14 +1,15 @@
 # Mekanikk-intuisjonsverktøy
 
-Interaktivt læringsverktøy for 2D-statikk, brukt fra studentens egen Claude som MCP-connector
-(`/mcp`, se `docs/mcp.md`). Claude tolker oppgaven; alle tall regnes deterministisk av løseren her,
-og webappen viser konstruksjonen med diagrammer og snitt i 3D. Opprinnelig spesifikasjon: `docs/spesifikasjon.pdf`.
+Interaktivt læringsverktøy for 2D-statikk. Studenten laster opp en oppgave, Claude lager en strukturert
+modell av den, og alt som vises, regnes deterministisk fra modellen. Som tillegg finnes en MCP-server
+(`/mcp`, se `docs/mcp.md`), så studenter kan bruke verktøyene fra sin egen Claude.
+Spesifikasjonen ligger i `docs/spesifikasjon.pdf`.
 
 ## Kom i gang
 
 ```
 pnpm install
-cp .env.example .env        # Supabase-variablene er valgfrie lokalt
+cp .env.example .env        # fyll inn ANTHROPIC_API_KEY; Supabase er valgfritt lokalt
 pnpm test                   # enhetstester
 pnpm testset:check          # sjekker fasitmodellene i testset/
 pnpm dev                    # webappen og MCP-serveren på http://localhost:5199/mcp
@@ -29,10 +30,11 @@ pnpm eval:interpret --examples --consistency never   # måling av tolkningen (ko
 | `src/core/cut.ts`, `stress.ts` | Snitt og frie legemer; spenninger σ og τ i tverrsnittet. |
 | `server/platform/` | Generisk MCP-lag: Streamable HTTP, OAuth-ressursserver (Supabase), abonnement og kvote. |
 | `server/modules/mechanics/` | Mekanikk-verktøyene (`force_system`, `solve_structure`). |
-| `api/` | Vercel-funksjonene: `mcp.ts` og OAuth-metadataene. |
+| `api/` | Vercel-funksjonene: `interpret.ts`, `agent.ts`, `mcp.ts` og OAuth-metadataene. |
 | `src/pdf/render.ts` | PDF-sider til bilder, felles for nettleser og eval. |
 | `eval/anastruct/` | Uavhengig referanse for løseren (Python, anaStruct). |
-| `src/core/llm/`, `server/llm/`, `server/interpret.ts` | Tolkning med Claude, brukt bare av målingen i `eval/` (appen kaller ikke Claude). |
+| `src/core/llm/`, `server/llm/`, `server/interpret.ts` | Tolkning med Claude (webappen og målingen i `eval/`). |
+| `server/interpretHandler.ts`, `server/agentHandler.ts`, `server/gate.ts` | `/api/interpret` og `/api/agent`: tolkning, veileder, innlogging og kvote. |
 | `eval/` | Måling av tolkningen og innlesing av testsettet. |
 | `testset/` | Oppgaver med fasitmodeller. Se `testset/README.md`. |
 | `src/ui/` | Webappen: forside, verktøyet (`/app`), innlogging, konto, OAuth-samtykke. |
@@ -59,10 +61,9 @@ pnpm eval:interpret --examples --consistency never   # måling av tolkningen (ko
   kort, mørkebrunt og oransje, Inter og Newsreader. Skriftene ligger i `public/fonts/` (OFL), så appen
   henter ingenting fra Google. Bare lyst tema.
 - **Publisert:** https://mekanikk-l-ringsverkt-y.vercel.app
-- **Omlegging til MCP (milepæl 1):** LLM-kallene i backenden er fjernet. `/mcp` er en MCP-server med
-  OAuth mot Supabase, `force_system` og `solve_structure`, ukekvote og abonnement. Webappen er visning
-  uten AI. Se `docs/mcp.md`.
-- **Neste:** visning i chatten (MCP Apps), koblede visninger, stegmotor, Mohrs sirkel (milepæl 2–5).
+- **MCP som tillegg:** `/mcp` med OAuth mot Supabase, `force_system` og `solve_structure`, ukekvote og
+  abonnement, og visning i Claude-chatten (MCP Apps). Webappen med tolkning og veileder er hovedveien.
+  Se `docs/mcp.md`.
 
 Referansene lages med `.venv/bin/python eval/anastruct/reference.py` etter
 `python3 -m venv .venv && .venv/bin/pip install -r eval/anastruct/requirements.txt`.

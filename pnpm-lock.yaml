@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^1.14.0
+        version: 1.14.0(zod@4.6.7)
       '@modelcontextprotocol/ext-apps':
         specifier: 2.0.4
         version: 2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
@@ -23,6 +26,9 @@ importers:
       lz-string:
         specifier: ^1.5.0
         version: 1.5.0
+      pdfjs-dist:
+        specifier: ^6.5.438
+        version: 6.5.438
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -39,9 +45,6 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/react@19.3.3)(react@19.3.1)
     devDependencies:
-      '@anthropic-ai/sdk':
-        specifier: ^1.14.0
-        version: 1.14.0(zod@4.6.7)
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.15.0)
@@ -81,9 +84,6 @@ importers:
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1
-      pdfjs-dist:
-        specifier: ^6.5.438
-        version: 6.5.438
       tsx:
         specifier: ^4.23.15
         version: 4.23.15

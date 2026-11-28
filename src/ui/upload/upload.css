@@ -1,0 +1,267 @@
+/* Opplasting og bekreftelsessteget (spor C), etter designet i docs/design. */
+.upload {
+  width: 100%;
+  max-width: 760px;
+  align-self: center;
+}
+.upload .card-title {
+  margin-bottom: 6px;
+}
+.upload h3 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+.upload-form {
+  border: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.dropzone {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+  padding: 28px 16px;
+  border: 2px dashed var(--line-strong);
+  border-radius: 16px;
+  background: var(--page);
+  cursor: pointer;
+}
+.dropzone:hover,
+.dropzone:focus-visible,
+.dropzone.dragging {
+  border-color: var(--accent);
+  outline: none;
+}
+.dropzone.dragging {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.upload-form:disabled .dropzone {
+  opacity: 0.6;
+  cursor: default;
+}
+.attachments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-width: 0;
+}
+.attachment.pdf {
+  display: grid;
+  gap: 6px;
+}
+.attachment-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.attachment-head button,
+.attachment > button {
+  margin-left: auto;
+}
+.attachment-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.attachment-image {
+  width: 72px;
+  height: 54px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 4px;
+  flex: none;
+}
+.attachment p {
+  margin: 0;
+}
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.thumb {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-height: 0;
+  padding: 4px;
+  border-width: 2px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.thumb img {
+  display: block;
+  width: 72px;
+  height: auto;
+  background: #fff;
+}
+.thumb.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+}
+.field {
+  display: grid;
+  gap: 4px;
+}
+.field span {
+  font-size: 14px;
+  font-weight: 600;
+}
+.field textarea,
+.field input {
+  width: 100%;
+}
+.field textarea {
+  resize: vertical;
+}
+.upload .toolbar {
+  margin-top: 16px;
+}
+.interpretation {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+.interpretation p {
+  margin: 0;
+}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+.description {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--surface-warm);
+}
+.description h3 {
+  margin-bottom: 4px;
+}
+.description p {
+  white-space: pre-wrap;
+  margin: 0;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.examples {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Bekreftelsessteget */
+.confirm .card-title {
+  margin-bottom: 6px;
+}
+.confirm > p {
+  margin: 0 0 12px;
+}
+.confirm h3 {
+  font-size: 16px;
+  margin: 18px 0 8px;
+}
+.confirm .toolbar {
+  margin: 18px 0 0;
+}
+.confirm details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+.confirm details p {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.confirm ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.confirm .questions li {
+  margin-bottom: 4px;
+}
+.uncertain-list {
+  list-style: none;
+  padding: 0 !important;
+  display: grid;
+  gap: 8px;
+}
+.uncertain {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--uncertain);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+}
+.uncertain-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+}
+.uncertain p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.choices button {
+  border-radius: 999px;
+  min-height: 40px;
+  font-size: 14px;
+}
+.choices button[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.confirm .meta {
+  font-size: 12px;
+  margin-top: 12px;
+}

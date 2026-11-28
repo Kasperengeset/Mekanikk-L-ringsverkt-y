@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAuth } from "../src/ui/auth/auth.js";
 import { Root } from "../src/ui/Root.js";
-import { StartPanel } from "../src/ui/start/StartPanel.js";
+import { UploadPanel } from "../src/ui/upload/UploadPanel.js";
 
 afterEach(() => {
   cleanup();
@@ -12,11 +12,18 @@ afterEach(() => {
 });
 
 describe("innlogging i appen", () => {
-  it("verktøyet uten modell viser eksemplene og adressen til connectoren", () => {
-    render(<StartPanel />);
-    expect(screen.getByRole("heading", { name: "Bruk Mekanikk-intuisjon i Claude" })).toBeTruthy();
-    expect(screen.getByText(`${window.location.origin}/mcp`)).toBeTruthy();
+  it("utlogget: opplastingen ber om innlogging, eksemplene er fortsatt der", () => {
+    useAuth.setState({ status: "signedOut" });
+    render(<UploadPanel />);
+    expect(screen.getByText("Logg inn for å laste opp egne oppgaver")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Tolk oppgaven/ })).toBeNull();
     expect(screen.getByRole("heading", { name: "Prøv et eksempel" })).toBeTruthy();
+  });
+
+  it("innlogget eller uten innlogging (lokalt): opplastingen vises", () => {
+    useAuth.setState({ status: "signedIn", user: { id: "u1", email: "ola@stud.ntnu.no" } });
+    render(<UploadPanel />);
+    expect(screen.getByRole("button", { name: /Tolk oppgaven/ })).toBeTruthy();
   });
 
   it("forsiden har veien inn, og topplinjen viser hvem som er logget inn", () => {
