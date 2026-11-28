@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { AGENT_TOOLS, stateSummary } from "../src/core/llm/agent.js";
 import { askedTargets, checkAttempt, hiddenValues, isDiagramValueHidden } from "../src/core/pedagogy.js";
 import { solve } from "../src/core/solver/index.js";
 import { FIXTURES } from "../src/ui/fixtures.js";
@@ -7,8 +6,6 @@ import { requestPrediction } from "../src/ui/state/prediction.js";
 import { useStore } from "../src/ui/state/store.js";
 import { model } from "./helpers.js";
 
-type OkSummary = Extract<ReturnType<typeof stateSummary>, { status: "ok" }>;
-const okSummary = (...args: Parameters<typeof stateSummary>) => stateSummary(...args) as OkSummary;
 
 /** Fritt opplagt bjelke 6 m, q = 4 kN/m: reaksjoner 12 kN, M_max = 18 kNm. */
 const beam = model({
@@ -58,17 +55,6 @@ describe("skjulte verdier", () => {
     expect(isDiagramValueHidden(after, "M", "AB")).toBe(false);
   });
 
-  it("get_state viser ikke skjulte tall, verken i reaksjoner eller diagrammer", () => {
-    const s = okSummary(beam, result, {});
-    const json = JSON.stringify(s);
-    expect(json).not.toContain('"V":12');
-    expect(json).not.toMatch(/"value":18\b/);
-    expect(s.reactions?.find((r) => r.node === "A")).toEqual({ node: "A", H: "skjult", V: "skjult", M: "skjult" });
-    expect(s.reactions?.find((r) => r.node === "B")).toMatchObject({ V: "skjult" });
-    const opened = okSummary(beam, result, { 0: { values: [0, 12], at: 1 }, 1: { values: [18], at: 1 }, 2: { values: null, at: 1 } });
-    expect(JSON.stringify(opened)).toMatch(/"value":18\b/);
-  });
-
   it("spør oppgaven bare etter diagrammene, skjules også reaksjonene (de er endeverdiene)", () => {
     const gerber = FIXTURES.gerber!.model;
     expect(gerber.asked).toEqual([{ quantity: "diagrams" }]);
@@ -81,15 +67,6 @@ describe("skjulte verdier", () => {
     const truss = FIXTURES.fagverk!.model;
     const h = hiddenValues(truss, {});
     expect(isDiagramValueHidden(h, "N", "AB")).toBe(true);
-    const s = okSummary(truss, solve(truss), {});
-    expect(s.members?.every((m) => m.N === "skjult")).toBe(true);
-  });
-});
-
-describe("agentens verktøy", () => {
-  it("har de fem verktøyene fra spesifikasjonen med JSON Schema", () => {
-    expect(AGENT_TOOLS.map((t) => t.name)).toEqual(["get_state", "set_param", "add_control", "highlight", "ask_prediction"]);
-    for (const t of AGENT_TOOLS) expect(t.input_schema).toMatchObject({ type: "object" });
   });
 });
 

@@ -3,8 +3,8 @@
  * (ingen bundling), og resultatet lastes som ESM i ren Node. Fanger relative importer uten .js og
  * JSON-importer uten `with { type: "json" }`, som ellers først feiler etter en deploy.
  *
- * Kjøres med ren `node` (ikke tsx, som ville skjult nettopp disse feilene). ANTHROPIC_API_KEY fjernes,
- * så kallet til hver funksjon stopper ved konfigurasjonssjekken og aldri når Claude.
+ * Kjøres med ren `node` (ikke tsx, som ville skjult nettopp disse feilene). Supabase-variablene fjernes, så
+ * MCP-serveren kjører åpen (som lokalt) og ingenting går mot nettverket.
  */
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
@@ -15,13 +15,28 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const work = mkdtempSync(join(tmpdir(), "check-api-"));
 const out = join(work, "out");
-delete process.env.ANTHROPIC_API_KEY;
-delete process.env.ACCESS_CODES;
+for (const key of Object.keys(process.env)) if (key.includes("SUPABASE")) delete process.env[key];
 
-/** En gyldig forespørsel til hver funksjon, så sjekken kommer forbi valideringen og til konfigurasjonen. */
-const requests = {
-  agent: { messages: [{ role: "user", content: "Hei" }] },
-  interpret: { text: "Fritt opplagt bjelke, L = 4 m, jevnt fordelt last q = 5 kN/m." },
+/** Én forespørsel per funksjon og hva svaret skal være. */
+const checks = {
+  mcp: {
+    request: () =>
+      new Request("http://localhost/mcp", {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "check-api", version: "1" } } }),
+      }),
+    method: "POST",
+    ok: (res, json) => res.status === 200 && json?.result?.serverInfo?.name === "mekanikk-intuisjon",
+    describe: (json) => `initialize svarer (${json.result.serverInfo.name} ${json.result.serverInfo.version})`,
+  },
+  "oauth-protected-resource": {
+    request: () => new Request("http://localhost/.well-known/oauth-protected-resource/mcp"),
+    method: "GET",
+    // Uten Supabase finnes det ingen autorisasjonsserver å peke på.
+    ok: (res) => res.status === 404,
+    describe: () => "svarer (404 uten Supabase, som forventet)",
+  },
 };
 
 let failed = false;
@@ -45,15 +60,13 @@ try {
   for (const name of names) {
     try {
       const mod = await import(pathToFileURL(join(out, "api", `${name}.js`)).href);
-      if (typeof mod.POST !== "function") throw new Error("eksporterer ikke POST");
-      const body = requests[name];
-      if (!body) throw new Error("mangler testforespørsel i scripts/check-api.mjs");
-      const res = await mod.POST(
-        new Request(`http://localhost/api/${name}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }),
-      );
+      const check = checks[name];
+      if (!check) throw new Error("mangler sjekk i scripts/check-api.mjs");
+      if (typeof mod[check.method] !== "function") throw new Error(`eksporterer ikke ${check.method}`);
+      const res = await mod[check.method](check.request());
       const json = await res.json().catch(() => undefined);
-      if (res.status !== 500 || json?.error?.code !== "config") throw new Error(`uventet svar ${res.status}: ${JSON.stringify(json)}`);
-      console.log(`api/${name}: laster og svarer (${json.error.message})`);
+      if (!check.ok(res, json)) throw new Error(`uventet svar ${res.status}: ${JSON.stringify(json)}`);
+      console.log(`api/${name}: laster og ${check.describe(json)}`);
     } catch (err) {
       failed = true;
       console.error(`api/${name}: ${err instanceof Error ? err.message : err}`);

@@ -1,0 +1,26 @@
+.start {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.start-steps {
+  margin: 8px 0 24px;
+  padding-left: 22px;
+  display: grid;
+  gap: 8px;
+}
+.start-url {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--surface-warm);
+  font-size: 14px;
+  word-break: break-all;
+}
+.start .examples h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+.start .example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

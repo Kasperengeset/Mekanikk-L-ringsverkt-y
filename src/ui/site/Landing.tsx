@@ -17,20 +17,24 @@ import { SiteFooter, SiteHeader } from "./SiteHeader.js";
 
 const STEPS = [
   {
-    title: "Last opp oppgaven",
-    text: "Et bilde, en PDF fra øvingen eller teksten. Claude leser figuren og lager en modell: noder, opplagre og laster.",
+    title: "Koble til Claude",
+    text: "Legg til Mekanikk-intuisjon som connector i Claude og logg inn. Det tar et minutt, og du gjør det én gang.",
   },
   {
-    title: "Sjekk tolkningen",
-    text: "Du ser modellen tegnet før noe regnes ut. Er noe usikkert, spør appen deg, og du retter med ett klikk.",
+    title: "Spør om oppgaven",
+    text: "Last opp et bilde eller en PDF fra øvingen i Claude. Claude leser figuren og sender konstruksjonen til våre verktøy.",
   },
   {
     title: "Utforsk",
-    text: "Dra i lastene, bytt opplagre og snitt hvor du vil. Diagrammene og kreftene følger med med en gang.",
+    text: "Tallene kommer fra løseren vår, ikke fra språkmodellen. Åpne konstruksjonen her, dra i lastene og snitt hvor du vil.",
   },
 ];
 
 const FEATURES = [
+  {
+    title: "Regnet ut, ikke gjettet",
+    text: "Claude tolker oppgaven. Reaksjoner, snittkrefter og resultanter regnes av en verifisert løser, med likevektskontroll på hvert svar.",
+  },
   {
     title: "Diagrammer som følger med",
     text: "N-, V- og M-diagrammet og den deformerte formen tegnes rett under konstruksjonen og endrer seg mens du drar.",
@@ -44,35 +48,31 @@ const FEATURES = [
     text: "Tallene du skal finne, er skjult til du har prøvd. Formen ser du, så du kan resonnere deg fram.",
   },
   {
-    title: "En veileder som ikke jukser",
-    text: "Spør om det du ser. Veilederen forklarer og stiller spørsmål tilbake, men gir deg ikke svaret på øvingen.",
+    title: "Samme språk hver gang",
+    text: "Faste farger, symboler og fortegn som i kurset, uansett oppgave. Ikke en ny tegning hver gang du spør.",
   },
   {
-    title: "Regnet ut, ikke gjettet",
-    text: "Claude tolker bare figuren. Alt som vises, regnes ut av en egen løser i nettleseren og kontrolleres med likevekt.",
-  },
-  {
-    title: "Bjelker, rammer og fagverk",
-    text: "Plan statikk på nivå med et første mekanikkfag: fast innspenning, fastlager, rullelager, ledd og fordelte laster.",
+    title: "Bjelker, rammer, fagverk og krefter",
+    text: "Plan statikk på nivå med et første mekanikkfag: dekomponering og resultant, opplagre, ledd og fordelte laster.",
   },
 ];
 
 const FAQ = [
   {
-    q: "Gir den meg svaret på øvingen?",
-    a: "Nei, ikke før du har prøvd. Tallene du blir spurt om, er skjult til du har skrevet inn et svar, og veilederen er laget for å hjelpe deg å tenke, ikke for å regne for deg.",
+    q: "Hva trenger jeg?",
+    a: "En Claude-konto og en gratis bruker her. Du legger til Mekanikk-intuisjon som egen connector i Claude under Connectors.",
   },
   {
-    q: "Hvilke oppgaver kan den?",
-    a: "Statisk bestemte og lavt ubestemte bjelker, plane rammer og fagverk med punktlaster, momenter og fordelte laster. Ikke 3D-konstruksjoner, dynamikk eller knekning.",
+    q: "Gir den meg svaret på øvingen?",
+    a: "Tallene i appen er skjult til du har prøvd selv. I Claude bestemmer du hvor mye hjelp du vil ha, men tallene som kommer fra oss, er alltid kontrollert.",
   },
   {
     q: "Hva koster det?",
-    a: "Eksemplene er gratis uten bruker. Med bruker får du en gratis kvote med tolkninger og spørsmål til veilederen hver uke. Et rimelig studentabonnement kommer for dem som vil ha mer.",
+    a: "Eksemplene er gratis uten bruker. Med bruker får du et antall oppgaver gratis hver uke. Et rimelig studentabonnement kommer for dem som vil ha mer.",
   },
   {
-    q: "Hva skjer med oppgavene jeg laster opp?",
-    a: "Bildet eller teksten sendes til Claude (Anthropic) for tolkning. Vi lagrer ikke oppgavene. Se personvern for detaljene.",
+    q: "Hva skjer med oppgavene mine?",
+    a: "Claude sender bare konstruksjonen (mål, opplagre og laster) til oss, og vi lagrer den ikke. Se personvern for detaljene.",
   },
 ];
 
@@ -109,16 +109,16 @@ export function Landing() {
             <p className="kicker">Statikk for byggstudenter</p>
             <h1>Se hva som skjer inni konstruksjonen</h1>
             <p className="lede">
-              Last opp en oppgave fra øvingen. Appen tegner konstruksjonen, regner ut diagrammene og lar deg dra i lastene og se alt endre seg. Snitt hvor du
-              vil og se kreftene i 3D.
+              Bruk Claude på øvingen, med tall du kan stole på. Mekanikk-intuisjon regner ut reaksjoner og diagrammer med en verifisert løser, og lar deg
+              dra i lastene og snitte hvor du vil, i 3D.
             </p>
             <div className="hero-actions">
               <a className="btn btn-primary" href="/app?eksempel=gerber" onClick={linkClick("/app?eksempel=gerber")}>
                 Prøv et eksempel
               </a>
               {signedIn ? (
-                <a className="btn" href="/app" onClick={linkClick("/app")}>
-                  Last opp en oppgave
+                <a className="btn" href="/konto" onClick={linkClick("/konto")}>
+                  Koble til Claude
                 </a>
               ) : (
                 <a className="btn" href="/logg-inn" onClick={linkClick("/logg-inn")}>
@@ -167,10 +167,10 @@ export function Landing() {
         <section className="section cta-band">
           <div>
             <h2 className="section-title">Kom i gang på et minutt</h2>
-            <p className="muted">Skriv inn e-posten din, klikk lenken du får, og last opp den første oppgaven.</p>
+            <p className="muted">Opprett bruker, legg til connectoren i Claude, og spør om den første oppgaven.</p>
           </div>
-          <a className="btn btn-accent" href={signedIn ? "/app" : "/logg-inn"} onClick={linkClick(signedIn ? "/app" : "/logg-inn")}>
-            {signedIn ? "Åpne verktøyet" : "Opprett gratis bruker"}
+          <a className="btn btn-accent" href={signedIn ? "/konto" : "/logg-inn"} onClick={linkClick(signedIn ? "/konto" : "/logg-inn")}>
+            {signedIn ? "Koble til Claude" : "Opprett gratis bruker"}
           </a>
         </section>
 
